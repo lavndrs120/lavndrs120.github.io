@@ -106,12 +106,19 @@ const GATE_OFFERS = {
     cta: 'احجز امتيازك'
   },
   tycoon: {
-    path: 'movement', theme: 'gold', icon: '👑', title: 'TYCOON', eyebrow: 'تايكون واحد لكل دولة',
-    short: 'قُد 20 سوقًا حيًّا في دولتك.',
-    body: 'امتلك وكالة لاڤندرز لتقود الرحلة إلى خير الوجود.\nبقيمة $51,480 فقط تسمح لـ2,400 بزنس وبراند أن ينتظموا في سوق موحد — 20 سوقًا، في كل سوق 120 بزنس وبراند — وتشوف حركة السوق قدامك لحظة بلحظة.\n\nتايكون واحد لكل دولة. ومن التأسيس وحتى استقرار النظام السنوي، تحصد ما يصل إلى 10 أضعاف قيمة الوكالة — نعم، حتى $514,800.',
-    variants: [ { tier: 'tycoon', label: 'تايكون الدولة', price: '51,480', period: 'وكالة' } ],
-    cta: 'كن تايكون دولتك',
-    needsCountry: true
+    path: 'movement', theme: 'gold', icon: '👑', title: 'TYCOON', eyebrow: 'تايكون المجال · تايكون القطاع',
+    short: 'قُد مجالًا كاملًا (20 سوقًا) أو قطاعًا جغرافيًا كاملًا (400 مؤشر).',
+    body: '',
+    variants: [
+      { tier: 'tycoon', label: 'تايكون المجال', price: '51,480', period: 'وكالة', eyebrow: 'تايكون واحد لكل مجال', cta: 'كن تايكون مجالك', scope: 'المجال (مطلوب — تايكون واحد لكل مجال)',
+        body: 'امتلك وكالة لاڤندرز لتقود الرحلة إلى خير الوجود.\nبقيمة $51,480 فقط تسمح لـ2,400 بزنس وبراند أن ينتظموا في سوق موحد — 20 سوقًا، في كل سوق 120 بزنس وبراند — وتشوف حركة السوق قدامك لحظة بلحظة.\n\nتايكون واحد لكل مجال. ومن التأسيس وحتى استقرار النظام السنوي، تحصد ما يصل إلى 10 أضعاف قيمة الوكالة — نعم، حتى $514,800.' },
+      { tier: 'tycoon_sector', label: 'تايكون القطاع', price: '1,029,600', period: 'وكالة', eyebrow: 'تايكون واحد لكل قطاع جغرافي', cta: 'كن تايكون قطاعك', scope: 'القطاع الجغرافي (مطلوب — تايكون واحد لكل قطاع)',
+        body: 'واحد في قطاع جغرافي. 400 مؤشر سوق فعلي مباشر، لحظة بلحظة.<b>\n\nتولوا </b>وكالة لاڤندرز<b> لتقود الرحلة إلى خير الوجود.\n\nبقيمة 1,029,600$ فقط، </b>اليوم تخلق اليسر<b> وتسمح لـ 20 ضعف من وحدة 2,400 بزنس وبراند إنهم:\n\n• ينتظموا في سوق موحد. \n• يتمكنوا. \n• يتمتعوا ويستمتعوا برحلتهم الفردية، نعم، لكن في وجود جماعي.\n\n400 </b>مؤشر في القطاع<b>، كل 2,400 بزنس موزعه في 20 سوق في كل سوق 120 بزنس وبراند. جملتها 48000 بزنس وبراند متحدة في القطاع كامل\n\nتنمو بجمعهم عبر </b>أداة واحدة<b>، في </b>نظام بسيط<b>، وتشوف حركة السوق قدامك </b>لحظة بلحظة.<b>\n\n</b>إنت تايكون القطاع.<b>\n\nتايكون واحد لكل </b>قطاع جغرافي<b>، يقود الـ400 مؤشر في منظومة واحدة.\n\nومن التأسيس وإلى استقرار النظام السنوي، تحصد ما يصل إلى 10 </b>أضعاف قيمة وكالة لاڤندرز<b>.\n\nنعم، حتى 10,296,000$. وبسقف 20,592,000$.\n\n</b>تولى وكالة لاڤندرز. كن تايكون قطاعك اليوم.*',
+        bodyEn: 'One in a Geographic Sector. 400 live, active markets index — moment by moment.\n\nAssume a Lavenders Agency and lead the journey toward a better existence.\n\nFor just $1,029,600, you create ease and enable 20 times the 2,400 businesses and brands to:\n\n• Organize within a unified market.\n• Become empowered.\n• Enjoy their individual journey, yes — but within a collective presence.\n\n400 indices in the sector comprising 2,400 businesses distributed across 20 markets, with 120 businesses and brands in each market. 48,000 businesses and brands in total united all in the sector\n\nGrow by bringing them together through one tool, within one simple system, and watch the market move before you, moment by moment.\n\nYou are the Sectoral Tycoon.\n\nOne Tycoon for each geographic sector, leading the 400 index within one ecosystem.\n\nFrom establishment through the system’s annual stabilization, you can generate up to 10× the value of the Lavenders Agency.\n\nYes — up to $10,296,000, with a ceiling of $20,592,000.\n\nAssume a Lavenders Agency. Become the Tycoon of your sector today.' }
+    ],
+    cta: 'كن تايكون',
+    needsCountry: true,
+    funding: true
   }
 };
 const GATE_PATHS = {
@@ -177,7 +184,7 @@ function offerView(key, tier) {
   const vip = sel.tier === 'oms_vip' ? `<div style="background:rgba(255,255,255,.06);border-radius:12px;padding:12px;margin:12px 0;font-size:12px;color:${t.body};line-height:1.9"><b>تفصيل قيمة OMS VIP — $942</b><br>• قيمة التطبيق: <b>$429</b><br>• مقعد المشارك: <b>$513</b></div>` : '';
   view.innerHTML = `<button class="back" onclick="history.back()">← ${GATE_PATHS[o.path].title}</button>
     <div style="border-radius:20px;padding:2px;background:${t.border}"><div style="border-radius:18px;padding:20px;background:${t.bg};text-align:right">
-      <div style="font-size:10px;letter-spacing:1.5px;color:${t.eyebrow};margin-bottom:4px">${o.eyebrow}</div>
+      <div style="font-size:10px;letter-spacing:1.5px;color:${t.eyebrow};margin-bottom:4px">${sel.eyebrow || o.eyebrow}</div>
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div style="font-size:21px;font-weight:900;color:${t.title}">${o.icon} ${o.title}</div>
         <div style="text-align:left"><div style="font-size:26px;font-weight:900;color:${t.title}">$${sel.price}</div><div style="font-size:10px;color:${t.eyebrow}">${sel.period}</div></div>
@@ -185,8 +192,10 @@ function offerView(key, tier) {
       ${vbtns}
       ${sel.note ? `<div style="font-size:11.5px;color:${t.eyebrow};margin:4px 0">${sel.note}</div>` : ''}
       ${vip}
-      <div style="font-size:13px;color:${t.body};line-height:2;margin:12px 0 6px;white-space:pre-line">${o.body}</div>
-      <div style="margin-top:14px"><button class="btn" onclick="start('${key}','${sel.tier}')" style="background:${t.btnBg};color:${t.btnColor}">${o.cta}</button></div>
+      <div style="font-size:13px;color:${t.body};line-height:2;margin:12px 0 6px;white-space:pre-line">${sel.body || o.body}</div>
+      ${sel.bodyEn ? `<details style="margin:6px 0"><summary style="cursor:pointer;font-size:12px;color:${t.eyebrow}">English</summary><div dir="ltr" style="font-size:12.5px;color:${t.body};line-height:1.9;margin-top:8px;white-space:pre-line;text-align:left">${sel.bodyEn}</div></details>` : ''}
+      ${o.funding ? `<div style="margin:14px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);font-size:12px;line-height:2;color:${t.body}"><b style="color:${t.title}">📑 مستندات الاعتماد</b><br><a href="roadmap.pdf" target="_blank" rel="noopener" style="color:${t.eyebrow}">🗺️ خارطة مقترح الشراكة والاستثمار (PDF)</a><br><a href="funding.pdf" target="_blank" rel="noopener" style="color:${t.eyebrow}">📝 صفحة اعتماد التمويل — PDF قابل للتعبئة</a></div>` : ''}
+      <div style="margin-top:14px"><button class="btn" onclick="start('${key}','${sel.tier}')" style="background:${t.btnBg};color:${t.btnColor}">${sel.cta || o.cta}</button></div>
       <div class="note">يطلب منك تسجيل الدخول بحساب Google، ثم تكمل من نفس هذه الباقة.<br>↩︎ استرداد نقدي خلال ${REFUND_DAYS} يومًا (3 أسابيع) وفق إجراءات الاسترداد المعتمدة.</div>
     </div></div>`;
 }
