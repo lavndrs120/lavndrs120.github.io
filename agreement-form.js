@@ -68,11 +68,65 @@
     ['p', '<b>يعتمد — إدارة لاڤندرز — منظومة مؤشر سوق لاڤندرز 120</b><br>الاسم: {{admin_name|اسم المعتمد}}<br>التوقيع: {{sig:sig_admin|توقيع الإدارة}}<br>التاريخ: {{admin_date|تاريخ الاعتماد|date}}']
   ];
 
-  var S = { open: false, sheetId: '', name: '', isAdmin: false, fields: {}, sigs: {}, status: 'draft', pending: {}, timer: null };
+  // ── صفحة اعتماد التمويل (التايكون) ──
+  var FUND_USER_KEYS = ['currency','pay_method','t_name','t_id','t_phone','t_country','t_date','pay_bank','pay_note'];
+  var FUND_ADMIN_KEYS = ['admin_name','admin_date','admin_note'];
+  var FUND_USER_SIGS = ['sig_tycoon'];
+  var FUND_ADMIN_SIGS = ['sig_admin'];
+  var ROADMAP = [
+    ['h', 'خارطة مقترح الشراكة والاستثمار — لاڤندرز 120'],
+    ['p', '<b>1. لماذا الآن؟</b> الخراب محى السجلات، والنظام اهتز؛ والرجعة تحتاج سوقاً يمكن رؤيته وتنظيمه لحظة بلحظة.<br><b>2. لماذا أنتم؟</b> موارد بشرية ومجتمعية جاهزة، تقابلها منظومة لاڤندرز التقنية والتشغيلية.<br><b>3. ماذا نبني؟</b> لاڤندرز 120: كل 120 بزنس وبراند = مؤشر سوق حي مباشر.<br><b>4. كيف يعمل؟</b> طلبات ← حركة سوق ← لاڤا ← داتا تكشف نبض السوق وسلوك المستهلك.<br><b>5. ماذا تنتج المنظومة؟</b> لاڤا: داتا السوق | ماغما: وصول المستهلك | ڤندكس/أوراكل: التحليل والتنبؤ.<br><b>6. ما الأثر؟</b> من التشتت إلى التنظيم، ومن السوق غير المرئي إلى سوق حي قابل للقياس.<br><b>7. ما حجم الهدف؟</b> 120 بزنس = مؤشر ← 20 مؤشر = مجال ← 400 مؤشر = قطاع ← 48,000 بزنس.<br><b>8. كيف ننفذ؟</b> 10 فرق × 41 قائد = 410 قائد لبناء المؤشرات وتشغيلها.<br><b>9. ما اقتصاد السوق؟</b> لاڤا + ماغما + ڤندكس/أوراكل = اقتصاد قائم على حركة السوق وداتا المستهلك.<br><b>10. ما دور التايكون؟</b> تمويل بناء المؤشرات، استرداد رأس المال، والمشاركة في عوائد السوق وفق النموذج.<br><b>11. ما المطلوب منكم؟</b> قيادة الحراك وبناء مؤشرات سوق القطاع/المجال، بالتعاون مع لاڤندرز.<br><b>المعادلة:</b> 120 بزنس ← مؤشر ← 20 مؤشراً ← مجال ← 400 مؤشر ← قطاع ← 48,000 بزنس. إنك تقود الحراك | لاڤندرز توفر المنظومة | القادة يبنون السوق | السوق يولد الداتا.']
+  ];
+  function fundDoc(tier) {
+    var sec = tier === 'tycoon_sector';
+    var nm = sec ? 'تايكون القطاع' : 'تايكون المجال';
+    var inv = sec ? '1,029,600' : '51,480', mk = sec ? '400 سوق (48,000 بزنس/براند)' : '20 سوقاً (2,400 بزنس/براند)';
+    var rest = sec ? '829,915' : '9,530', p40 = sec ? '331,966' : '3,812', p30 = sec ? '248,975' : '2,859';
+    var a1 = sec ? '50' : '10', a2 = sec ? '100' : '20', gain = sec ? '20,592,000' : '1,029,600';
+    var due = sec ? '331,966' : '45,762';
+    var doc = [
+      ['t', 'صفحة اعتماد التمويل — تايكون لاڤندرز 120'],
+      ['sub', nm + ' — القيمة $' + inv]
+    ];
+    doc = doc.concat(ROADMAP);
+    doc = doc.concat([
+      ['p', 'أقرّ أنا الموقع أدناه باعتمادي لتمويل وتنفيذ فعالية لاڤندرز 120 بعد الاطلاع الكامل على البروبوزال والهيكل والميزانية والاتفاقية.'],
+      ['h', 'صفة التايكون'],
+      ['p', '<b>' + nm + '</b> — وكالة ' + mk + ' — القيمة $' + inv],
+      ['h', 'الميزانية التشغيلية المعتمدة للفعالية'],
+      ['p', sec ? 'عشرة فرق — 410 قائد: تشغيل $67,435 + تسويق $132,250 = <b>$199,685</b>' : 'فريق واحد — 41 قائد: تشغيل $28,725 + تسويق $13,225 = <b>$41,950</b>'],
+      ['h', 'تنويه محاسبي وقانوني معتمد'],
+      ['p', 'إجمالي الاستثمار معلوم، والصافي المتبقي ($' + rest + ') وميزانيات التشغيل والتسويق معلومة ومحددة سلفاً. كل مبلغ تم توجيهه لميزانية التشغيل والتسويق هو في الأصل مستحق بالكامل لإدارة لاڤندرز 120 كقيمة باقة التايكون المختارة، وتم توجيهه للتشغيل والتسويق ضماناً للانطلاقة، ويحق لإدارة لاڤندرز 120 استرداده لاحقاً من عوائد التشغيل. أما الصافي المتبقي فيسدد مباشرة من التايكون لصالح لاڤندرز 120 وفق آلية السداد أدناه.'],
+      ['h', 'إقرار والتزام'],
+      ['p', 'أقرّ أنا التايكون الممول باطلاعي وموافقتي على كامل البنود أعلاه، وأن الميزانيات المذكورة هي حق أصيل للاڤندرز 120 تم توجيهه للتشغيل ويسترد من التشغيل، وأن الصافي المتبقي هو التزام مباشر عليّ لصالح لاڤندرز 120.'],
+      ['h', 'مستحق التايكون'],
+      ['p', 'يسترد رأس ماله من رسوم دخول البزنس للمؤشر بواقع رسم قدره $22.58 قبل التشغيل. وربحه الصافي ثلث الداتا = $51,480 للمؤشر = $' + gain + (sec ? ' للقطاع كامل (400 مؤشر)' : ' للمجال كامل (20 مؤشر)') + '.'],
+      ['h', 'حق الفرصة الاستثمارية'],
+      ['p', 'يحق للبزنسات المتفوقة تقييمياً الحصول على فرصة استثمارية اختيارية غير ملزمة، بنسبة 13.93% من إجمالي عوائد المؤسسين وهم التايكون ولاڤندرز والكريترز عوائدهم السنوية من داتا السوق، وتمنح هذه الفرصة وفقاً لضوابط البزنس الداخلية الخاصة وحدها، ولا دخل للمؤشر في تقييمها الداخلي، وتعتبر شراكة استثمارية مباشرة وليست توزيعاً لأرباح الداتا.'],
+      ['h', 'العملة المعتمدة للدفع'],
+      ['p', '{{opt:currency:usd|دولار أمريكي}}{{opt:currency:local|العملة المحلية — سعر الصرف حسب البنك المحلي المفضل يوم السداد}}'],
+      ['h', 'آلية سداد الصافي المتبقي (اختر واحدة)'],
+      ['p', '{{opt:pay_method:direct|تحويل مباشر بالقيمة}}{{opt:pay_method:bank_guarantee|دفعات بضمان بنكي: 40% مع التوقيع = $' + p40 + '؛ 30% عند اكتمال ' + a1 + ' مؤشر = $' + p30 + '؛ 30% عند اكتمال ' + a2 + ' مؤشر = $' + p30 + '}}{{opt:pay_method:cheques|شيكات: سداد 40% = $' + p40 + ' عند التوقيع، وتسليم عدد 2 شيك مصرفي معتمد القبول مربوط بالدولار: الأول 30% = $' + p30 + ' يصرف عند اكتمال ' + a1 + ' مؤشر بمحضر تسليم، والثاني 30% = $' + p30 + ' عند اكتمال ' + a2 + ' مؤشر بمحضر تسليم}}{{opt:pay_method:guarantee_letter|خطاب ضمان دفع دولاري بالقيمة}}'],
+      ['p', 'ملاحظات / بيانات الضمان أو الشيك: {{pay_note|ملاحظات آلية السداد}}<br>المستحق مع التوقيع حسب الباقة المختارة: <b>$' + due + '</b>'],
+      ['h', 'التايكون الممول'],
+      ['p', 'الاسم: {{t_name|الاسم الكامل}}<br>رقم الهوية / الجواز: {{t_id|رقم الهوية / الجواز}}<br>رقم التواصل: {{t_phone|رقم التواصل|tel}}<br>' + (sec ? 'القطاع الجغرافي' : 'المجال') + ': {{t_country|' + (sec ? 'القطاع الجغرافي' : 'المجال') + '}}<br>التوقيع: {{sig:sig_tycoon|توقيع التايكون}}<br>التاريخ: {{t_date|التاريخ|date}}'],
+      ['h', 'إدارة لاڤندرز 120'],
+      ['p', 'الاسم: {{admin_name|اسم المعتمد}}<br>التوقيع: {{sig:sig_admin|توقيع الإدارة}}<br>التاريخ: {{admin_date|تاريخ الاعتماد|date}}<br>ملاحظة الإدارة: {{admin_note|ملاحظة}}']
+    ]);
+    return doc;
+  }
+  function curDoc() { return S.kind === 'funding' ? fundDoc(S.tier) : DOC; }
+  function docTitle() { return S.kind === 'funding' ? 'صفحة اعتماد التمويل — ' + (S.name || '') : 'لاڤندرز لإدارة البزنسات — ' + (S.name || ''); }
+
+  var S = { open: false, kind: 'business', tier: '', sheetId: '', name: '', isAdmin: false, fields: {}, sigs: {}, status: 'draft', pending: {}, timer: null };
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function toast(m) { try { if (typeof showToast === 'function') { showToast(m); return; } } catch (e) {} alert(m); }
-  function canEditKey(k) { return S.isAdmin ? ADMIN_KEYS.indexOf(k) !== -1 || ADMIN_SIGS.indexOf(k) !== -1 : (BUSINESS_KEYS.indexOf(k) !== -1 || BUSINESS_SIGS.indexOf(k) !== -1); }
+  function canEditKey(k) {
+    var f = S.kind === 'funding';
+    var ak = f ? FUND_ADMIN_KEYS : ADMIN_KEYS, as = f ? FUND_ADMIN_SIGS : ADMIN_SIGS, bk = f ? FUND_USER_KEYS : BUSINESS_KEYS, bs = f ? FUND_USER_SIGS : BUSINESS_SIGS;
+    return S.isAdmin ? ak.indexOf(k) !== -1 || as.indexOf(k) !== -1 : (bk.indexOf(k) !== -1 || bs.indexOf(k) !== -1);
+  }
   function locked() { return !S.isAdmin && S.status === 'received'; }
 
   function api(method, body, query) {
@@ -98,7 +152,7 @@
   }
   function renderDoc() {
     var html = '';
-    DOC.forEach(function (b) {
+    curDoc().forEach(function (b) {
       var t = b[1].replace(/\{\{([^}]+)\}\}/g, function (_, m) { return renderToken(m); });
       if (b[0] === 't') html += '<h1>' + t + '</h1>';
       else if (b[0] === 'sub') html += '<div class="sub">' + t + '</div>';
@@ -108,7 +162,7 @@
     });
     return html;
   }
-  var STATUS_AR = { draft: '📝 مسودة', submitted: '⏳ بانتظار مراجعة الإدارة', received: '✅ تم استلام الاتفاقية', rejected: '❌ غير مقبولة — عدّل وأعد الإرسال' };
+  var STATUS_AR = { draft: '📝 مسودة', submitted: '⏳ بانتظار مراجعة الإدارة', received: '✅ تم الاستلام والاعتماد', rejected: '❌ غير مقبولة — عدّل وأعد الإرسال' };
   function paint() {
     var body = document.getElementById('agrBody'); if (!body) return;
     var top = body.scrollTop;
@@ -117,7 +171,7 @@
     var st = document.getElementById('agrStatus'); if (st) st.textContent = (STATUS_AR[S.status] || S.status);
     var sb = document.getElementById('agrSubmit'); if (sb) sb.style.display = (!S.isAdmin && S.status !== 'received' && S.status !== 'submitted') ? '' : 'none';
     var hint = document.getElementById('agrHint');
-    if (hint) hint.textContent = locked() ? 'الاتفاقية مستلمة ومقفلة.' : (S.isAdmin ? 'أنت تعبّئ خانات الإدارة فقط (نموذج 3 + اعتماد الإدارة).' : 'المس أي خانة لتعبئتها، والمس خانة التوقيع لترسم توقيعك.');
+    if (hint) hint.textContent = locked() ? 'الاتفاقية مستلمة ومقفلة.' : (S.isAdmin ? (S.kind === 'funding' ? 'أنت تعبّئ خانات الإدارة فقط (الاسم والتوقيع والتاريخ).' : 'أنت تعبّئ خانات الإدارة فقط (نموذج 3 + اعتماد الإدارة).') : 'المس أي خانة لتعبئتها، والمس خانة التوقيع لترسم توقيعك.');
   }
 
   // ── الاستجابة للمس
@@ -199,7 +253,7 @@
 
   function submit() {
     flush().then(function () {
-      if (!confirm('إرسال الاتفاقية للإدارة؟ سيُراجعها الأدمن، ولن تستطيع التعديل أثناء المراجعة.')) return;
+      if (!confirm('إرسال النموذج للإدارة؟ سيُراجعها الأدمن، ولن تستطيع التعديل أثناء المراجعة.')) return;
       api('POST', { action: 'submit_agreement_form', sheetId: S.sheetId }).then(function (d) {
         if (d.error) { toast(d.error); return; }
         S.status = 'submitted'; paint(); toast('تم الإرسال — بانتظار مراجعة الإدارة');
@@ -230,7 +284,7 @@
     if (document.getElementById('agrOverlay')) document.getElementById('agrOverlay').remove();
     if (!document.getElementById('agrCss')) { var st = document.createElement('style'); st.id = 'agrCss'; st.textContent = CSS; document.head.appendChild(st); }
     var o = document.createElement('div'); o.id = 'agrOverlay';
-    o.innerHTML = '<div class="agr-top"><button class="agr-x" id="agrClose" aria-label="إغلاق">✕</button><b>لاڤندرز لإدارة البزنسات — ' + esc(S.name || '') + '</b>' +
+    o.innerHTML = '<div class="agr-top"><button class="agr-x" id="agrClose" aria-label="إغلاق">✕</button><b>' + esc(docTitle()) + '</b>' +
       '<span id="agrSaved" style="font-size:11px;color:#6EE7B7"></span><button class="agr-btn" id="agrPrint">🖨 PDF</button></div>' +
       '<div style="padding:6px 14px;font-size:11.5px;color:var(--text-dim,#aaa);display:flex;gap:10px;flex-wrap:wrap"><span id="agrStatus"></span><span id="agrHint"></span></div>' +
       '<div id="agrBody"></div>' +
@@ -250,13 +304,16 @@
 
   window.AgreementForm = {
     open: function (opts) {
-      S = { open: true, sheetId: opts.sheetId, name: opts.name || '', isAdmin: false, fields: {}, sigs: {}, status: 'draft', pending: {}, timer: null };
+      var fund = opts.kind === 'funding';
+      var owner = String(opts.owner || (function () { try { return sessionStorage.getItem('lavndr_email') || ''; } catch (e) { return ''; } })()).toLowerCase();
+      var sid = fund ? 'FUND:' + opts.tier + ':' + owner : opts.sheetId;
+      S = { open: true, kind: fund ? 'funding' : 'business', tier: opts.tier || '', sheetId: sid, name: opts.name || '', isAdmin: false, fields: {}, sigs: {}, status: 'draft', pending: {}, timer: null };
       build();
       document.getElementById('agrBody').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim,#aaa)">جاري التحميل...</div>';
       try { history.pushState({ agr: 1 }, ''); } catch (e) {}
       api('GET', null, 'action=agreement_form&sheetId=' + encodeURIComponent(S.sheetId)).then(function (d) {
         if (d.error) { toast(d.error); close(); return; }
-        S.fields = d.fields || {}; S.sigs = d.sigs || {}; S.status = d.status || 'draft'; S.isAdmin = !!d.isAdmin; if (!S.name) S.name = d.businessName || '';
+        if (d.kind) S.kind = d.kind; if (d.tier) S.tier = d.tier; S.fields = d.fields || {}; S.sigs = d.sigs || {}; S.status = d.status || 'draft'; S.isAdmin = !!d.isAdmin; if (!S.name) S.name = d.businessName || '';
         build(); paint();
       }).catch(function () { toast('تعذّر تحميل النموذج'); close(); });
     },
