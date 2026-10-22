@@ -33,10 +33,15 @@ ld = json.dumps({'@context': 'https://schema.org', '@type': 'WebPage', 'name': t
                  'image': SITE + 'og-card.jpg', 'dateModified': d.get('timestamp') or None}, ensure_ascii=False).replace('<', '\\u003c')
 meta = ('<title>%s</title>\n<meta name="description" content="%s">\n<meta property="og:title" content="%s">\n<meta property="og:description" content="%s">\n'
         '<meta name="twitter:title" content="%s">\n<meta name="twitter:description" content="%s">\n<script type="application/ld+json">%s</script>\n') % (e(title), e(desc), e(title), e(desc), e(title), e(desc), ld)
-card = ('<div class="live" id="liveCard"><div class="k">صافي قيمة الأصول</div><div class="v %s">$%s</div><div class="ch %s">%s %s (%s%%)</div>'
-        '<div class="g"><div>Volatility<b>%s%%</b></div><div>Low<b>$%s</b></div><div>High<b>$%s</b></div></div>'
-        '<div class="ab">%s</div>%s</div>\n') % (cls, nav, cls, arrow, e(chabs), e(p), f(x.get('volatility')), f(x.get('dayLow')), f(x.get('dayHigh')), e(about),
-        ('<div class="ts">آخر تحديث: %s UTC</div>' % e(ts)) if ts else '')
+hm = (d.get('timestamp') or '')[11:16]
+card = ('<div class="hero"><div class="hero-eyebrow">المؤشر الاستهلاكي</div><div class="hero-ticker">LAVNDR120</div><div class="hero-subtitle" id="lastUpdateText">%s</div></div>\n'
+        '<div class="glass nav-card" id="liveCard"><span class="dl-badge dl-live">مباشر · لحظة بلحظة</span><div class="nav-label">صافي قيمة الأصول</div>'
+        '<div class="nav-value %s">$%s</div><div class="nav-change %s">%s %s%s (%s%%)</div>'
+        '<div class="nav-meta"><div class="nav-meta-item"><div class="nav-meta-label">High</div><div class="nav-meta-val">$%s</div></div>'
+        '<div class="nav-meta-item"><div class="nav-meta-label">Low</div><div class="nav-meta-val">$%s</div></div>'
+        '<div class="nav-meta-item"><div class="nav-meta-label">Volatility</div><div class="nav-meta-val">%s%%</div></div></div></div>\n'
+        '<p class="ab">%s</p>\n') % (('آخر تحديث ' + hm) if hm else '', cls, nav, cls, arrow, '+' if ch >= 0 else '-', e(chabs), e(p),
+        f(x.get('dayHigh')), f(x.get('dayLow')), f(x.get('volatility')), e(about))
 dash = os.environ.get('DASH_PATH', 'dashboard.html')
 if os.path.exists(dash):
     ds = open(dash, encoding='utf-8').read()
