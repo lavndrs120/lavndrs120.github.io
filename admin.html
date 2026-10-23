@@ -136,8 +136,16 @@ button {
     <div id="capacityList"><div class="empty">جاري التحميل...</div></div>
   </div>
 
+  <div class="glass section">
+    <h2>🔄 إعادة عدّ الطلبات من الصفر</h2>
+    <p style="font-size:.85rem;opacity:.8;margin:0 0 10px">العدّ تراكمي (يقرأ الصفوف الجديدة فقط). بعد تعديل أو حذف قيم قديمة في شيت Orders اضغط هنا لتنعكس في المنصة.</p>
+    <button class="approve" id="recountBtn" type="button">🔄 إعادة العدّ الآن</button> <span id="recountMsg" style="font-size:.85rem"></span>
+  </div>
+
   <!-- طلبات المسار الثاني المعلّقة (OMS / تايكون / ريسيلر / فرانشايز): قبول وتفعيل أو رفض -->
   <div class="glass section">
+    <h2>🧩 طلبات الريسلر (بيع / تفاوض) <span class="badge" id="rsCount">0</span></h2>
+    <div id="rsList"><div class="empty">جاري التحميل...</div></div>
     <h2>🏛️ طلبات إضافة بزنس إلى أسواق الفرانشايز <span class="badge" id="fbCount">0</span></h2>
     <div id="fbList"><div class="empty">جاري التحميل...</div></div>
     <h2>🧭 طلبات المسار الثاني — قبول وتفعيل <span class="badge" id="mvCount">0</span></h2>
@@ -298,7 +306,15 @@ async function boot() {
   document.getElementById('adminEmailLabel').textContent = USER_EMAIL;
   // تحميل متدرّج (دفعتان) لتخفيف الضغط على الخادم
   loadSubscriptions(); loadParticipants(); loadEntitlements(); loadBusinessList();
-  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadBusinessRequests(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
+  document.getElementById('recountBtn').onclick = async function () {
+    if (!confirm('سيُعاد عدّ كل الطلبات من كل الشيتات من الصفر. متابعة؟')) return;
+    const m = document.getElementById('recountMsg'); m.textContent = 'جارٍ العدّ... قد يستغرق دقيقة';
+    try {
+      const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_recount_orders', token: AUTH_TOKEN }) });
+      const j = await res.json(); m.textContent = j.error ? ('❌ ' + j.error) : ('✅ ' + (j.message || 'تم'));
+    } catch (e) { m.textContent = '❌ تعذّر الاتصال'; }
+  };
+  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadBusinessRequests(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
 }
 function redirectToDashboard(msg) {
   try { sessionStorage.setItem('lavndr_flash', msg || ''); sessionStorage.removeItem('lavndr_stay_dash'); } catch (e) {}
@@ -464,6 +480,36 @@ async function loadCapacity() {
 
 // ✅ متابعة الفرانشايز: المدفوع/المتبقي + عدد البزنسات المضافة (الأدمن يدخله يدويًا)
 const OMS_STATUS_AR = { waitlisted: 'قائمة الانتظار', awaiting_otp: '💳 بانتظار الدفع', awaiting_review: '⏳ دفع بانتظار الاعتماد', active: '✅ فعّال' };
+async function loadResellerReqs() {
+  const el = document.getElementById('rsList');
+  if (!el) return;
+  try {
+    const data = await authGet('admin_reseller_requests');
+    const rows = data.rows || [];
+    document.getElementById('rsCount').textContent = rows.length;
+    if (!rows.length) { el.innerHTML = '<div class="empty">لا توجد طلبات ريسلر معلّقة</div>'; return; }
+    el.innerHTML = rows.map((r, i) => `
+      <div class="row">
+        <div class="info">
+          <div class="email">${esc(r.name)} <small>· خانة ${esc(r.idx)}</small></div>
+          <div class="meta">${esc(r.email)} · ${r.status === 'sold' ? '✅ تم البيع — الدفعة $' + esc(r.amount) + ' · المرجع: ' + esc(r.txnRef || '—') : '🤝 قيد التفاوض (بلا دفع)'}</div>
+        </div>
+        <div class="btns"><button class="approve" data-rs="${i}" data-d="approved">✓ اعتماد</button><button class="reject" data-rs="${i}" data-d="rejected">رفض</button></div>
+      </div>`).join('');
+    el.querySelectorAll('[data-rs]').forEach(b => b.onclick = async () => {
+      const r = rows[+b.dataset.rs];
+      if (!confirm((b.dataset.d === 'approved' ? 'اعتماد ' : 'رفض ') + r.name + ' (' + r.email + ')؟')) return;
+      b.disabled = true;
+      try {
+        const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_decide_reseller', row: r.row, decision: b.dataset.d, token: AUTH_TOKEN }) });
+        const d = await res.json();
+        if (d.error) { showToast('خطأ: ' + d.error); b.disabled = false; return; }
+        showToast(b.dataset.d === 'approved' ? '✓ اعتُمد' : '✓ رُفض');
+        loadResellerReqs();
+      } catch (e) { showToast('فشل الاتصال'); b.disabled = false; }
+    });
+  } catch (e) { }
+}
 async function loadFranchiseBiz() {
   const el = document.getElementById('fbList');
   if (!el) return;
