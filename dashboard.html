@@ -2506,6 +2506,10 @@ function renderLocationChart(byLocation) {
 // ✅ التراتب الحيّ للبزنسات
 // ══════════════════════════════════════════════
 let lbData = null, lbFilter = 'all', lbShown = 20, lbQuery = '', myBiz = null;
+function vBadge(stage) {
+  if (!stage || stage <= 0) return '';
+  return '<svg width="16" height="16" viewBox="0 0 20 20" role="img" aria-label="موثّق" style="vertical-align:-3px;margin-inline-start:5px;flex:none"><title>موثّق — حتى مرحلة ' + stage + ' طلب</title><circle cx="10" cy="10" r="10" fill="#E11D48"/><path d="M5.2 10.4l3.1 3.1 6.5-6.9" fill="none" stroke="#FACC15" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
 function renderLeaderboard(data) {
   lbData = data && data.leaderboard ? data.leaderboard : null;
   drawLeaderboard();
@@ -2546,7 +2550,7 @@ function drawLeaderboard() {
     const badges = (r.stages || []).map(st => '<span class="lb-badge">' + STAGE_AT[st] + '</span>').join('');
     const mine = myBiz && ((myBiz.ticker && r.ticker === myBiz.ticker) || (myBiz.name && r.name === myBiz.name));
     return '<div class="lb-row" style="' + (mine ? 'background:rgba(212,175,55,0.12);border-radius:10px;' : '') + '"><div class="lb-rank ' + (r.rank <= 3 ? 'top' : '') + '">' + r.rank + '</div>' +
-      '<div class="lb-name">' + esc(r.name) + (mine ? ' <span class="lb-badge">بزنسك</span>' : '') + badges + '<div class="lb-sub"><bdi>' + esc(r.ticker) + '</bdi> · <bdi>' + (r.orders || 0).toLocaleString('en-US') + '</bdi> طلب · <bdi>' + (r.points || 0).toLocaleString('en-US') + '</bdi> نقطة · <bdi>$' + ((r.orders || 0) * 4.275).toFixed(2) + '</bdi></div></div>' +
+      '<div class="lb-name">' + esc(r.name) + vBadge(r.verified) + (mine ? ' <span class="lb-badge">بزنسك</span>' : '') + badges + '<div class="lb-sub"><bdi>' + esc(r.ticker) + '</bdi> · <bdi>' + (r.orders || 0).toLocaleString('en-US') + '</bdi> طلب · <bdi>' + (r.points || 0).toLocaleString('en-US') + '</bdi> نقطة · <bdi>$' + ((r.orders || 0) * 4.275).toFixed(2) + '</bdi></div></div>' +
       '<div class="lb-w">' + (parseFloat(r.weight) || 0).toFixed(2) + '%</div>' + mv + '</div>';
   }).join('') || '<div class="empty">لا توجد بزنسات في هذه المجموعة</div>';
   moreBtn.style.display = (!lbQuery && rows.length > lbShown) ? '' : 'none';
@@ -2584,7 +2588,7 @@ function renderWeightsTable(weights) {
       <div class="comp-row">
         <div class="comp-rank">${i + 1}</div>
         <div class="comp-ticker ${cls}">${esc(item.ticker)}</div>
-        <div class="comp-name">${esc(item.name)}</div>
+        <div class="comp-name">${esc(item.name)}${vBadge(item.verified)}</div>
         <div class="comp-right">
           <div class="comp-weight" style="color:${barClr}">${w.toFixed?w.toFixed(1):w}%</div>
           <div class="comp-alloc">$${alloc}</div>
