@@ -717,7 +717,7 @@ body.builder-mode #builderPanel { display:block; }
        عن غيرهم، راجع updateTabVisibility) -->
   <div id="builderPanel" style="margin:18px 0 30px;">
     <div id="builderHubBody"><div class="glass" style="padding:28px 18px;text-align:center;color:var(--text-dim);font-size:13px;">جاري تحميل مساحتك…</div></div>
-    <div style="text-align:center;margin-top:6px;"><button id="bhToData" onclick="bhToData()" style="display:none;margin-left:8px;padding:11px 22px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;">عرض المؤشر</button><button onclick="showSubscribeGate(true)" style="padding:11px 22px;border:1px solid var(--glass-border);border-radius:12px;background:transparent;color:var(--text-dim);font-weight:700;font-size:13px;cursor:pointer;">عضويتي واشتراكاتي</button></div>
+    <div style="text-align:center;margin-top:6px;"><button id="bhToData" onclick="goToIndicator()" style="display:none;margin-left:8px;padding:11px 22px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;">عرض المؤشر</button><button onclick="showSubscribeGate(true)" style="padding:11px 22px;border:1px solid var(--glass-border);border-radius:12px;background:transparent;color:var(--text-dim);font-weight:700;font-size:13px;cursor:pointer;">عضويتي واشتراكاتي</button></div>
   </div>
 
   <div class="screen" id="screenMagma">
@@ -768,7 +768,7 @@ body.builder-mode #builderPanel { display:block; }
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "166.73", "change": "-0.00", "changePercent": "-0.00", "dayHigh": "166.73", "dayLow": "166.73", "volatility": "0.00"}, "timestamp": "2026-10-25T21:19:21"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index":{"NAV":"0.00","change":"0.00","changePercent":"0.00","dayHigh":"0.00","dayLow":"0.00","volatility":"0.00"},"timestamp":null};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -894,7 +894,9 @@ function renderDemoBanner() {
   applyDemoLiveBadges();
   if (isLive) { el.style.display = 'none'; return; }
   if (AUTH_TOKEN && USER_EMAIL) {
-    textEl.textContent = '🔒 حسابك غير مشترك — الأقسام الموسومة «تجريبي» للعرض فقط، اضغط للاشتراك ورؤية البيانات الحقيقية';
+    textEl.textContent = currentRole === 'movement'
+      ? '🔒 باقتك لا تتيح عرض المؤشر — هذه بيانات تجريبية. للمؤشر الحقيقي اشترك في باقات المسار الأول'
+      : '🔒 حسابك غير مشترك — الأقسام الموسومة «تجريبي» للعرض فقط، اضغط للاشتراك ورؤية البيانات الحقيقية';
   } else {
     textEl.textContent = '🔍 الأقسام الموسومة «تجريبي» بيانات للعرض فقط — اضغط لاستكشاف الباقات والانضمام';
   }
@@ -1075,14 +1077,14 @@ async function renderBuilderHub() {
   } catch (e) { box.innerHTML = '<div class="glass" style="padding:24px;text-align:center;color:var(--red);font-size:13px;">تعذّر تحميل مساحتك</div>'; return; }
   const h = builderHub || {};
   const parts = [];
-  if (h.reseller) parts.push(bhResellerHtml(h.reseller));
-  if (h.franchise) parts.push(bhFranchiseHtml(h.franchise));
+  if (h.reseller) parts.push('<div id="bh_reseller" style="scroll-margin-top:70px;">' + bhResellerHtml(h.reseller) + '</div>');
+  if (h.franchise) parts.push('<div id="bh_franchise" style="scroll-margin-top:70px;">' + bhFranchiseHtml(h.franchise) + '</div>');
   try {
     const sr = await fetch(WORKER_URL + '?action=my_subscriptions&token=' + encodeURIComponent(AUTH_TOKEN));
     const sj = await sr.json();
     ((sj && sj.items) || []).filter(i => i.stage === 'active' && i.tier !== 'reseller' && i.tier !== 'franchise').forEach(i => {
       const meta = TIER_META[i.tier] || {};
-      parts.push('<div class="glass" style="padding:20px 16px;border-radius:18px;margin-bottom:14px;text-align:center;">' +
+      parts.push('<div id="bh_' + esc(i.tier) + '" class="glass" style="scroll-margin-top:70px;padding:20px 16px;border-radius:18px;margin-bottom:14px;text-align:center;">' +
         '<div style="font-size:32px;">' + (meta.badge || '✅') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
@@ -1105,6 +1107,35 @@ async function bhSave(kind, idx) {
 }
 // ريسيلر/فرانشايز (بلا تايكون): بناؤون لا دخل لهم بالداتا — تُخفى الرئيسية والمكونات والأرشيف ويرون عضويتهم فقط
 let _bmAt = 0;
+const OT_TIERS = ['tycoon', 'tycoon_sector', 'oms_services', 'oms_products', 'oms_vip'];   // يرون المؤشر
+const PATH2_TIERS = OT_TIERS.concat(['reseller', 'franchise']);
+const DATA_ONLY_TIERS = ['lava', 'annual', 'fendex', 'magma'];
+let _actTiers = [];
+function getSelTier() { try { return sessionStorage.getItem('lavndr_tier') || ''; } catch (e) { return ''; } }
+function setSelTier(t) { try { sessionStorage.setItem('lavndr_tier', t || ''); } catch (e) {} }
+function hasIndicatorTier() { return _actTiers.some(t => OT_TIERS.indexOf(t) !== -1); }
+function setMembershipBadge(tier) {
+  const b = document.getElementById('tierBadge'); if (!b) return;
+  if (!tier) { window._lvBadgeTxt = ''; return; }
+  window._lvBadgeTxt = ((TIER_META[tier] || {}).badge || '') + ' ' + tierNameAr(tier);
+  b.textContent = window._lvBadgeTxt;
+  b.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap;background:rgba(201,168,76,0.2);color:#F0D080;border:1px solid rgba(201,168,76,0.4);';
+}
+function bhScrollTo(tier) {
+  setTimeout(() => { const el = document.getElementById('bh_' + tier); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 250);
+}
+// «عرض المؤشر»: لأعضاء OMS/تايكون فقط — يثبّت باقة تسمح بالبيانات ثم يحمّل المؤشر الحقيقي
+async function goToIndicator() {
+  const cur = getSelTier();
+  const tier = OT_TIERS.indexOf(cur) !== -1 ? cur : (_actTiers.find(t => OT_TIERS.indexOf(t) !== -1) || '');
+  setViewPref('data');
+  closeSubscribeGateModal();
+  if (!tier) { checkBuilderMode(true); return; }
+  setSelTier(tier);
+  try { await fetch(WORKER_URL + '?action=select_view_tier&token=' + encodeURIComponent(AUTH_TOKEN) + '&tier=' + encodeURIComponent(tier)); } catch (e) {}
+  document.getElementById('mainWrap').style.display = 'none'; document.getElementById('loadingWrap').style.display = '';
+  await loadData(true);
+}
 async function checkBuilderMode(force) {
   if (!AUTH_TOKEN || !USER_EMAIL) return;
   if (!force && Date.now() - _bmAt < 20000) return;
@@ -1113,14 +1144,21 @@ async function checkBuilderMode(force) {
     const r = await fetch(WORKER_URL + '?action=my_subscriptions&token=' + encodeURIComponent(AUTH_TOKEN));
     const j = await r.json();
     const act = ((j && j.items) || []).filter(i => i.stage === 'active').map(i => i.tier);
-    const hasB = act.some(t => t === 'reseller' || t === 'franchise');
-    const hasData = act.some(t => ['tycoon', 'tycoon_sector', 'lava', 'annual', 'fendex', 'magma', 'oms_services', 'oms_products', 'oms_vip'].indexOf(t) !== -1) || currentRole === 'admin' || currentRole === 'participant';
+    _actTiers = act;
+    const hasP2 = act.some(t => PATH2_TIERS.indexOf(t) !== -1);
+    const hasDataOnly = act.some(t => DATA_ONLY_TIERS.indexOf(t) !== -1) || currentRole === 'admin' || currentRole === 'participant';
     let pref = ''; try { pref = sessionStorage.getItem('lavndr_view') || ''; } catch (e) {}
-    const movementOnly = currentRole === 'movement' && act.length > 0; // عضو حركة نشط بلا دور بيانات: لوحة عضويته بدل العرض التجريبي
-    const builder = movementOnly || hasB && (pref === 'builder' || (pref !== 'data' && !act.some(t => ['tycoon', 'tycoon_sector', 'lava', 'annual', 'fendex', 'magma', 'oms_services', 'oms_products', 'oms_vip'].indexOf(t) !== -1)));
-    const tb = document.getElementById('bhToData'); if (tb) tb.style.display = (builder && hasData && !movementOnly) ? '' : 'none';
+    const sel = getSelTier();
+    const selActive = sel && act.indexOf(sel) !== -1;
+    // المسار الثاني: صفحته الداخلية افتراضياً، والمؤشر باختياره (عرض المؤشر) فقط
+    const movementOnly = currentRole === 'movement' && act.length > 0;
+    const builder = movementOnly || (hasP2 && (pref === 'builder' || (pref !== 'data' && !hasDataOnly)));
+    // زر «عرض المؤشر»: OMS/تايكون فقط، ويختفي حين تكون الباقة المختارة ريسيلر/فرانشايز
+    const showBtn = builder && hasIndicatorTier() && !(selActive && (sel === 'reseller' || sel === 'franchise'));
+    const tb = document.getElementById('bhToData'); if (tb) tb.style.display = showBtn ? '' : 'none';
     document.body.classList.toggle('builder-mode', builder);
-    if (builder) renderBuilderHub();
+    setMembershipBadge(selActive && hasP2 ? sel : '');
+    if (builder) { await renderBuilderHub(); if (selActive && force) bhScrollTo(sel); }
   } catch (e) {}
 }
 // ── أزرار ترويجية لمشتركي المسار الأول: لافا يومي → السنوي/ماقما، السنوي → ڤندكس ──
@@ -1252,6 +1290,9 @@ function updateTabVisibility() {
   } else if (currentRole === 'magma') {
     badge.textContent = '🌋 ماقما';
     badge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap;background:rgba(249,115,22,0.18);color:#FDBA74;border:1px solid rgba(249,115,22,0.4);';
+  } else if (window._lvBadgeTxt) {
+    badge.textContent = window._lvBadgeTxt;
+    badge.style.cssText = 'display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;white-space:nowrap;background:rgba(201,168,76,0.2);color:#F0D080;border:1px solid rgba(201,168,76,0.4);';
   } else {
     badge.style.display = 'none';
   }
@@ -1502,6 +1543,7 @@ function renderSubscriptionChooser(items) {
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">اختر الاشتراك الذي تريد الدخول إليه</div>
     ${cards}
     <button id="subAddAnotherBtn" style="width:100%;padding:12px;border:1px dashed var(--gold);border-radius:12px;background:transparent;color:var(--gold);font-size:13px;cursor:pointer;">+ اشترك في باقة أخرى</button>
+    ${items.some(x => x.stage === 'active' && OT_TIERS.indexOf(x.tier) !== -1) ? '<button onclick="goToIndicator()" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px;background:rgba(201,168,76,0.12);color:var(--gold);font-weight:800;font-size:13px;cursor:pointer;">عرض المؤشر</button>' : ''}
   `);
   document.querySelectorAll('[data-sub-idx]').forEach(b => b.onclick = () => pickSubscription(items[+b.dataset.subIdx]));
   document.getElementById('subAddAnotherBtn').onclick = async () => {
@@ -1513,11 +1555,18 @@ function renderSubscriptionChooser(items) {
   };
 }
 function setViewPref(v) { try { sessionStorage.setItem('lavndr_view', v); } catch (e) {} }
-function bhToData() { setViewPref('data'); checkBuilderMode(true); }
 async function pickSubscription(it) {
+  if (it.stage === 'active' && it.tier !== '__business' && currentRole !== 'participant' && PATH2_TIERS.indexOf(it.tier) !== -1) {
+    // المسار الثاني: صفحته الداخلية (موحّدة) ثم تمرير تلقائي إلى قسم باقته
+    setViewPref('builder'); setSelTier(it.tier);
+    closeSubscribeGateModal();
+    try { await fetch(WORKER_URL + '?action=select_view_tier&token=' + encodeURIComponent(AUTH_TOKEN) + '&tier=' + encodeURIComponent(it.tier)); } catch (e) {}
+    await checkBuilderMode(true);
+    bhScrollTo(it.tier);
+    return;
+  }
   if (it.stage === 'active') {
-    if (it.tier === 'reseller' || it.tier === 'franchise') { setViewPref('builder'); closeSubscribeGateModal(); await checkBuilderMode(true); return; }
-    setViewPref('data'); checkBuilderMode(true);
+    setViewPref('data'); setSelTier(''); setMembershipBadge(''); checkBuilderMode(true);
   }
   if (it.tier === '__business') { setSpace('market'); closeSubscribeGateModal(); applySpace(); return; }
   currentSubCtx = { tier: it.tier, country: it.country || '' };
@@ -1571,7 +1620,7 @@ function subscribeGateShell(innerHtml) {
       <div style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:6px;">LAVNDR120</div>
       <div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:32px;">المؤشر الاستهلاكي</div>
       ${innerHtml}
-      <button onclick="closeSubscribeGateModal()" style="width:100%;margin-top:14px;padding:10px;border:1px solid var(--glass-border);border-radius:10px;background:transparent;color:var(--text-dim);font-size:12px;cursor:pointer;">${(currentRole && currentRole !== 'visitor') ? 'إغلاق' : 'تصفح فقط الآن (بيانات تجريبية)'}</button>
+      <button onclick="closeSubscribeGateModal()" style="width:100%;margin-top:14px;padding:10px;border:1px solid var(--glass-border);border-radius:10px;background:transparent;color:var(--text-dim);font-size:12px;cursor:pointer;">${(currentRole && currentRole !== 'visitor') ? 'رجوع' : 'تصفح فقط الآن (بيانات تجريبية)'}</button>
     </div>`;
 }
 
