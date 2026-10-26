@@ -70,7 +70,7 @@ input:checked + .slider:before { transform:translateX(-20px); }
 .badge-guarantee { background:var(--gold-dim); color:var(--gold); }
 .badge-completed { background:var(--emerald-dim); color:var(--emerald-solid); }
 .empty { text-align:center; color:var(--text-dim); font-size:13px; padding:24px 0; }
-.toast {
+.toast { pointer-events:none;
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
   background:#111; border:1px solid var(--glass-border); padding:10px 18px;
   border-radius:10px; font-size:13px; z-index:10000; opacity:0; transition:opacity .3s;
@@ -237,6 +237,7 @@ async function loadPortal() {
     }
 
     el.innerHTML = data.businesses.map(renderBusinessCard).join('');
+    if (window.Donation) { try { Donation.load(); } catch (e) {} }
     if (!window.__restored) { window.__restored = true; restoreProgress(data.businesses); }
   } catch(e) {
     el.innerHTML = '<div class="empty">فشل الاتصال — حاول تاني</div>';
@@ -428,6 +429,7 @@ window.addEventListener('load', function() {
   new MutationObserver(mk).observe(w, { childList: true });
 })();
 </script>
+<script src="donation.js"></script>
 <script src="lavndr-app.js"></script>
 </body>
 </html>

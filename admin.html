@@ -196,6 +196,11 @@ button {
     <div id="omsList"><div class="empty">جاري التحميل...</div></div>
   </div>
 
+  <!-- تبرعات الشهادات الذهبية بين البزنسات -->
+  <div class="glass section">
+    <h2>🎁 تبرعات الشهادات بين البزنسات <span class="badge" id="donCount">0</span></h2>
+    <div id="donAdminList"><div class="empty">جاري التحميل...</div></div>
+  </div>
   <!-- طلبات البزنسات: الاتفاقية الموقعة + طلب الشهادة الذهبية -->
   <div class="glass section">
     <h2>📝 طلبات البزنسات (اتفاقية / شهادة ذهبية) <span class="badge" id="brCount">0</span></h2>
@@ -352,7 +357,7 @@ async function boot() {
       const j = await res.json(); m.textContent = j.error ? ('❌ ' + j.error) : ('✅ ' + (j.message || 'تم'));
     } catch (e) { m.textContent = '❌ تعذّر الاتصال'; }
   };
-  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadBusinessRequests(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
+  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadBusinessRequests(); loadDonations(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
 }
 function redirectToDashboard(msg) {
   try { sessionStorage.setItem('lavndr_flash', msg || ''); sessionStorage.removeItem('lavndr_stay_dash'); } catch (e) {}
@@ -725,6 +730,29 @@ async function linkOmsMember(r) {
   } catch (e) { showToast('فشل الاتصال'); }
 }
 
+async function loadDonations() {
+  const el = document.getElementById('donAdminList'); if (!el) return;
+  try {
+    const data = await authGet('admin_donations');
+    const offs = data.offers || [], reqs = data.openRequests || [];
+    const live = offs.filter(o => o.status === 'accepted' || o.status === 'pending');
+    document.getElementById('donCount').textContent = live.length;
+    const L = { pending: 'معروض', accepted: 'جارية', completed: 'مكتملة', declined: 'اعتُذر', withdrawn: 'سُحب', cancelled: 'مُلغاة' };
+    let h = '<div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">طلبات مفتوحة: ' + reqs.length + (reqs.length ? ' — ' + reqs.map(r => esc(r.name)).join('، ') : '') + '</div>';
+    h += offs.length ? offs.slice(0, 60).map(o => {
+      const act = (o.status === 'pending' || o.status === 'accepted') ? '<button class="reject" data-don="' + o.row + '">إلغاء</button>' : '';
+      return '<div class="row"><div class="info"><div class="email"><b>$' + esc(o.value) + '</b> · ' + esc(o.donor) + ' ← ' + esc(o.donee) + '</div>' +
+        '<div class="meta">' + (L[o.status] || esc(o.status)) + ' · إرجاع ' + esc(o.returnDays) + ' يوم' + (o.growthPct > 0 ? ' · شرط نمو ' + esc(o.growthPct) + '% (الآن ' + esc(o.growthNow) + '%)' : '') + (o.overdue ? ' · <b style="color:#f87171;">متأخرة</b>' : '') + '</div>' +
+        '<div class="meta" style="direction:ltr;text-align:right;">' + esc(o.donorEmail) + ' → ' + esc(o.doneeEmail) + '</div></div><div class="btns">' + act + '</div></div>';
+    }).join('') : '<div class="empty">لا توجد عروض</div>';
+    el.innerHTML = h;
+    el.querySelectorAll('[data-don]').forEach(b => b.onclick = async () => {
+      if (!confirm('إلغاء هذه الصفقة وفكّ الحجز؟')) return;
+      const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_donation_cancel', row: b.dataset.don, token: AUTH_TOKEN }) });
+      const j = await res.json(); showToast(j.error ? j.error : '✓ أُلغيت'); loadDonations();
+    });
+  } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
+}
 async function loadBusinessRequests() {
   const el = document.getElementById('brList');
   try {
