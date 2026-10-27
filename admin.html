@@ -160,7 +160,7 @@ button {
       عند بلوغ البزنس <b>100 / 500 / 1000</b> طلب يُطلب منه ملف التوثيق لهذه المرحلة. وثّقه من هنا فقط بعد مراجعة الملف الموحّد وفق الاتفاقية:
       <b>المادة 7</b> (إيصال دفتر الفواتير · الإقرار الضريبي الأخير · الفواتير المتسلسلة بعدد طلبات المرحلة · الإشعار البنكي لـ36% وكشف الحساب)،
       و<b>المادة 8</b> (لا يُعتدّ بطلب غير موثّق)، و<b>المادة 9</b> (محضر الربط المستندي)، و<b>المادة 3/أ</b> و<b>5/ب</b> (التوثيق شرط لأي معاملة مالية).
-      لا تظهر العلامة <span id="vfDemo"></span> إلا بعد تأشيرك «موثّق»، وتبقى دائماً (لا يوجد إلغاء). يظهر زر «توثيق» عند كل مرحلة 100 / 500 / 1000 ويختفي بعد الضغط.
+      لا تظهر العلامة <span id="vfDemo"></span> إلا بعد تأشيرك «موثّق»، وتبقى حتى تُلغيها بزر «إلغاء التوثيق» الذي يظهر بعد اكتمال التوثيق. يظهر زر «توثيق» عند كل مرحلة 100 / 500 / 1000 ويختفي بعد الضغط.
     </div>
     <input id="vfSearch" placeholder="ابحث باسم البزنس…" style="width:100%;margin-bottom:8px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit">
     <div id="vfList"><div class="empty">جاري التحميل...</div></div>
@@ -548,12 +548,13 @@ function renderVerification() {
     const st = r.verifiedStage;
     const state = st ? ('موثّق حتى ' + st + ' طلب') : 'غير موثّق';
     const need = r.pending ? ' · <b style="color:#FACC15">⏳ يحتاج توثيق مرحلة ' + r.requiredStage + '</b>' : '';
-    const btns = r.pending ? '<button class="approve" data-vf="' + esc(r.sheetId) + '">✓ توثيق مرحلة ' + r.requiredStage + '</button>' : '';
+    const btns = (r.pending ? '<button class="approve" data-vf="' + esc(r.sheetId) + '">✓ توثيق مرحلة ' + r.requiredStage + '</button>' : '') +
+      (st ? '<button class="reject" data-vfx="' + esc(r.sheetId) + '">↩ إلغاء التوثيق</button>' : '');
     return '<div class="row"><div class="info"><div class="email">' + esc(r.name || '(بدون اسم)') + vBadge(st) + '</div><div class="meta">' + r.orders + ' طلب · ' + state + need + '</div></div><div class="btns">' + btns + '</div></div>';
   }).join('');
   el.querySelectorAll('button[data-vf]').forEach(b => b.onclick = async () => {
     const r = vfRows.find(x => x.sheetId === b.dataset.vf);
-    if (!confirm('توثيق «' + r.name + '» عند مرحلة ' + r.requiredStage + ' طلب؟\nتأكد من مراجعة ملف التوثيق (المادة 7). لا يمكن التراجع.')) return;
+    if (!confirm('توثيق «' + r.name + '» عند مرحلة ' + r.requiredStage + ' طلب؟\nتأكد من مراجعة ملف التوثيق (المادة 7). يمكنك إلغاؤه لاحقاً.')) return;
     try {
       const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_set_verified', sheetId: r.sheetId, token: AUTH_TOKEN }) });
       const j = await res.json();
@@ -563,6 +564,18 @@ function renderVerification() {
   });
 }
 document.getElementById('vfSearch').addEventListener('input', renderVerification);
+document.getElementById('vfList').addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('button[data-vfx]'); if (!b) return;
+  const r = vfRows.find(x => x.sheetId === b.dataset.vfx); if (!r) return;
+  if (!confirm('إلغاء توثيق «' + r.name + '» (موثّق حتى ' + r.verifiedStage + ' طلب)؟\nتختفي علامة «موثّق» عنه فوراً ويعود بحاجة إلى توثيق مرحلته.')) return;
+  b.disabled = true;
+  try {
+    const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_unset_verified', sheetId: r.sheetId, token: AUTH_TOKEN }) });
+    const j = await res.json();
+    if (j.error) { showToast('❌ ' + j.error); b.disabled = false; return; }
+    showToast('↩ أُلغي التوثيق'); loadVerification();
+  } catch (e) { showToast('❌ تعذّر الاتصال'); b.disabled = false; }
+});
 
 // ── 🔔 الإشعارات: كل ما يحتاج مراجعة الأدمن، والضغط على إشعار يوجّهك إلى مكانه
 const NOTIF_DEFS = [
