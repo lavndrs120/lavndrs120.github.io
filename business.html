@@ -291,7 +291,7 @@ function renderStageVal(b) {
 function renderBusinessCard(b) {
   const entitlementsHtml = (b.entitlements && b.entitlements.length)
     ? b.entitlements.map(e => {
-        const s = statusLabel(e.status);
+        const s = e.donated ? { text: '🏁 منتهية — تم التبرع بها', cls: 'badge-completed' } : statusLabel(e.status);
         const extra = e.status === 'accepted_awaiting_guarantee'
           ? `<div class="ent-meta">ضمان مطلوب: $${e.guaranteeAmount} (36% × ${e.orders} طلب × $4.275)</div>`
           : '';

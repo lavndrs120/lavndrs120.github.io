@@ -44,9 +44,9 @@
   };
 
   function renderCert(b, c) {
-    var tag = c.locked ? (c.lockStatus === 'accepted' ? '🔒 في صفقة' : '⏳ معروضة') : '✅ حرّة';
+    var tag = c.consumed ? '🏁 منتهية — تم التبرع بها' : (c.locked ? (c.lockStatus === 'accepted' ? '🔒 في صفقة' : '⏳ معروضة') : '✅ حرّة');
     return '<div class="ent-row"><div class="ent-top"><span class="ent-amount">' + money(c.value) + '</span><span class="badge-status badge-completed">' + tag + '</span></div>' +
-      '<div class="ent-meta">شهادة ذهبية مُصدَرة · ' + dt(c.date) + ' · وزنها ' + (Number(c.weight) || 0).toFixed(2) + '%</div></div>';
+      '<div class="ent-meta">شهادة ذهبية مُصدَرة · ' + dt(c.date) + ' · وزنها ' + (Number(c.weight) || 0).toFixed(2) + '%</div>' + (c.consumed ? '<div class="ent-meta" style="color:var(--text-dim);">انتهت قيمتها بإتمام التبرع بها، ولا تُحتسب ولا تُصدَر لها شهادة مرة أخرى.</div>' : '') + '</div>';
   }
   function offerLine(o) {
     return money(o.value) + ' · إرجاع خلال ' + o.returnDays + ' يوماً · ' + (o.growthPct > 0 ? 'بشرط نمو ' + o.growthPct + '%' : 'بلا شرط نمو');
@@ -68,6 +68,7 @@
     h += '<div class="ent-meta" style="line-height:1.9;margin-top:8px;">يمكن لصاحب شهادة مُصدَرة أن يتبرع بقيمتها لبزنس من الـ120 يعلن حاجته، بفترة إرجاع يحددها وبشرط نمو اختياري. ' + E(DISC) + '</div>';
     // 1) شهاداتي
     h += '<div class="section-title">شهاداتي المُصدَرة</div>';
+    h += '<div class="ent-meta" style="margin:-4px 0 8px;line-height:1.8;">كل قيمة صدرت لها شهادة محجوزة من القسمة ولا تُصدَر لها شهادة ثانية، وتنتهي نهائياً بإتمام التبرع بها.</div>';
     h += b.certs.length ? b.certs.map(function (c) { return renderCert(b, c); }).join('') : '<div class="empty" style="padding:10px 0;">لا توجد شهادة مُصدَرة بعد — تصدر بعد تأكيد الإدارة استلام الضمان.</div>';
     // 2) الدونر: طلبات معروضة
     if (free.length) {
