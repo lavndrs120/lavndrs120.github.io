@@ -283,7 +283,7 @@ function home() {
   const row = (ic, t, s, c) => `<div style="display:flex;gap:10px;align-items:center;padding:5px 0;text-align:right"><div style="font-size:19px">${ic}</div><div><div style="font-size:13px;font-weight:800;color:${c}">${t}</div><div style="font-size:11px;color:#9a9a9a;line-height:1.6">${s}</div></div></div>`;
   view.innerHTML = `<div class="lead" style="text-align:right;padding:0"><button type="button" id="howBtn" aria-expanded="false" onclick="toggleHow()" style="width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:#f2f2f2;font:inherit;font-size:13.5px;font-weight:800;padding:9px 14px;cursor:pointer"><span>كيف يتحرك المؤشر؟</span><span id="howArrow" style="color:var(--gold);transition:transform .25s">▼</span></button>
       <div id="howBody" style="display:none;padding:0 14px 8px">
-      ${step('١', '120 بزنس', 'لكل بزنس شيت طلبات خاص به.')}
+      ${step('١', '120 بزنس', 'لكل بزنس تطبيق طلبات خاص به.')}
       ${step('٢', 'كل طلب جديد', 'يرفع وزن بزنسه داخل المؤشر.')}
       ${step('٣', 'طلبات أكثر', 'تعني قيمة أعلى للمؤشر.')}</div></div>
 <div class="sub" style="text-align:right;padding:6px 14px">
