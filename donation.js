@@ -19,6 +19,29 @@
   var btn = 'padding:9px 14px;border-radius:10px;border:1px solid var(--gold);background:rgba(201,168,76,.12);color:var(--gold);cursor:pointer;font-weight:700;font-size:12px;';
   var btn2 = 'padding:9px 14px;border-radius:10px;border:1px solid var(--glass-border);background:none;color:var(--text-dim);cursor:pointer;font-size:12px;';
 
+  // التواصل: رقم اتصال فقط + الوسيلة (مكالمة / واتساب / أخرى يكتبها يدوياً)
+  var MKEY = 'lavndr_don_contact';
+  function savedContact() { try { return JSON.parse(localStorage.getItem(MKEY) || 'null') || {}; } catch (e) { return {}; } }
+  var inp = 'width:100%;padding:10px;border-radius:10px;background:#15151f;color:#fff;border:1px solid var(--glass-border);box-sizing:border-box;';
+  function contactFields() {
+    var sv = savedContact(), m = sv.method || 'واتساب', std = ['مكالمة', 'واتساب'].indexOf(m) !== -1;
+    return '<div style="margin:14px 0 4px;padding:12px;border:1px solid var(--glass-border);border-radius:12px;background:rgba(255,255,255,.03);">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:6px;">📞 رقم التواصل (يظهر للطرف الآخر فقط بعد القبول)</div>' +
+      '<input id="donPhone" type="tel" inputmode="tel" dir="ltr" maxlength="20" placeholder="رقم الاتصال مثل +249912345678" value="' + E(sv.phone || '') + '" style="' + inp + 'text-align:left;">' +
+      '<div style="font-size:12px;margin:8px 0 4px;">الوسيلة على هذا الرقم</div>' +
+      '<select id="donMethod" style="' + inp + '"><option value="مكالمة"' + (m === 'مكالمة' ? ' selected' : '') + '>مكالمة</option><option value="واتساب"' + (m === 'واتساب' ? ' selected' : '') + '>واتساب</option><option value="__other"' + (!std ? ' selected' : '') + '>خدمة أخرى (أكتبها)</option></select>' +
+      '<input id="donMethodOther" maxlength="30" placeholder="اكتب الوسيلة (مثل تيليغرام)" value="' + (std ? '' : E(m)) + '" style="' + inp + 'margin-top:6px;' + (std ? 'display:none;' : '') + '"></div>';
+  }
+  function bindContact() { var s = $('donMethod'); if (s) s.onchange = function () { $('donMethodOther').style.display = this.value === '__other' ? '' : 'none'; }; }
+  function readContact() {
+    var p = ($('donPhone').value || '').replace(/[\s\-().]/g, ''), m = $('donMethod').value === '__other' ? ($('donMethodOther').value || '').trim() : $('donMethod').value;
+    if (!/^\+?[0-9]{7,15}$/.test(p)) { showToast('أدخل رقم اتصال صحيحاً (أرقام فقط)'); return null; }
+    if (!m) { showToast('اكتب وسيلة التواصل'); return null; }
+    try { localStorage.setItem(MKEY, JSON.stringify({ phone: p, method: m })); } catch (e) {}
+    return { phone: p, method: m };
+  }
+  function contactLine(c) { return c && c.phone ? '<span style="direction:ltr;display:inline-block;">' + E(c.phone) + '</span> · ' + E(c.method || '') : '—'; }
+
   function post(body) { return bizPost(body); }
   function modal(html) {
     close();
@@ -44,9 +67,10 @@
   };
 
   function renderCert(b, c) {
-    var tag = c.consumed ? '🏁 منتهية — تم التبرع بها' : (c.locked ? (c.lockStatus === 'accepted' ? '🔒 في صفقة' : '⏳ معروضة') : '✅ حرّة');
+    var part = !c.consumed && (Number(c.reserved) || 0) > 0.01;
+    var tag = c.consumed ? '🏁 منتهية — تم التبرع بها' : (c.locked ? (c.lockStatus === 'accepted' ? '🔒 في صفقة' : '⏳ معروضة') : (part ? '✅ متبقٍّ ' + money(c.free) : '✅ حرّة'));
     return '<div class="ent-row"><div class="ent-top"><span class="ent-amount">' + money(c.value) + '</span><span class="badge-status badge-completed">' + tag + '</span></div>' +
-      '<div class="ent-meta">شهادة ذهبية مُصدَرة · ' + dt(c.date) + ' · وزنها ' + (Number(c.weight) || 0).toFixed(2) + '%</div>' + (c.consumed ? '<div class="ent-meta" style="color:var(--text-dim);">انتهت قيمتها بإتمام التبرع بها، ولا تُحتسب ولا تُصدَر لها شهادة مرة أخرى.</div>' : '') + '</div>';
+      '<div class="ent-meta">شهادة ذهبية مُصدَرة · ' + dt(c.date) + ' · وزنها ' + (Number(c.weight) || 0).toFixed(2) + '%</div>' + (part ? '<div class="ent-meta">محجوز/متبرَّع به ' + money(c.reserved) + ' · المتاح للتبرع ' + money(c.free) + ' — يمكنك التبرع بالمتبقي لبزنس آخر.</div>' : '') + (c.consumed ? '<div class="ent-meta" style="color:var(--text-dim);">انتهت قيمتها بإتمام التبرع بها، ولا تُحتسب ولا تُصدَر لها شهادة مرة أخرى.</div>' : '') + '</div>';
   }
   function offerLine(o) {
     return money(o.value) + ' · إرجاع خلال ' + o.returnDays + ' يوماً · ' + (o.growthPct > 0 ? 'بشرط نمو ' + o.growthPct + '%' : 'بلا شرط نمو');
@@ -57,7 +81,7 @@
     var prog = (o.status === 'accepted' || o.status === 'completed') && o.growthPct > 0
       ? '<div class="ent-meta">نمو المستفيد منذ القبول: <b style="color:' + (o.growthReached ? '#6EE7B7' : 'var(--amber)') + ';">' + o.growthNow + '%</b> من الشرط ' + o.growthPct + '% ' + (o.growthReached ? '✓ تحقق' : '') + '</div>' : '';
     return '<div class="ent-row"><div class="ent-top"><span class="ent-amount">' + E(offerLine(o)) + '</span><span class="badge-status ' + s[1] + '">' + s[0] + '</span></div>' +
-      (other ? '<div class="ent-meta" style="color:var(--text);">' + (role === 'donee' ? 'الدونر: ' : 'المستفيد: ') + '<b>' + E(other.name) + '</b> · <span style="direction:ltr;display:inline-block;">' + E(other.email) + '</span></div>' : '') +
+      (other ? '<div class="ent-meta" style="color:var(--text);">' + (role === 'donee' ? 'الدونر: ' : 'المستفيد: ') + '<b>' + E(other.name) + '</b> · 📞 ' + contactLine(other) + '</div>' : '') +
       '<div class="ent-meta">قُبلت ' + dt(o.acceptedAt) + ' · تعهّد المستفيد بالتنفيذ في موعد أقصاه ' + dt(o.dueAt) + (o.overdue ? ' <b style="color:var(--red);">· تجاوز الموعد</b>' : '') + '</div>' +
       '<div class="ent-meta">قيمة الدونر المحجوزة ' + money(o.value) + ' (وزنه ' + (o.donorWeight || 0).toFixed(2) + '%) · مستحق المستفيد المحسوب ' + money(o.doneeValue) + ' (وزنه ' + (o.doneeWeight || 0).toFixed(2) + '%)</div>' + prog +
       (role === 'donor' && o.status === 'accepted' ? '<button style="' + btn + 'margin-top:8px;" onclick="Donation.complete(\'' + o.offerId + '\')">✓ استلمت قيمتي — إنهاء الصفقة</button>' : '') + '</div>';
@@ -65,7 +89,7 @@
   function renderBiz(b) {
     var sid = E(b.sheetId), free = b.certs.filter(function (c) { return !c.locked; });
     var h = '<div class="glass card"><div class="biz-name">🎁 التبرع بالشهادة الذهبية</div><div class="biz-ticker">' + E(b.name) + '</div>';
-    h += '<div class="ent-meta" style="line-height:1.9;margin-top:8px;">يمكن لصاحب شهادة مُصدَرة أن يتبرع بقيمتها لبزنس من الـ120 يعلن حاجته، بفترة إرجاع يحددها وبشرط نمو اختياري. ' + E(DISC) + '</div>';
+    h += '<div class="ent-meta" style="line-height:1.9;margin-top:8px;">يمكن لصاحب شهادة مُصدَرة أن يتبرع بقيمتها أو بجزء منها (تكتبه أنت، ولا يقل عن مستحق المتبرَّع له ولا يزيد عن قيمة شهادتك) لبزنس من الـ120 يعلن حاجته، ثم يتبرع بالمتبقي لبزنس آخر وهكذا، بفترة إرجاع تحددها وبشرط نمو اختياري. ' + E(DISC) + '</div>';
     // 1) شهاداتي
     h += '<div class="section-title">شهاداتي المُصدَرة</div>';
     h += '<div class="ent-meta" style="margin:-4px 0 8px;line-height:1.8;">كل قيمة صدرت لها شهادة محجوزة من القسمة ولا تُصدَر لها شهادة ثانية، وتنتهي نهائياً بإتمام التبرع بها.</div>';
@@ -136,7 +160,20 @@
     if (okMsg) showToast(okMsg);
     await D.load(); return d;
   }
-  D.requestFor = function (sid) { if (confirm('إعلان طلب تبرع يظهر لأصحاب الشهادات باسم بزنسك ووزنك. متابعة؟')) act({ action: 'donation_request_create', sheetId: sid }, 'تم نشر طلبك'); };
+  D.requestFor = function (sid) {
+    modal('<div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:6px;">إعلان طلب تبرع</div>' +
+      '<div style="font-size:12px;line-height:1.9;color:var(--text-dim);">يظهر طلبك لأصحاب الشهادات باسم بزنسك ووزنك. أدخل رقم تواصلك الآن ليكون جاهزاً؛ لا يُكشف لأحد إلا عند قبولك لعرض، ولا يُكشف لك رقم الدونر إلا حينها.</div>' +
+      contactFields() +
+      '<div style="display:flex;gap:8px;margin-top:14px;"><button style="' + btn + 'flex:1;" id="donReqBtn">نشر الطلب</button><button style="' + btn2 + '" onclick="Donation.close()">إلغاء</button></div>');
+    bindContact();
+    $('donReqBtn').onclick = async function () {
+      var c = readContact(); if (!c) return;
+      $('donReqBtn').disabled = true;
+      var d = await post({ action: 'donation_request_create', sheetId: sid, phone: c.phone, method: c.method });
+      if (d && d.error) { showToast(d.error); $('donReqBtn').disabled = false; return; }
+      close(); showToast('تم نشر طلبك'); D.load();
+    };
+  };
   D.cancelReq = function (id) { if (confirm('إغلاق الطلب؟ ستُعاد العروض الواردة.')) act({ action: 'donation_request_cancel', reqId: id }, 'أُغلق الطلب'); };
   D.withdraw = function (id) { if (confirm('سحب العرض؟')) act({ action: 'donation_offer_withdraw', offerId: id }, 'سُحب العرض'); };
   D.decline = function (id) { if (confirm('الاعتذار عن هذا العرض؟')) act({ action: 'donation_offer_respond', offerId: id, decision: 'decline' }, 'تم الاعتذار'); };
@@ -147,7 +184,7 @@
     modal('<div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:10px;">قبول التبرع ومتابعته</div>' +
       '<div style="font-size:13px;line-height:2;">' + E(offerLine(o)) + '</div>' +
       '<div style="font-size:13px;line-height:2;margin:10px 0;padding:12px;border:1px solid var(--gold);border-radius:12px;background:rgba(201,168,76,.08);"><b style="color:var(--gold);">تعهّدك عند القبول</b><br>' + E(commitText(o)) + '</div>' +
-      '<div style="font-size:12px;line-height:1.9;color:var(--text-dim);margin:10px 0;">عند القبول: تُحجز قيمة الدونر ووزنه، ووزنك ومستحقك المحسوب بتاريخ اليوم، ويُكشف لكما بيانات التواصل لإكمال الإجراء بينكما. ' + E(DISC) + '</div>' +
+      '<div style="font-size:12px;line-height:1.9;color:var(--text-dim);margin:10px 0;">عند القبول: تُحجز قيمة الدونر ووزنه، ووزنك ومستحقك المحسوب بتاريخ اليوم، ويُكشف لكلٍّ منكما رقم تواصل الآخر (الذي أدخله مسبقاً) لإكمال الإجراء بينكما. ' + E(DISC) + '</div>' +
       '<label style="display:flex;gap:8px;font-size:12px;align-items:flex-start;"><input type="checkbox" id="donAck" style="margin-top:3px;"> قرأت ما سبق وأتعهّد بتنفيذ شرط المتبرع في الموعد المذكور</label>' +
       '<div style="display:flex;gap:8px;margin-top:14px;"><button style="' + btn + 'flex:1;" id="donAccBtn">قبول ومتابعة</button><button style="' + btn2 + '" onclick="Donation.close()">إلغاء</button></div>');
     $('donAccBtn').onclick = async function () {
@@ -157,34 +194,49 @@
       if (d && d.error) { showToast(d.error); $('donAccBtn').disabled = false; return; }
       modal('<div style="text-align:center;font-size:36px;">🤝</div><div style="text-align:center;font-size:16px;font-weight:800;color:var(--gold);margin:8px 0;">تمّ القبول</div>' +
         '<div style="font-size:12px;line-height:1.9;margin-bottom:8px;color:var(--gold);">موعدك الأقصى لتنفيذ الشرط: ' + E(dFull(dueFrom(o.returnDays))) + '</div>' +
-        '<div style="font-size:13px;line-height:2;">تواصل مع الدونر لإكمال الإجراء:<br><b>' + E(d.contact.name) + '</b><br><span style="direction:ltr;display:inline-block;">' + E(d.contact.email) + '</span></div>' +
+        '<div style="font-size:13px;line-height:2;">تواصل مع الدونر لإكمال الإجراء:<br><b>' + E(d.contact.name) + '</b><br>📞 ' + contactLine(d.contact) + '</div>' +
         '<button style="' + btn + 'width:100%;margin-top:14px;" onclick="Donation.close()">حسناً</button>'); D.load();
     };
   };
   D.offerForm = function (sid, reqId) {
     var b = board.businesses.filter(function (x) { return x.sheetId === sid; })[0], req = board.openRequests.filter(function (r) { return r.reqId === reqId; })[0];
     if (!b || !req) return;
-    var free = b.certs.filter(function (c) { return !c.locked; });
+    var free = b.certs.filter(function (c) { return !c.locked && c.free > 0.01; });
+    if (!free.length) { showToast('لا يتبقى من شهاداتك ما يُتبرَّع به'); return; }
     modal('<div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:4px;">التبرع إلى ' + E(req.name) + '</div>' +
       '<div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;">وزنه الآن ' + req.weight.toFixed(2) + '% · مستحقه المحسوب ' + money(req.value) + ' · اسمك لا يظهر له إلا بعد قبوله</div>' +
       '<div style="font-size:12px;margin-bottom:4px;">الشهادة</div><select id="donCert" style="width:100%;padding:10px;border-radius:10px;background:#15151f;color:#fff;border:1px solid var(--glass-border);">' +
-      free.map(function (c) { return '<option value="' + c.row + '">' + money(c.value) + ' — وزن ' + (Number(c.weight) || 0).toFixed(2) + '%</option>'; }).join('') + '</select>' +
+      free.map(function (c) { return '<option value="' + c.row + '" data-free="' + c.free + '">' + money(c.value) + ' (المتاح ' + money(c.free) + ') — وزن ' + (Number(c.weight) || 0).toFixed(2) + '%</option>'; }).join('') + '</select>' +
+      '<div style="font-size:12px;margin:12px 0 4px;">قيمة تبرعك ($)</div><input id="donAmount" type="number" step="0.01" style="' + inp + '">' +
+      '<div id="donAmtHint" style="font-size:11px;color:var(--text-dim);margin-top:4px;"></div>' +
       '<div style="font-size:12px;margin:12px 0 4px;">فترة إرجاع القيمة (بالأيام)</div>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">' + [30, 90, 180, 365].map(function (n) { return '<button type="button" style="' + btn2 + '" onclick="document.getElementById(\'donDays\').value=' + n + '">' + n + '</button>'; }).join('') + '</div>' +
       '<input id="donDays" type="number" min="7" max="1825" value="90" style="width:100%;padding:10px;border-radius:10px;background:#15151f;color:#fff;border:1px solid var(--glass-border);">' +
       '<label style="display:flex;gap:8px;font-size:12px;margin:14px 0 6px;align-items:center;"><input type="checkbox" id="donGrowthOn"> أشترط الإرجاع ببلوغ نسبة نمو</label>' +
       '<input id="donGrowth" type="number" min="1" max="1000" placeholder="نسبة النمو % (نمو طلبات المستفيد منذ القبول)" disabled style="width:100%;padding:10px;border-radius:10px;background:#15151f;color:#fff;border:1px solid var(--glass-border);">' +
       '<div style="font-size:12px;line-height:1.9;margin:12px 0;color:var(--gold);">عند قبول المستفيد يتعهّد بتنفيذ شرطك خلال فترة تبدأ من لحظة قبوله وبحدٍّ أقصى المدة التي تحددها أعلاه، ويظهر له التاريخ النهائي صريحاً.</div>' +
-      '<div style="font-size:11px;line-height:1.8;color:var(--text-dim);margin:12px 0;">' + E(DISC) + '</div>' +
+      contactFields() + '<div style="font-size:11px;line-height:1.8;color:var(--text-dim);margin:12px 0;">' + E(DISC) + '</div>' +
       '<label style="display:flex;gap:8px;font-size:12px;align-items:flex-start;"><input type="checkbox" id="donAck2" style="margin-top:3px;"> قرأت ما سبق وأوافق عليه</label>' +
       '<div style="display:flex;gap:8px;margin-top:14px;"><button style="' + btn + 'flex:1;" id="donSendBtn">إرسال العرض</button><button style="' + btn2 + '" onclick="Donation.close()">إلغاء</button></div>');
     $('donGrowthOn').onchange = function () { $('donGrowth').disabled = !this.checked; };
+    var minV = Math.max(0.01, Number(req.value) || 0);
+    function hint() {
+      var mx = parseFloat($('donCert').selectedOptions[0].getAttribute('data-free')) || 0, a = $('donAmount');
+      a.min = minV; a.max = mx; $('donAmtHint').textContent = 'من ' + money(minV) + ' (مستحق المتبرَّع له) إلى ' + money(mx) + ' (المتاح من شهادتك). المتبقي بعدها يبقى لك للتبرع به لبزنس آخر.';
+      if (!a.value || parseFloat(a.value) > mx) a.value = Math.max(minV, Math.min(mx, minV)).toFixed(2);
+    }
+    $('donCert').onchange = hint; hint(); bindContact();
     $('donSendBtn').onclick = async function () {
       if (!$('donAck2').checked) { showToast('أكّد الموافقة أولاً'); return; }
       var g = $('donGrowthOn').checked ? $('donGrowth').value : '';
       if ($('donGrowthOn').checked && !(parseFloat(g) > 0)) { showToast('أدخل نسبة النمو'); return; }
+      var c = readContact(); if (!c) return;
+      var amt = parseFloat($('donAmount').value), mx = parseFloat($('donCert').selectedOptions[0].getAttribute('data-free')) || 0;
+      if (!(amt > 0)) { showToast('اكتب قيمة التبرع'); return; }
+      if (amt + 0.001 < minV) { showToast('القيمة أقل من مستحق المتبرَّع له (' + money(minV) + ')'); return; }
+      if (amt > mx + 0.001) { showToast('القيمة أعلى من المتاح من شهادتك (' + money(mx) + ')'); return; }
       $('donSendBtn').disabled = true;
-      var d = await post({ action: 'donation_offer_create', sheetId: sid, reqId: reqId, certRow: $('donCert').value, returnDays: $('donDays').value, growthPct: g });
+      var d = await post({ action: 'donation_offer_create', sheetId: sid, reqId: reqId, certRow: $('donCert').value, returnDays: $('donDays').value, growthPct: g, amount: amt, phone: c.phone, method: c.method });
       if (d && d.error) { showToast(d.error); $('donSendBtn').disabled = false; return; }
       close(); showToast('أُرسل عرضك للمستفيد'); D.load();
     };

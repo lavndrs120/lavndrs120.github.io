@@ -757,7 +757,7 @@ async function loadDonations() {
       const act = (o.status === 'pending' || o.status === 'accepted') ? '<button class="reject" data-don="' + o.row + '">إلغاء</button>' : '';
       return '<div class="row"><div class="info"><div class="email"><b>$' + esc(o.value) + '</b> · ' + esc(o.donor) + ' ← ' + esc(o.donee) + '</div>' +
         '<div class="meta">' + (L[o.status] || esc(o.status)) + ' · إرجاع ' + esc(o.returnDays) + ' يوم' + (o.growthPct > 0 ? ' · شرط نمو ' + esc(o.growthPct) + '% (الآن ' + esc(o.growthNow) + '%)' : '') + (o.overdue ? ' · <b style="color:#f87171;">متأخرة</b>' : '') + '</div>' +
-        '<div class="meta" style="direction:ltr;text-align:right;">' + esc(o.donorEmail) + ' → ' + esc(o.doneeEmail) + '</div></div><div class="btns">' + act + '</div></div>';
+        '<div class="meta" style="direction:ltr;text-align:right;">' + esc(o.donorEmail) + ' → ' + esc(o.doneeEmail) + '</div><div class="meta" style="direction:ltr;text-align:right;">📞 ' + esc(o.donorPhone || '—') + ' (' + esc(o.donorMethod || '') + ') → ' + esc(o.doneePhone || '—') + ' (' + esc(o.doneeMethod || '') + ')</div></div><div class="btns">' + act + '</div></div>';
     }).join('') : '<div class="empty">لا توجد عروض</div>';
     el.innerHTML = h;
     el.querySelectorAll('[data-don]').forEach(b => b.onclick = async () => {

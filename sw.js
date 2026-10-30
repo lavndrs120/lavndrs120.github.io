@@ -1,7 +1,7 @@
 /* LAVNDR120 service worker — تصفح بلا إنترنت من نسخة محفوظة. تغيير VERSION يمسح النسخ القديمة. */
-const VERSION = 'lv-1';
+const VERSION = 'lv-2';
 const STATIC = VERSION + '-static', DATA = VERSION + '-data';
-const SHELL = ['./', 'index.html', 'dashboard.html', 'business.html', 'admin.html', 'lavndr-app.js', 'agreement-form.js', 'bg-m.jpg', 'bg-d.jpg'];
+const SHELL = ['./', 'index.html', 'dashboard.html', 'business.html', 'admin.html', 'lavndr-app.js', 'agreement-form.js', 'demo-data.js', 'bg-m.jpg', 'bg-d.jpg'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();
