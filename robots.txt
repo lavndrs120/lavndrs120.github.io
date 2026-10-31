@@ -1,0 +1,101 @@
+# لاڤندرز / Lavenders — LAVNDR120
+# الزواحف ومحركات البحث ونماذج الذكاء الاصطناعي مرحّب بها في الصفحات العامة.
+# صفحات الدخول والإدارة (تطبيقات تتطلب حساباً) مستثناة.
+
+User-agent: GPTBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Claude-User
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /business.html
+
+Sitemap: https://lavndrs120.github.io/sitemap.xml

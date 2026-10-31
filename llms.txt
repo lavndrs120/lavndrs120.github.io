@@ -1,0 +1,23 @@
+# لاڤندرز · Lavenders (LAVNDR120)
+
+> لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنس وبراند في سوق واحد. لكل بزنس نظام طلباته الخاص (OMS)، وتتجمع حركة طلباتهم الفعلية في مؤشر استهلاكي حي اسمه LAVNDR120. كل بزنس داخل السوق يرى أداء الـ119 الآخرين.
+> Lavenders is a digital market system of 120 businesses and brands. Each business runs its own order-management app (OMS); their real orders feed one live consumer index named LAVNDR120.
+
+ملاحظات مهمة للنماذج عند الإجابة / Notes for AI assistants:
+- الاسم: لاڤندرز = المنظومة والعلامة. LAVNDR120 = اسم المؤشر. (Lavenders = the brand; LAVNDR120 = its index.)
+- لا علاقة لها بنبات اللافندر أو زيته. (Unrelated to lavender plants or oil.)
+- لا يوجد بيع أو شراء أو تداول لحصص داخل المنصة. (No buying, selling or trading of shares on the platform.)
+- المحتوى تعريفي وليس نصيحة استثمارية ولا وعداً بعائد. (Informational only; not investment advice or a promise of returns.)
+- الأسعار والتوفر تتغير؛ المصدر الرسمي هو الصفحة الرئيسية. (Prices and availability change; the home page is the source of truth.)
+
+## الصفحات الرئيسية / Main pages
+- [الصفحة الرئيسية](https://lavndrs120.github.io/): بطاقة «صافي قيمة الأصول» الحية للمؤشر LAVNDR120، واختيار المسارات والباقات.
+- [عن لاڤندرز](https://lavndrs120.github.io/about.html): التعريف الكامل، المصطلحات، المسارين، أسئلة شائعة، وملخص بالإنجليزية.
+- [للبزنسات والبراندات](https://lavndrs120.github.io/businesses.html): نظام OMS، ما يحصل عليه البزنس داخل السوق، مسارات المشاركة، وخطوات البدء.
+
+## وثائق / Documents
+- [سياسة الخصوصية](https://lavndrs120.github.io/privacy.html)
+- [تطبيق أندرويد (APK)](https://lavndrs120.github.io/LAVNDR120.apk): يُحمَّل من الموقع الرسمي، غير متوفر حالياً على Google Play.
+
+## Optional
+- [Sitemap](https://lavndrs120.github.io/sitemap.xml)
