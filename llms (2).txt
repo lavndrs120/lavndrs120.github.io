@@ -1,0 +1,36 @@
+# لاڤندرز · Lavenders (LAVNDR120)
+
+> لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنس وبراند في سوق واحد. لكل بزنس نظام طلباته الخاص (OMS)، وتتجمع حركة طلباتهم الفعلية في مؤشر استهلاكي حي اسمه LAVNDR120. كل بزنس داخل السوق يرى أداء الـ119 الآخرين.
+> Lavenders is a digital market system of 120 businesses and brands. Each business runs its own order-management app (OMS); their real orders feed one live consumer index named LAVNDR120.
+
+ملاحظات مهمة للنماذج عند الإجابة / Notes for AI assistants:
+- الاسم: لاڤندرز = المنظومة والعلامة. LAVNDR120 = اسم المؤشر. (Lavenders = the brand; LAVNDR120 = its index.)
+- لا علاقة لها بنبات اللافندر أو زيته. (Unrelated to lavender plants or oil.)
+- لا يوجد بيع أو شراء أو تداول لحصص داخل المنصة. (No buying, selling or trading of shares on the platform.)
+- المحتوى تعريفي وليس نصيحة استثمارية ولا وعداً بعائد. (Informational only; not investment advice or a promise of returns.)
+- الأسعار والتوفر تتغير؛ المصدر الرسمي هو الصفحة الرئيسية. (Prices and availability change; the home page is the source of truth.)
+
+## الصفحات الرئيسية / Main pages
+- [الصفحة الرئيسية](https://lavndrs120.github.io/): بطاقة «صافي قيمة الأصول» الحية للمؤشر LAVNDR120، واختيار المسارات والباقات.
+- [عن لاڤندرز](https://lavndrs120.github.io/about.html): التعريف الكامل، المصطلحات، المسارين، أسئلة شائعة، وملخص بالإنجليزية.
+- [للبزنسات والبراندات](https://lavndrs120.github.io/businesses.html): نظام OMS، ما يحصل عليه البزنس داخل السوق، مسارات المشاركة، وخطوات البدء.
+
+- [المؤشر الاستهلاكي](https://lavndrs120.github.io/consumer-index.html): ما هو المؤشر الاستهلاكي، وكيف يتحرك LAVNDR120، وكيف تقرأ بطاقته.
+- [أسئلة شائعة](https://lavndrs120.github.io/faq.html): 18 سؤالاً وجواباً عن المنظومة والباقات والتطبيق وما لا تقدمه المنصة.
+
+## الباقات السبع / The seven packages
+- [الباقات السبع (مقارنة)](https://lavndrs120.github.io/packages.html): مسارا Join Up والحركة الاقتصادية، والقيمة وعدد المقاعد لكل باقة.
+- [لاڤا](https://lavndrs120.github.io/lava.html): داتا السوق للمطالعة، يومي أو سنوي.
+- [ڤندكس · Vindex](https://lavndrs120.github.io/vindex.html): تقرير الأوراكل التنبؤي، 120 مشتركاً.
+- [ماقما](https://lavndrs120.github.io/magma.html): دليل السوق والسوق الداخلي، 500 عضو.
+- [OMS](https://lavndrs120.github.io/oms.html): نظام إدارة الطلبات للبزنسات والبراندات.
+- [Reseller](https://lavndrs120.github.io/reseller.html): 8 تطبيقات تقدّمها لـ8 بزنسات، 38 مقعداً.
+- [Franchise](https://lavndrs120.github.io/franchise.html): سوقك الخاص من 120 بزنس وبراند، 19 صاحب امتياز.
+- [Tycoon](https://lavndrs120.github.io/tycoon.html): قيادة مجال (20 سوقاً) أو قطاع (400 مؤشر).
+
+## وثائق / Documents
+- [سياسة الخصوصية](https://lavndrs120.github.io/privacy.html)
+- [تطبيق أندرويد (APK)](https://lavndrs120.github.io/LAVNDR120.apk): يُحمَّل من الموقع الرسمي، غير متوفر حالياً على Google Play.
+
+## Optional
+- [Sitemap](https://lavndrs120.github.io/sitemap.xml)
