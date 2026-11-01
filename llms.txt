@@ -22,6 +22,9 @@
 - [About Lavenders (LAVNDR120)](https://lavndrs120.github.io/en/about.html): what Lavenders is, how the index moves, terms, FAQ.
 - [The seven packages](https://lavndrs120.github.io/en/packages.html): Lava, Vindex, Magma, OMS, Reseller, Franchise, Tycoon with prices and seats.
 - [FAQ](https://lavndrs120.github.io/en/faq.html): short answers, including what the platform does not offer.
+- [The consumer index](https://lavndrs120.github.io/en/consumer-index.html): what a consumer index is and how LAVNDR120 works.
+- [For businesses and brands](https://lavndrs120.github.io/en/businesses.html): OMS, what a business gets, ways to join.
+- [OMS](https://lavndrs120.github.io/en/oms.html) · [Lava](https://lavndrs120.github.io/en/lava.html) · [Vindex](https://lavndrs120.github.io/en/vindex.html) · [Magma](https://lavndrs120.github.io/en/magma.html) · [Reseller](https://lavndrs120.github.io/en/reseller.html) · [Franchise](https://lavndrs120.github.io/en/franchise.html) · [Tycoon](https://lavndrs120.github.io/en/tycoon.html): one page per package.
 
 ## الباقات السبع / The seven packages
 - [الباقات السبع (مقارنة)](https://lavndrs120.github.io/packages.html): مسارا Join Up والحركة الاقتصادية، والقيمة وعدد المقاعد لكل باقة.
