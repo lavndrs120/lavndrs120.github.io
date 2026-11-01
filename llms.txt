@@ -18,6 +18,11 @@
 - [المؤشر الاستهلاكي](https://lavndrs120.github.io/consumer-index.html): ما هو المؤشر الاستهلاكي، وكيف يتحرك LAVNDR120، وكيف تقرأ بطاقته.
 - [أسئلة شائعة](https://lavndrs120.github.io/faq.html): 18 سؤالاً وجواباً عن المنظومة والباقات والتطبيق وما لا تقدمه المنصة.
 
+## English
+- [About Lavenders (LAVNDR120)](https://lavndrs120.github.io/en/about.html): what Lavenders is, how the index moves, terms, FAQ.
+- [The seven packages](https://lavndrs120.github.io/en/packages.html): Lava, Vindex, Magma, OMS, Reseller, Franchise, Tycoon with prices and seats.
+- [FAQ](https://lavndrs120.github.io/en/faq.html): short answers, including what the platform does not offer.
+
 ## الباقات السبع / The seven packages
 - [الباقات السبع (مقارنة)](https://lavndrs120.github.io/packages.html): مسارا Join Up والحركة الاقتصادية، والقيمة وعدد المقاعد لكل باقة.
 - [لاڤا](https://lavndrs120.github.io/lava.html): داتا السوق للمطالعة، يومي أو سنوي.

@@ -79,6 +79,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://lavndrs120.github.io/en/about.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://lavndrs120.github.io/en/packages.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://lavndrs120.github.io/en/faq.html</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://lavndrs120.github.io/privacy.html</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>yearly</changefreq>
