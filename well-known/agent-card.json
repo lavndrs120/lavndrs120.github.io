@@ -1,0 +1,42 @@
+{
+ "protocolVersion": "0.3.0",
+ "name": "Lavenders (LAVNDR120)",
+ "description": "Lavenders is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS); their real orders feed one live consumer index called LAVNDR120. Lavenders is the brand; LAVNDR120 is the index. Unrelated to lavender plants or oil.",
+ "url": "https://lavndr.omssolutionorders.workers.dev/mcp",
+ "provider": {
+  "organization": "Lavenders",
+  "url": "https://lavndrs120.github.io/"
+ },
+ "version": "1.0.0",
+ "documentationUrl": "https://lavndrs120.github.io/llms-full.txt",
+ "capabilities": {
+  "streaming": false
+ },
+ "defaultInputModes": [
+  "text/plain"
+ ],
+ "defaultOutputModes": [
+  "application/json"
+ ],
+ "skills": [
+  {
+   "id": "brand-facts",
+   "name": "Brand and package facts",
+   "description": "Answer questions about Lavenders, its seven packages, prices, seats and what it does not offer.",
+   "tags": [
+    "brand",
+    "packages",
+    "faq"
+   ]
+  },
+  {
+   "id": "live-index",
+   "name": "Live index card",
+   "description": "Current LAVNDR120 net asset value and day change (informational).",
+   "tags": [
+    "index",
+    "data"
+   ]
+  }
+ ]
+}
