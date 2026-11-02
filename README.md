@@ -10,6 +10,8 @@
 - FAQ | الأسئلة الشائعة: https://lavndrs120.github.io/en/faq.html
 - For AI assistants and crawlers | للمساعدات الذكية والزواحف: https://lavndrs120.github.io/llms.txt
 
+- MCP server (read-only) | خادم MCP للقراءة فقط: `io.github.lavndrs120/lavenders` in the official MCP Registry — https://lavndr.omssolutionorders.workers.dev/mcp
+
 ## Packages | الباقات
 
 Lava (daily access), Vindex (Oracle reports), Magma (activity directory), OMS (business order management), Reseller, Franchise, Tycoon.

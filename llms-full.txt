@@ -111,6 +111,7 @@ Yes. Full demo previews of several screens with sample data open from the home p
 See the OMS package and the Economic Movement path on the packages page.
 
 ## Machine-readable endpoints
+- Official MCP Registry name: io.github.lavndrs120/lavenders
 - MCP (read-only, no auth): https://lavndr.omssolutionorders.workers.dev/mcp
 - JSON: https://lavndr.omssolutionorders.workers.dev/api/brand , /api/packages , /api/faq , /api/index (live index card)
 - OpenAPI: https://lavndrs120.github.io/openapi.json

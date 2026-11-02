@@ -45,6 +45,7 @@
 
 ## للوكلاء والذكاء الاصطناعي / For agents
 - [llms-full.txt](https://lavndrs120.github.io/llms-full.txt): المرجع الكامل بنص واحد (الباقات والأسعار والأسئلة الشائعة) / the full reference in one file.
+- Official MCP Registry: io.github.lavndrs120/lavenders — https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.lavndrs120/lavenders
 - MCP server (read-only, no auth): https://lavndr.omssolutionorders.workers.dev/mcp — tools: get_brand_overview, list_packages, get_package, get_faq, get_live_index.
 - JSON: https://lavndr.omssolutionorders.workers.dev/api/brand · /api/packages · /api/faq · /api/index
 - [OpenAPI](https://lavndrs120.github.io/openapi.json) · [Agent card](https://lavndrs120.github.io/.well-known/agent-card.json) · [MCP server card](https://lavndrs120.github.io/.well-known/mcp.json) · [Data](https://lavndrs120.github.io/lavenders-data.json)
