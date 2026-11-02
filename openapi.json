@@ -1,0 +1,91 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Lavenders (LAVNDR120) public API",
+  "version": "1.0.0",
+  "description": "Public, read-only, unauthenticated facts about Lavenders. No trading, no advice, no promise of returns."
+ },
+ "servers": [
+  {
+   "url": "https://lavndr.omssolutionorders.workers.dev"
+  }
+ ],
+ "paths": {
+  "/api/brand": {
+   "get": {
+    "operationId": "getBrand",
+    "summary": "Brand overview and disclaimers",
+    "description": "Read-only facts about Lavenders (LAVNDR120).",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/packages": {
+   "get": {
+    "operationId": "listPackages",
+    "summary": "The seven packages with prices and seats",
+    "description": "Prices as of 1 November 2026.",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/faq": {
+   "get": {
+    "operationId": "getFaq",
+    "summary": "Frequently asked questions",
+    "description": "Includes what the platform does not offer.",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/index": {
+   "get": {
+    "operationId": "getLiveIndex",
+    "summary": "Live LAVNDR120 index card",
+    "description": "Net asset value and day change of the consumer index. Informational only; not investment advice.",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

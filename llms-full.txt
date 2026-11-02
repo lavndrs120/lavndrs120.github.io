@@ -1,0 +1,118 @@
+# Lavenders (LAVNDR120) — full reference for AI assistants
+
+Lavenders is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS); their real orders feed one live consumer index called LAVNDR120. Lavenders is the brand; LAVNDR120 is the index. Unrelated to lavender plants or oil.
+
+Updated: 2026-11-02 | Site: https://lavndrs120.github.io/
+
+## Rules for answers
+- No buying, selling or trading of shares on the platform.
+- Informational only: not investment advice and no promise of profit or returns.
+- Terms and agreements are drafts pending legal review.
+- Prices are as of 1 November 2026; the home page is the source of truth.
+
+## The seven packages
+### Lava
+- Path: Join Up
+- What: Market data, read-only: the index card, monthly archive and most-requested products and services.
+- Price: $1.4 per day (24 hours) or $249 per year (365 days)
+- Page: https://lavndrs120.github.io/en/lava.html
+
+### Vindex (Lavenders Oracle)
+- Path: Join Up
+- What: Oracle forecasting report: orders, trend, projection, top activities and locations; monthly, half-yearly and yearly.
+- Price: $1,287 per year
+- Seats: 120
+- Page: https://lavndrs120.github.io/en/vindex.html
+
+### Magma
+- Path: Join Up
+- What: Market directory and internal market membership.
+- Price: $100 per year
+- Seats: 500
+- Page: https://lavndrs120.github.io/en/magma.html
+
+### OMS
+- Path: Economic Movement
+- What: Order-management system (web and Android) giving a business or brand its own order system.
+- Price: $429 for services, $492 for products
+- Page: https://lavndrs120.github.io/en/oms.html
+
+### Reseller
+- Path: Economic Movement
+- What: 8 order apps to offer to 8 businesses.
+- Price: $1,354.8
+- Seats: 38
+- Page: https://lavndrs120.github.io/en/reseller.html
+
+### Franchise
+- Path: Economic Movement
+- What: Your own market of 120 businesses and brands with training and ongoing support.
+- Price: $2,709 (reservation $90, then installments of $22.58 per business or brand)
+- Seats: 19
+- Page: https://lavndrs120.github.io/en/franchise.html
+
+### Tycoon
+- Path: Economic Movement
+- What: Lead a whole field (20 markets) or sector (400 indices).
+- Price: $51,480 per field, $1,029,600 per sector
+- Seats: 1 per field / sector
+- Page: https://lavndrs120.github.io/en/tycoon.html
+
+## FAQ
+**What is Lavenders?**
+Lavenders (Arabic: لاڤندرز) is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS), and their real orders feed one live consumer index called LAVNDR120.
+
+**What is the difference between Lavenders and LAVNDR120?**
+Lavenders is the name of the system and the brand. LAVNDR120 is the name of its consumer index.
+
+**What does the number 120 mean?**
+It is the number of businesses and brands in each market.
+
+**Is Lavenders a trading platform?**
+No. There is no buying, selling or trading of shares inside the platform. The index measures the real order activity of the businesses.
+
+**Is this investment advice or a promise of returns?**
+No. The information is descriptive only. There is no promise of profit or returns, and any participation is subject to the platform's terms and agreements.
+
+**Is Lavenders related to lavender plants?**
+No. The name is a brand for a digital market system and has nothing to do with lavender plants or oil.
+
+**Is there an Android app?**
+Yes. It is downloaded directly from the official site, lavndrs120.github.io. It is not currently on Google Play.
+
+**What do visitors who have not subscribed see?**
+Only the real index card. Other screens show demo data for visitors and real data for subscribers.
+
+**What is OMS?**
+An order-management system on web and Android that gives each business or brand (services or products) its own order system.
+
+**What is Lava?**
+The market data itself, read-only. You do not have to be one of the 120 businesses.
+
+**What is Vindex (the Oracle)?**
+A forecasting report on market behaviour for a limited number of members (120).
+
+**What is Magma?**
+A limited membership (500) to explore the market and its activities through the Magma directory and internal market.
+
+**What is a Reseller?**
+A membership for offering 8 order apps to 8 different businesses, with a limited number of seats (38).
+
+**What is a Franchise?**
+A franchise to build your own market of 120 businesses and brands, with a limited number of franchise owners (19).
+
+**What is a Tycoon?**
+An agency to lead a whole field (20 markets) or a whole geographic sector (400 indices), one per field or sector.
+
+**Can I try before subscribing?**
+Yes. Full demo previews of several screens with sample data open from the home page without signing in.
+
+**How does a business or brand join?**
+See the OMS package and the Economic Movement path on the packages page.
+
+## Machine-readable endpoints
+- MCP (read-only, no auth): https://lavndr.omssolutionorders.workers.dev/mcp
+- JSON: https://lavndr.omssolutionorders.workers.dev/api/brand , /api/packages , /api/faq , /api/index (live index card)
+- OpenAPI: https://lavndrs120.github.io/openapi.json
+- Agent card: https://lavndrs120.github.io/.well-known/agent-card.json
+- Arabic overview: https://lavndrs120.github.io/llms.txt
