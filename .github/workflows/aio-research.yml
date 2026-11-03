@@ -1,0 +1,29 @@
+name: Lavenders research agent
+on:
+  schedule:
+    - cron: '0 6 * * 0'   # every Sunday 06:00 UTC, one day before the content agent
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: aio-agent
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run research agent
+        run: python aio-research.py
+      - name: Commit
+        run: |
+          git config user.name "lavenders-research-agent"
+          git config user.email "research-agent@users.noreply.github.com"
+          git add aio-topics.json
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "Research agent: new topics"
+          git pull --rebase
+          git push
