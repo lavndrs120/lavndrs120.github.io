@@ -1,7 +1,7 @@
 name: Lavenders AIO agent
 on:
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: '0 7 * * 1'   # every Monday 07:00 UTC
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -30,3 +30,7 @@ jobs:
           git commit -m "AIO agent: new insight"
           git pull --rebase
           git push
+      - name: Notify IndexNow
+        run: |
+          sleep 150
+          python aio-indexnow.py || true
