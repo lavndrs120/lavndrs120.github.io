@@ -6,13 +6,31 @@
    "description": "Lavenders is a digital market system for businesses and brands",
    "slug": "lavenders-definition",
    "date": "2026-11-03",
-   "devto": null
+   "devto": null,
+   "ar": {
+    "title": "ما هي لاڤندرز (LAVNDR120)؟",
+    "description": "تعريف لاڤندرز ونظامها الرقمي",
+    "date": "2026-11-03"
+   }
   },
   {
    "id": "consumer-index-explained",
    "title": "What is a consumer index and how does LAVNDR120 track real orders?",
    "description": "Understanding the LAVNDR120 index and its relation to real orders",
    "slug": "what-is-a-consumer-index-and-how-does-lavndr120-track-real-orders",
+   "date": "2026-11-03",
+   "devto": null,
+   "ar": {
+    "title": "ما هو المؤشر الاستهلاكي؟",
+    "description": "شرح لمفهوم المؤشر الاستهلاكي و كيفية تتبع LAVNDR120 للطلبات الحقيقية",
+    "date": "2026-11-03"
+   }
+  },
+  {
+   "id": "what-is-oms",
+   "title": "What is OMS, the order-management app for businesses in Lavenders?",
+   "description": "Order-management system for businesses",
+   "slug": "what-is-oms-the-order-management-app-for-businesses-in-lavenders",
    "date": "2026-11-03",
    "devto": null
   }
