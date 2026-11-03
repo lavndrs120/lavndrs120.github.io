@@ -56,7 +56,7 @@ Hard rules:
 Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..."}
 - title: at most 70 characters, a clear question or statement.
 - description: at most 155 characters.
-- body_md: 300 to 450 words of Markdown. Start with a 2-sentence direct answer, then 2 to 4 sections with '## ' headings, then a '## Key facts' bulleted list. No H1 title and no links (links are added automatically)."""
+- body_md: at least 280 and at most 450 words of Markdown (do not write less than 280 words). Start with a 2-sentence direct answer, then 2 to 4 sections with '## ' headings, then a '## Key facts' bulleted list. No H1 title and no links (links are added automatically)."""
 
 
 def call_llm(topic, facts):
@@ -118,7 +118,7 @@ def validate(draft, facts):
     if len(draft["title"]) > 90:
         errors.append("title too long")
     words = len(draft["body_md"].split())
-    if not DRY and (words < 150 or words > 900):
+    if not DRY and (words < 220 or words > 900):
         errors.append("body length %d words" % words)
     if BANNED.search(text):
         errors.append("banned word: " + BANNED.search(text).group(0))
@@ -340,8 +340,9 @@ def main():
         print("no valid draft for", topic["id"], "- nothing published")
         return 1
     today = datetime.date.today().isoformat()
-    entry = {"id": topic["id"], "title": draft["title"].strip(), "description": draft["description"].strip(),
-             "slug": slugify(draft["title"]) or topic["id"], "date": today}
+    title = topic["question"].strip() if len(topic["question"]) <= 90 else draft["title"].strip()
+    entry = {"id": topic["id"], "title": title, "description": draft["description"].strip(),
+             "slug": slugify(title) or topic["id"], "date": today}
     style = site_style()
     out_dir = os.path.join(ROOT, "insights")
     if DRY:
