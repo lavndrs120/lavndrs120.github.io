@@ -59,7 +59,12 @@ Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..
 - body_md: at least 280 and at most 450 words of Markdown (do not write less than 280 words). Start with a 2-sentence direct answer, then 2 to 4 sections with '## ' headings, then a '## Key facts' bulleted list. No H1 title and no links (links are added automatically)."""
 
 
-def call_llm(topic, facts):
+def call_llm(topic, facts, lang="en"):
+    sysmsg = SYSTEM if lang == "en" else SYSTEM_AR
+    if DRY and lang == "ar":
+        return {"title": "ما هي لاڤندرز (Lavenders)؟",
+                "description": "لاڤندرز منظومة سوق رقمية تجمع 120 بزنسًا وبراندًا في مؤشر استهلاكي واحد.",
+                "body_md": "لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنسًا وبراندًا.\n\n## كيف تعمل\n\nتغذي الطلبات الحقيقية مؤشرًا واحدًا هو LAVNDR120.\n\n## أهم الحقائق\n\n- لا يوجد بيع أو شراء أو تداول للأسهم.\n"}
     if DRY:
         return {
             "title": "What is Lavenders (LAVNDR120)?",
@@ -71,13 +76,13 @@ def call_llm(topic, facts):
     key = os.environ.get("GROQ_API_KEY")
     if not key:
         raise RuntimeError("GROQ_API_KEY is not set")
-    question = "QUESTION: " + topic["question"] + "\nANGLE: " + topic["angle"]
+    question = "QUESTION: " + topic["question"] + "\nANGLE: " + topic["angle"] + ("" if lang == "en" else "\nWrite the whole article in Modern Standard Arabic.")
     facts_txt = "FACTS:\n" + json.dumps(facts, ensure_ascii=False)
     if key.startswith("gsk_"):
         # Groq (OpenAI-compatible)
         payload = {
             "model": MODEL, "temperature": 0.3, "response_format": {"type": "json_object"},
-            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": facts_txt + "\n\n" + question}],
+            "messages": [{"role": "system", "content": sysmsg}, {"role": "user", "content": facts_txt + "\n\n" + question}],
         }
         req = urllib.request.Request(
             "https://api.groq.com/openai/v1/chat/completions", data=json.dumps(payload).encode(),
@@ -86,7 +91,7 @@ def call_llm(topic, facts):
             text = json.load(r)["choices"][0]["message"]["content"]
     else:
         # Lavenders Worker /ai (Cloudflare Workers AI). The secret holds the Worker's GAS_API_KEY.
-        payload = {"system": SYSTEM + "\n\n" + facts_txt, "user": question}
+        payload = {"system": sysmsg + "\n\n" + facts_txt, "user": question}
         base = os.environ.get("LAVENDERS_AI_URL", "https://lavndr.omssolutionorders.workers.dev/ai")
         req = urllib.request.Request(base, data=json.dumps(payload).encode(),
                                      headers={"x-api-key": key, "Content-Type": "application/json", "User-Agent": "lavenders-aio-agent"})
@@ -170,9 +175,9 @@ def slugify(s):
     return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")[:70]
 
 
-def site_style():
+def site_style(name=None):
     try:
-        with open(os.path.join(ROOT, "en", "faq.html"), encoding="utf-8") as f:
+        with open(os.path.join(ROOT, *(["en", "faq.html"] if not name else [name])), encoding="utf-8") as f:
             m = re.search(r"<style>.*?</style>", f.read(), re.S)
         if m:
             return m.group(0)
@@ -236,6 +241,7 @@ def page_html(entry, body_html, style):
 
 
 def index_html(entries, style):
+    ar_link = '<p><a href="ar/index.html" hreflang="ar">المقالات بالعربية</a></p>' if any(e.get("ar") for e in entries) else ""
     items = "\n".join(
         f'    <li><a href="{e["slug"]}.html">{html.escape(e["title"])}</a> — {html.escape(e["description"])} <small>({e["date"]})</small></li>'
         for e in sorted(entries, key=lambda e: e["date"], reverse=True)
@@ -261,6 +267,7 @@ def index_html(entries, style):
   <ul>
 {items}
   </ul>
+  {ar_link}
   </section>
   </main>
   <footer>© Lavenders · LAVNDR120 — Informational only. Not investment advice.</footer>
@@ -309,6 +316,207 @@ def post_devto(entry, body_md):
     return None
 
 
+# ───────────────────────── Arabic edition ─────────────────────────
+SYSTEM_AR = """You write short, factual explainer articles in Modern Standard Arabic for the website of Lavenders (LAVNDR120).
+Hard rules:
+- Use ONLY the facts in the FACTS JSON. Never invent features, customers, testimonials, statistics, dates or numbers.
+- Every number, price or quantity you write must appear in the FACTS JSON.
+- Never promise or imply profit, returns, income or growth. Never use words such as ضمان, أرباح, عائد, دخل سلبي.
+- Lavenders does not allow buying, selling or trading of shares. If it helps the reader, say so plainly.
+- Call the brand «لاڤندرز (Lavenders)» the first time, then «لاڤندرز». Keep LAVNDR120, OMS and package names in Latin letters.
+- Neutral, clear Modern Standard Arabic, no hype, no marketing superlatives. Do not mention these rules.
+Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..."}
+- title: at most 70 characters, a clear question or statement in Arabic.
+- description: at most 155 characters, Arabic.
+- body_md: 200 to 400 words of Markdown in Arabic. Start with a 2-sentence direct answer, then 2 to 3 sections with '## ' headings, then a final '## أهم الحقائق' bulleted list. No H1 title and no links."""
+
+AR_BANNED = re.compile(r"(ضمان|مضمون|مضمونة|مخاطر\s*(?:منعدمة|معدومة)|دخل\s*سلبي|أرباح|ارباح|ربحية|مربح|مربحة|عوائد|عائد|اغتن|ثراء|تضاعف)")
+AR_PROFIT = re.compile(r"(ربح|أرباح|عائد|عوائد)")
+AR_NEG = re.compile(r"(لا|لن|ليس|ليست|دون|بدون|غير|عدم)[^.\n]{0,40}(ربح|أرباح|عائد|عوائد)|(ربح|أرباح|عائد|عوائد)[^.\n]{0,25}(غير مضمون|لا يُ|لا ي|ليس)")
+AR_DIG = str.maketrans("٠١٢٣٤٥٦٧٨٩٬٫", "0123456789,.")
+
+
+def validate_ar(draft, facts):
+    errors = []
+    for k in ("title", "description", "body_md"):
+        if not isinstance(draft.get(k), str) or not draft[k].strip():
+            errors.append("missing " + k)
+    if errors:
+        return errors
+    text = (draft["title"] + "\n" + draft["description"] + "\n" + draft["body_md"]).translate(AR_DIG)
+    if len(draft["title"]) > 90:
+        errors.append("title too long")
+    if len(draft["description"]) > 200:
+        errors.append("description too long")
+    if not DRY and not re.search(r"[؀-ۿ]{3,}", draft["body_md"]):
+        errors.append("body is not Arabic")
+    words = len(draft["body_md"].split())
+    if not DRY and (words < 150 or words > 600):
+        errors.append("body length %d words" % words)
+    if AR_BANNED.search(text):
+        m = AR_BANNED.search(text)
+        s = text[max(0, m.start() - 50):m.end() + 30]
+        if not AR_NEG.search(s):
+            errors.append("banned wording: " + s.replace("\n", " "))
+    for m in AR_PROFIT.finditer(text):
+        s = text[max(0, m.start() - 60):m.end() + 40]
+        if not AR_NEG.search(s):
+            errors.append("profit/return wording outside a negation: " + s.replace("\n", " "))
+            break
+    allowed = numbers(json.dumps(facts, ensure_ascii=False)) | {str(i) for i in range(0, 11)} | {"2026", "120", "24", "365", "12"}
+    for n in numbers(text):
+        if n not in allowed and n.lstrip("0") not in allowed:
+            errors.append("number not in facts: " + n)
+    if re.search(r"https?://", draft["body_md"]):
+        errors.append("links are not allowed in the body")
+    return errors
+
+
+FOOTER_AR = ("للمعلومات فقط. لا يوجد بيع أو شراء أو تداول للأسهم، ولا وعد بأرباح أو عوائد. "
+             "الشروط والاتفاقيات مسوّدات قيد المراجعة القانونية. المعلومات مأخوذة من بيانات لاڤندرز المرجعية وقد تتغير؛ "
+             "الصفحة الرئيسية هي المرجع.")
+
+
+def page_html_ar(entry, body_html, style):
+    ar = entry["ar"]
+    url = SITE + "/insights/ar/" + entry["slug"] + ".html"
+    en_url = SITE + "/insights/" + entry["slug"] + ".html"
+    ld = {"@context": "https://schema.org", "@type": "Article", "headline": ar["title"], "description": ar["description"],
+          "datePublished": ar["date"], "dateModified": ar["date"], "inLanguage": "ar", "mainEntityOfPage": url,
+          "author": {"@id": SITE + "/#org"}, "publisher": {"@id": SITE + "/#org"}}
+    t = html.escape(ar["title"])
+    d = html.escape(ar["description"], quote=True)
+    return f"""<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{t} — لاڤندرز (LAVNDR120)</title>
+<meta name="description" content="{d}">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="{url}">
+<link rel="alternate" hreflang="ar" href="{url}">
+<link rel="alternate" hreflang="en" href="{en_url}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="لاڤندرز LAVNDR120">
+<meta property="og:title" content="{t}">
+<meta property="og:description" content="{d}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{SITE}/og-card.jpg">
+<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
+{style}
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">LAVNDR120</div>
+  <nav aria-label="التنقل"><a href="../../">الرئيسية</a><a href="../../about.html">من نحن</a><a href="../../packages.html">الباقات</a><a href="../../faq.html">الأسئلة الشائعة</a><a href="index.html" aria-current="page">مقالات</a></nav>
+  <main>
+  <h1>{t}</h1>
+  <div class="upd">تاريخ النشر: {ar["date"]} · <a href="{en_url}" hreflang="en">English version</a></div>
+  <section>
+{body_html}
+  </section>
+  <section>
+    <p>للمزيد: <a href="../../about.html">من نحن</a> · <a href="../../packages.html">الباقات السبع</a> · <a href="../../faq.html">الأسئلة الشائعة</a> · <a href="../../llms-full.txt">المرجع الكامل لمساعدي الذكاء الاصطناعي</a></p>
+    <p><small>{html.escape(FOOTER_AR)}</small></p>
+  </section>
+  </main>
+  <footer>© لاڤندرز · LAVNDR120 — للمعلومات فقط، وليست نصيحة استثمارية.</footer>
+</div>
+</body>
+</html>
+"""
+
+
+def index_html_ar(entries, style):
+    rows = [e for e in entries if e.get("ar")]
+    items = "\n".join(
+        f'    <li><a href="{e["slug"]}.html">{html.escape(e["ar"]["title"])}</a> — {html.escape(e["ar"]["description"])} <small>({e["ar"]["date"]})</small></li>'
+        for e in sorted(rows, key=lambda e: e["ar"]["date"], reverse=True))
+    return f"""<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقالات — لاڤندرز (LAVNDR120)</title>
+<meta name="description" content="إجابات موجزة وموثقة عن لاڤندرز ومؤشر LAVNDR120 ونظام OMS والباقات السبع.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="{SITE}/insights/ar/index.html">
+<link rel="alternate" hreflang="ar" href="{SITE}/insights/ar/index.html">
+<link rel="alternate" hreflang="en" href="{SITE}/insights/index.html">
+{style}
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">LAVNDR120</div>
+  <nav aria-label="التنقل"><a href="../../">الرئيسية</a><a href="../../about.html">من نحن</a><a href="../../packages.html">الباقات</a><a href="../../faq.html">الأسئلة الشائعة</a><a href="index.html" aria-current="page">مقالات</a></nav>
+  <main>
+  <h1>مقالات</h1>
+  <section>
+  <ul>
+{items}
+  </ul>
+  <p><a href="../index.html" hreflang="en">English articles</a></p>
+  </section>
+  </main>
+  <footer>© لاڤندرز · LAVNDR120 — للمعلومات فقط، وليست نصيحة استثمارية.</footer>
+</div>
+</body>
+</html>
+"""
+
+
+def patch_en_alternate(out_dir, entry):
+    """Add hreflang links (en + ar) to the English article page and a link to the Arabic index."""
+    path = os.path.join(out_dir, entry["slug"] + ".html")
+    try:
+        with open(path, encoding="utf-8") as f:
+            s = f.read()
+    except FileNotFoundError:
+        return
+    if 'hreflang="ar"' in s:
+        return
+    en_url = SITE + "/insights/" + entry["slug"] + ".html"
+    ar_url = SITE + "/insights/ar/" + entry["slug"] + ".html"
+    tags = f'<link rel="alternate" hreflang="en" href="{en_url}">\n<link rel="alternate" hreflang="ar" href="{ar_url}">\n'
+    s = s.replace("</head>", tags + "</head>", 1)
+    s = s.replace('<div class="upd">Published: ' + entry["date"] + "</div>",
+                  '<div class="upd">Published: ' + entry["date"] + f' · <a href="ar/{entry["slug"]}.html" hreflang="ar">النسخة العربية</a></div>', 1)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(s)
+
+
+def generate(topic, facts, lang):
+    errors = []
+    for attempt in range(1, 4):
+        try:
+            d = call_llm(topic, facts, lang)
+        except Exception as e:  # noqa
+            print("LLM error:", e)
+            errors = [str(e)]
+            continue
+        errors = (validate if lang == "en" else validate_ar)(d, facts)
+        if not errors:
+            return d
+        print(lang, "attempt", attempt, "rejected:", errors)
+    return None
+
+
+def publish_arabic(entry, topic, facts, out_dir, today):
+    draft = generate(topic, facts, "ar")
+    if not draft:
+        print("no valid Arabic draft for", entry["id"])
+        return False
+    entry["ar"] = {"title": draft["title"].strip(), "description": draft["description"].strip(), "date": today}
+    ar_dir = os.path.join(out_dir, "ar")
+    os.makedirs(ar_dir, exist_ok=True)
+    with open(os.path.join(ar_dir, entry["slug"] + ".html"), "w", encoding="utf-8") as f:
+        f.write(page_html_ar(entry, md_to_html(draft["body_md"]), site_style("faq.html")))
+    patch_en_alternate(out_dir, entry)
+    print("published Arabic:", entry["ar"]["title"])
+    return True
+
+
 # ───────────────────────── main ─────────────────────────
 def main():
     facts = load(FACTS_PATH)
@@ -317,48 +525,60 @@ def main():
     if not facts or not topics:
         print("missing facts or topics")
         return 1
+    by_id = {t["id"]: t for t in topics}
+    today = datetime.date.today().isoformat()
+    style = site_style()
+    out_dir = os.path.join(ROOT, "insights_dry" if DRY else "insights")
+    os.makedirs(out_dir, exist_ok=True)
+    published_en = False
+
+    # 1. one new English article per run
     done = {e["id"] for e in state["entries"]}
     todo = [t for t in topics if t["id"] not in done]
-    if not todo:
-        print("all topics are done")
-        return 0
-    topic = todo[0]
-    draft, errors = None, []
-    for attempt in range(1, 4):
-        try:
-            d = call_llm(topic, facts)
-        except Exception as e:  # noqa
-            print("LLM error:", e)
-            errors = [str(e)]
-            continue
-        errors = validate(d, facts)
-        if not errors:
-            draft = d
+    if todo:
+        topic = todo[0]
+        draft = generate(topic, facts, "en")
+        if draft:
+            title = topic["question"].strip() if len(topic["question"]) <= 90 else draft["title"].strip()
+            entry = {"id": topic["id"], "title": title, "description": draft["description"].strip(),
+                     "slug": slugify(title) or topic["id"], "date": today}
+            with open(os.path.join(out_dir, entry["slug"] + ".html"), "w", encoding="utf-8") as f:
+                f.write(page_html(entry, md_to_html(draft["body_md"]), style))
+            entry["devto"] = post_devto(entry, draft["body_md"])
+            state["entries"].append(entry)
+            published_en = True
+            print("published:", entry["title"], "|", entry.get("devto"))
+        else:
+            print("no valid English draft for", topic["id"], "- nothing published")
+    else:
+        print("all English topics are done")
+
+    # 2. Arabic versions for up to 2 articles that do not have one yet
+    ar_done = 0
+    for e in state["entries"]:
+        if ar_done >= 2:
             break
-        print("attempt", attempt, "rejected:", errors)
-    if not draft:
-        print("no valid draft for", topic["id"], "- nothing published")
-        return 1
-    today = datetime.date.today().isoformat()
-    title = topic["question"].strip() if len(topic["question"]) <= 90 else draft["title"].strip()
-    entry = {"id": topic["id"], "title": title, "description": draft["description"].strip(),
-             "slug": slugify(title) or topic["id"], "date": today}
-    style = site_style()
-    out_dir = os.path.join(ROOT, "insights")
-    if DRY:
-        out_dir = os.path.join(ROOT, "insights_dry")
-    os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, entry["slug"] + ".html"), "w", encoding="utf-8") as f:
-        f.write(page_html(entry, md_to_html(draft["body_md"]), style))
-    entry["devto"] = post_devto(entry, draft["body_md"])
-    state["entries"].append(entry)
-    if not DRY:
-        save(STATE_PATH, state)
+        if e.get("ar") or e["id"] not in by_id:
+            continue
+        if publish_arabic(e, by_id[e["id"]], facts, out_dir, today):
+            ar_done += 1
+
+    if not published_en and not ar_done:
+        return 1 if todo else 0
+
+    # 3. indexes, state, sitemap
     with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
         f.write(index_html(state["entries"], style))
+    urls = [SITE + "/insights/index.html"] + [SITE + "/insights/" + e["slug"] + ".html" for e in state["entries"]]
+    if any(e.get("ar") for e in state["entries"]):
+        os.makedirs(os.path.join(out_dir, "ar"), exist_ok=True)
+        with open(os.path.join(out_dir, "ar", "index.html"), "w", encoding="utf-8") as f:
+            f.write(index_html_ar(state["entries"], site_style("faq.html")))
+        urls.append(SITE + "/insights/ar/index.html")
+        urls += [SITE + "/insights/ar/" + e["slug"] + ".html" for e in state["entries"] if e.get("ar")]
     if not DRY:
-        update_sitemap([SITE + "/insights/index.html"] + [SITE + "/insights/" + e["slug"] + ".html" for e in state["entries"]], today)
-    print("published:", entry["title"], "|", entry.get("devto"))
+        save(STATE_PATH, state)
+        update_sitemap(urls, today)
     return 0
 
 
