@@ -56,7 +56,7 @@ Hard rules:
 Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..."}
 - title: at most 70 characters, a clear question or statement.
 - description: at most 155 characters.
-- body_md: 350 to 600 words of Markdown. Start with a 2-sentence direct answer, then 2 to 4 sections with '## ' headings, then a '## Key facts' bulleted list. No H1 title and no links (links are added automatically)."""
+- body_md: 300 to 450 words of Markdown. Start with a 2-sentence direct answer, then 2 to 4 sections with '## ' headings, then a '## Key facts' bulleted list. No H1 title and no links (links are added automatically)."""
 
 
 def call_llm(topic, facts):
@@ -71,21 +71,29 @@ def call_llm(topic, facts):
     key = os.environ.get("GROQ_API_KEY")
     if not key:
         raise RuntimeError("GROQ_API_KEY is not set")
-    user = "FACTS:\n" + json.dumps(facts, ensure_ascii=False) + "\n\nQUESTION: " + topic["question"] + "\nANGLE: " + topic["angle"]
-    payload = {
-        "model": MODEL,
-        "temperature": 0.3,
-        "response_format": {"type": "json_object"},
-        "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}],
-    }
-    req = urllib.request.Request(
-        "https://api.groq.com/openai/v1/chat/completions",
-        data=json.dumps(payload).encode(),
-        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json", "User-Agent": "lavenders-aio-agent"},
-    )
-    with urllib.request.urlopen(req, timeout=120) as r:
-        out = json.load(r)
-    return json.loads(out["choices"][0]["message"]["content"])
+    question = "QUESTION: " + topic["question"] + "\nANGLE: " + topic["angle"]
+    facts_txt = "FACTS:\n" + json.dumps(facts, ensure_ascii=False)
+    if key.startswith("gsk_"):
+        # Groq (OpenAI-compatible)
+        payload = {
+            "model": MODEL, "temperature": 0.3, "response_format": {"type": "json_object"},
+            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": facts_txt + "\n\n" + question}],
+        }
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/chat/completions", data=json.dumps(payload).encode(),
+            headers={"Authorization": "Bearer " + key, "Content-Type": "application/json", "User-Agent": "lavenders-aio-agent"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            text = json.load(r)["choices"][0]["message"]["content"]
+    else:
+        # Lavenders Worker /ai (Cloudflare Workers AI). The secret holds the Worker's GAS_API_KEY.
+        payload = {"system": SYSTEM + "\n\n" + facts_txt, "user": question}
+        base = os.environ.get("LAVENDERS_AI_URL", "https://lavndr.omssolutionorders.workers.dev/ai")
+        req = urllib.request.Request(base, data=json.dumps(payload).encode(),
+                                     headers={"x-api-key": key, "Content-Type": "application/json", "User-Agent": "lavenders-aio-agent"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            text = json.load(r)["text"]
+    m = re.search(r"\{.*\}", text, re.S)
+    return json.loads(m.group(0) if m else text)
 
 
 # ───────────────────────── validation ─────────────────────────
@@ -110,7 +118,7 @@ def validate(draft, facts):
     if len(draft["title"]) > 90:
         errors.append("title too long")
     words = len(draft["body_md"].split())
-    if not DRY and (words < 200 or words > 900):
+    if not DRY and (words < 150 or words > 900):
         errors.append("body length %d words" % words)
     if BANNED.search(text):
         errors.append("banned word: " + BANNED.search(text).group(0))
