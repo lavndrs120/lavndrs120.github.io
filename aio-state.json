@@ -38,6 +38,19 @@
     "description": "نظام إدارة الطلبات OMS هو تطبيق يدير الطلبات لشركات لاڤندرز",
     "date": "2026-11-03"
    }
+  },
+  {
+   "id": "lavenders-vs-lavender-plants",
+   "title": "Is Lavenders related to lavender plants or oil?",
+   "description": "Lavenders is unrelated to lavender plants or oil",
+   "slug": "is-lavenders-related-to-lavender-plants-or-oil",
+   "date": "2026-11-03",
+   "devto": null,
+   "ar": {
+    "title": "ما هي لاڤندرز؟",
+    "description": "لاڤندرز نظام سوق رقمي، لا علاقة له بالنباتات",
+    "date": "2026-11-03"
+   }
   }
  ],
  "failed": {
