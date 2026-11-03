@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.lavndrs120/lavenders",
+  "title": "Lavenders (LAVNDR120)",
+  "description": "Read-only facts on Lavenders (LAVNDR120): packages, prices, FAQ and the live consumer index card.",
+  "repository": {
+    "url": "https://github.com/lavndrs120/lavndrs120.github.io",
+    "source": "github"
+  },
+  "websiteUrl": "https://lavndrs120.github.io/",
+  "version": "1.0.1",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://lavndr.omssolutionorders.workers.dev/mcp"
+    }
+  ],
+  "icons": [
+    {
+      "src": "https://lavndrs120.github.io/icon-324.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "324x324"
+      ]
+    }
+  ]
+}
