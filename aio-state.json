@@ -32,7 +32,12 @@
    "description": "Order-management system for businesses",
    "slug": "what-is-oms-the-order-management-app-for-businesses-in-lavenders",
    "date": "2026-11-03",
-   "devto": null
+   "devto": null,
+   "ar": {
+    "title": "ما هو نظام إدارة الطلبات OMS في لاڤندرز؟",
+    "description": "نظام إدارة الطلبات OMS هو تطبيق يدير الطلبات لشركات لاڤندرز",
+    "date": "2026-11-03"
+   }
   }
  ]
 }
