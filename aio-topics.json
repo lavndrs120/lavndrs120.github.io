@@ -1,0 +1,22 @@
+[
+ {"id":"what-is-lavenders","question":"What is Lavenders (LAVNDR120) and who is it for?","angle":"Plain definition of the system, the brand vs the index, and the audience of businesses and brands."},
+ {"id":"consumer-index-explained","question":"What is a consumer index and how does LAVNDR120 track real orders?","angle":"Explain the idea of an index fed by real order data from business apps, without any trading or return claims."},
+ {"id":"what-is-oms","question":"What is OMS, the order-management app for businesses in Lavenders?","angle":"What an order-management app does for a business and how it connects to the index."},
+ {"id":"lavenders-vs-lavender-plants","question":"Is Lavenders related to lavender plants or oil?","angle":"Disambiguate the brand name from the plant; short and factual."},
+ {"id":"seven-packages-overview","question":"What are the seven Lavenders packages and how do they differ?","angle":"Compare Lava, Vindex, Magma, OMS, Reseller, Franchise and Tycoon using only the facts provided, including prices."},
+ {"id":"lava-package","question":"What does the Lava package include?","angle":"Read-only market data access; durations and price from the facts."},
+ {"id":"vindex-package","question":"What does the Vindex package include?","angle":"Oracle reports; seats and price from the facts."},
+ {"id":"magma-package","question":"What is the Magma activity directory?","angle":"What it is, who it is for, seats and price from the facts."},
+ {"id":"oms-package","question":"How does a small business join Lavenders through the OMS package?","angle":"Steps and pricing from the facts for services vs products brands."},
+ {"id":"reseller-package","question":"What is the Lavenders Reseller package?","angle":"What a reseller receives and the limits, from the facts only."},
+ {"id":"franchise-package","question":"How does the Lavenders Franchise package work?","angle":"Reservation, per-business payments and seat limits from the facts; no income promises."},
+ {"id":"tycoon-package","question":"What is the Tycoon package in Lavenders?","angle":"Describe the field and sector agency scope neutrally from the facts; no return or earnings claims."},
+ {"id":"what-lavenders-does-not-offer","question":"What does Lavenders not offer?","angle":"No buying, selling or trading of shares; no promise of profit or returns; terms are drafts pending legal review."},
+ {"id":"ai-agents-and-lavenders","question":"How can AI assistants and agents read Lavenders information?","angle":"Describe llms.txt, the read-only MCP server, the JSON API and the official MCP Registry entry."},
+ {"id":"mcp-server-lavenders","question":"What is the Lavenders MCP server and which tools does it expose?","angle":"List the five read-only tools and what each returns; give the endpoint."},
+ {"id":"live-index-card","question":"What does the live LAVNDR120 index card show?","angle":"Net asset value, day change, high and low as an informational card, with the disclaimer."},
+ {"id":"arabic-and-english","question":"Is Lavenders available in Arabic and English?","angle":"Bilingual pages, language toggle, and where to find each."},
+ {"id":"why-120-businesses","question":"Why does each Lavenders market have 120 businesses?","angle":"Explain the number 120 only as stated in the facts."},
+ {"id":"try-before-subscribing","question":"Can I try Lavenders before subscribing?","angle":"Demo previews with sample data, from the facts."},
+ {"id":"mobile-app","question":"Is there a Lavenders mobile app?","angle":"The Android app (APK) from the website; not on Google Play, per the facts."}
+]
