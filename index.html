@@ -152,7 +152,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 <p>مسار الحركة الاقتصادية (المشاركة في بناء السوق): <a href="oms.html">OMS</a> · <a href="reseller.html">Reseller</a> · <a href="franchise.html">Franchise</a> · <a href="tycoon.html">Tycoon</a></p>
 <p><a href="packages.html">مقارنة الباقات السبع</a> · <a href="consumer-index.html">ما هو المؤشر الاستهلاكي؟</a> · <a href="faq.html">أسئلة شائعة</a></p>
 <p>يلزم تفعيل جافاسكربت لاستعراض الباقات والاشتراك.</p></div></noscript>
-  <div style="text-align:center;margin:26px 0 0;font-size:11.5px"><span id="footLinks"><a href="about.html" style="color:rgba(255,255,255,.45);text-decoration:underline">عن لاڤندرز</a> · <a href="packages.html" style="color:rgba(255,255,255,.45);text-decoration:underline">الباقات</a> · <a href="businesses.html" style="color:rgba(255,255,255,.45);text-decoration:underline">للبزنسات والبراندات</a> · <a href="insights/ar/index.html" style="color:rgba(255,255,255,.45);text-decoration:underline">مقالات</a> · <a href="privacy.html" style="color:rgba(255,255,255,.45);text-decoration:underline">سياسة الخصوصية</a></span></div>
+  <div style="text-align:center;margin:26px 0 0;font-size:11.5px"><span id="footLinks"><a href="about.html" style="color:rgba(255,255,255,.45);text-decoration:underline">عن لاڤندرز</a> · <a href="packages.html" style="color:rgba(255,255,255,.45);text-decoration:underline">الباقات</a> · <a href="businesses.html" style="color:rgba(255,255,255,.45);text-decoration:underline">للبزنسات والبراندات</a> · <a href="insights/ar/index.html" style="color:rgba(255,255,255,.45);text-decoration:underline">مقالات</a> · <a href="embed.html" style="color:rgba(255,255,255,.45);text-decoration:underline">ودجت</a> · <a href="privacy.html" style="color:rgba(255,255,255,.45);text-decoration:underline">سياسة الخصوصية</a></span></div>
   <div class="foot" id="footAcct">لديك حساب؟ <a href="dashboard.html" onclick="goLogin();return false;">ادخل إلى حسابك</a></div>
 </div>
 <div id="pop"><div id="popBody"></div></div>
@@ -495,7 +495,7 @@ function toggleLang() {
   var a = document.getElementById('btnLogin'); if (a) a.textContent = 'Sign in';
   var g = document.getElementById('btnGuest'); if (g) g.textContent = 'Guest · Try';
   var st = 'style="color:rgba(255,255,255,.45);text-decoration:underline"';
-  var f = document.getElementById('footLinks'); if (f) f.innerHTML = '<a href="en/about.html" ' + st + '>About</a> · <a href="en/packages.html" ' + st + '>Packages</a> · <a href="en/businesses.html" ' + st + '>For businesses</a> · <a href="insights/index.html" ' + st + '>Insights</a> · <a href="privacy.html" ' + st + '>Privacy policy</a>';
+  var f = document.getElementById('footLinks'); if (f) f.innerHTML = '<a href="en/about.html" ' + st + '>About</a> · <a href="en/packages.html" ' + st + '>Packages</a> · <a href="en/businesses.html" ' + st + '>For businesses</a> · <a href="insights/index.html" ' + st + '>Insights</a> · <a href="embed.html" ' + st + '>Widget</a> · <a href="privacy.html" ' + st + '>Privacy policy</a>';
   var fa = document.getElementById('footAcct'); if (fa) fa.innerHTML = 'Have an account? <a href="dashboard.html" onclick="goLogin();return false;">Sign in</a>';
 })();
 render(location.hash);
