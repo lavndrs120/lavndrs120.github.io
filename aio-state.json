@@ -51,6 +51,19 @@
     "description": "لاڤندرز نظام سوق رقمي، لا علاقة له بالنباتات",
     "date": "2026-11-03"
    }
+  },
+  {
+   "id": "seven-packages-overview",
+   "title": "What are the seven Lavenders packages and how do they differ?",
+   "description": "Compare 7 packages: Lava, Vindex, Magma, OMS, Reseller, Franchise, Tycoon",
+   "slug": "what-are-the-seven-lavenders-packages-and-how-do-they-differ",
+   "date": "2026-11-09",
+   "devto": null,
+   "ar": {
+    "title": "حزم لاڤندرز السبعة",
+    "description": "مقارنة بين حزم لاڤندرز السبعة",
+    "date": "2026-11-09"
+   }
   }
  ],
  "failed": {

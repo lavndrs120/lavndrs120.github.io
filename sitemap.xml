@@ -234,4 +234,16 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://lavndrs120.github.io/insights/what-are-the-seven-lavenders-packages-and-how-do-they-differ.html</loc>
+    <lastmod>2026-11-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://lavndrs120.github.io/insights/ar/what-are-the-seven-lavenders-packages-and-how-do-they-differ.html</loc>
+    <lastmod>2026-11-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>
