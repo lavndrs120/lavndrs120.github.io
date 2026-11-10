@@ -32,7 +32,7 @@
   {
    "id": "live-index",
    "name": "Live index card",
-   "description": "Current LAVNDR120 net asset value and day change (informational).",
+   "description": "Current LAVNDR120 order value and day change (informational).",
    "tags": [
     "index",
     "data"
