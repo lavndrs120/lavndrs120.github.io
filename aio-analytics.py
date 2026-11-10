@@ -111,6 +111,30 @@ CORE_FILES = {
         ("# Lavenders (LAVNDR120) — full reference for AI assistants\n\n", "# Lavenders (LAVNDR120) — full reference for AI assistants\n\n" + CORE_EN + "\n\n"),
     ],
 }
+CORE_FILES["faq.html"] = [
+    ("إجابات مختصرة عن لاڤندرز (Lavenders) ومؤشر LAVNDR120 ونظام OMS والباقات والتطبيق،",
+     "إجابات عن لاڤندرز (Lavenders): ماذا تكشف عن سلوك المستهلك، ومؤشر LAVNDR120 ونظام OMS والباقات والتطبيق،"),
+    ("<h2>عن المنظومة والاسم</h2>\n    <h3>ما هي لاڤندرز؟</h3>",
+     "<h2>عن المنظومة والاسم</h2>\n    <h3>ما الذي تكشفه لاڤندرز؟</h3>\n    <p>" + CORE_AR + " المصدر طلبات فعلية لا استبيانات: المنتجات والخدمات الأكثر طلباً، وحركة الطلبات عبر الوقت. المعلومات تعريفية وليست نصيحة استثمارية.</p>\n    <h3>ما هي لاڤندرز؟</h3>"),
+]
+CORE_FILES["businesses.html"] = [
+    ("لكل بزنس وبراند نظام طلبات خاص (OMS) يعمل من الويب وأندرويد، وموقع داخل سوق من 120 بزنس ترى فيه أداء الآخرين.",
+     "طلباتك الفعلية تكشف سلوك المستهلك: لكل بزنس وبراند نظام طلبات خاص (OMS) من الويب وأندرويد، وموقع داخل سوق من 120 بزنس ترى فيه أداء الآخرين."),
+    ("<section>\n    <h2>نظام OMS</h2>",
+     "<section>\n    <h2>ماذا يكشف السوق عن سلوك المستهلك؟</h2>\n    <p>كل طلب يسجّله بزنس في نظام OMS يدخل في قراءة واحدة للسوق: ماذا يطلب الناس فعلاً ومن أي بزنس. يرى كل بزنس أداء الـ119 الآخرين داخل السوق، وتعرض باقة ڤندكس (Vindex) الطلبات والاتجاه والتوقع وأبرز الأنشطة والمواقع. المعلومات تعريفية ولا تتضمن وعداً بعائد.</p>\n  </section>\n\n  <section>\n    <h2>نظام OMS</h2>"),
+]
+CORE_FILES["en/faq.html"] = [
+    ("Short answers about Lavenders, the LAVNDR120 index, OMS, the seven packages and the app,",
+     "Answers about Lavenders and the consumer behaviour it reveals, the LAVNDR120 index, OMS, the seven packages and the app,"),
+    ("<h2>About the system</h2>\n    <h3>What is Lavenders?</h3>",
+     "<h2>About the system</h2>\n    <h3>What does Lavenders reveal?</h3>\n    <p>" + CORE_EN + " The source is real orders, not surveys: the most-requested products and services and how order activity moves over time. The information is descriptive only, not investment advice.</p>\n    <h3>What is Lavenders?</h3>"),
+]
+CORE_FILES["en/businesses.html"] = [
+    ("Every business and brand gets its own order system (OMS) on web and Android, and a place in a market of 120",
+     "Your real orders reveal consumer behaviour: every business and brand gets its own order system (OMS) on web and Android, and a place in a market of 120"),
+    ("<section>\n    <h2>OMS</h2>",
+     "<section>\n    <h2>What the market reveals about consumer behaviour</h2>\n    <p>Every order a business records in its OMS feeds one reading of the market: what people actually order, and from which businesses. Each business can see the performance of the other 119, and the Vindex package presents orders, trend, projection, top activities and locations. The information is descriptive and carries no promise of returns.</p>\n  </section>\n  <section>\n    <h2>OMS</h2>"),
+]
 for fn, pairs in CORE_FILES.items():
     pth = os.path.join(ROOT, fn)
     try:
