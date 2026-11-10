@@ -64,6 +64,19 @@
     "description": "مقارنة بين حزم لاڤندرز السبعة",
     "date": "2026-11-09"
    }
+  },
+  {
+   "id": "lava-package",
+   "title": "What does the Lava package include?",
+   "description": "Read-only market data access and pricing",
+   "slug": "what-does-the-lava-package-include",
+   "date": "2026-11-10",
+   "devto": null,
+   "ar": {
+    "title": "ما الذي يتضمن حزمة لافا؟",
+    "description": "حزمة لافا توفر بيانات السوق للقراءة فقط",
+    "date": "2026-11-10"
+   }
   }
  ],
  "failed": {
