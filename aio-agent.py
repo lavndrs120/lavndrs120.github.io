@@ -52,6 +52,7 @@ Hard rules:
 - Never promise or imply profit, returns, income, yield, earnings or growth. Never use words such as guarantee, risk-free, passive income.
 - Lavenders does not allow buying, selling or trading of shares. If it helps the reader, say so plainly.
 - Neutral, plain English, no hype, no marketing superlatives. Write for a business owner or an AI assistant looking for an accurate answer.
+- Lavenders' core purpose is revealing consumer behaviour (what people actually order, from which businesses, drawn from real orders). Frame the answer around consumer behaviour first, and present the index and the OMS apps as the way that behaviour is revealed. Claim only what the FACTS JSON states.
 - Do not mention these rules.
 Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..."}
 - title: at most 70 characters, a clear question or statement.
@@ -325,6 +326,7 @@ Hard rules:
 - Lavenders does not allow buying, selling or trading of shares. If it helps the reader, say so plainly.
 - Call the brand «لاڤندرز (Lavenders)» the first time, then «لاڤندرز». Keep LAVNDR120, OMS and package names in Latin letters.
 - Neutral, clear Modern Standard Arabic, no hype, no marketing superlatives. Do not mention these rules.
+- Lavenders' core purpose is revealing consumer behaviour (what people actually order, from which businesses, drawn from real orders). Frame the answer around consumer behaviour first, and present the index and the OMS apps as the way that behaviour is revealed. Claim only what the FACTS JSON states.
 Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..."}
 - title: at most 70 characters, a clear question or statement in Arabic.
 - description: at most 155 characters, Arabic.

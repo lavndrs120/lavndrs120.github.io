@@ -24,10 +24,12 @@ SEEDS = [
     "order management app for brands", "brand index platform", "how to join a business index",
     "franchise vs reseller", "mcp server for business data", "ai agents business index",
     "arabic business index", "index of 120 businesses",
+    "consumer behavior data", "consumer behaviour analysis", "what do consumers order", "consumer demand data",
+    "consumer purchasing patterns",
 ]
 PREFIXES = ["what is ", "how does ", "how to ", "is ", "can "]
 # a suggestion is kept only if it touches our subject
-RELEVANT = re.compile(r"\b(consumer|index|oms|order management|brand|business|franchise|reseller|mcp|agent|package|market)\b", re.I)
+RELEVANT = re.compile(r"\b(consumer|behaviou?r|demand|index|oms|order management|brand|business|franchise|reseller|mcp|agent|package|market)\b", re.I)
 # never write articles about these (money-promise or unrelated intent)
 BLOCK = re.compile(r"\b(profit|returns?|earn|income|rich|guarantee|buy|sell|trade|trading|stock|stocks|shares?|price|crypto|forex|invest(?:ing|ment)?|loan|free money|scam|reddit|free|today|best|cheap|download|login|pdf|jobs?|salary|near me|vs)\b", re.I)
 UA = {"User-Agent": "Mozilla/5.0 (lavenders-research)"}

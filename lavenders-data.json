@@ -1,157 +1,162 @@
 {
- "name": "Lavenders (LAVNDR120)",
- "arabicName": "لاڤندرز",
- "updated": "2026-11-02",
- "site": "https://lavndrs120.github.io/",
- "overview": "Lavenders is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS); their real orders feed one live consumer index called LAVNDR120. Lavenders is the brand; LAVNDR120 is the index. Unrelated to lavender plants or oil.",
- "disclaimers": [
-  "No buying, selling or trading of shares on the platform.",
-  "Informational only: not investment advice and no promise of profit or returns.",
-  "Terms and agreements are drafts pending legal review.",
-  "Prices are as of 1 November 2026; the home page is the source of truth."
- ],
- "packages": [
-  {
-   "id": "lava",
-   "name": "Lava",
-   "path": "Join Up",
-   "summary": "Market data, read-only: the index card, monthly archive and most-requested products and services.",
-   "price": "$1.4 per day (24 hours) or $249 per year (365 days)",
-   "seats": null,
-   "url": "https://lavndrs120.github.io/en/lava.html"
+  "name": "Lavenders (LAVNDR120)",
+  "arabicName": "لاڤندرز",
+  "updated": "2026-11-10",
+  "site": "https://lavndrs120.github.io/",
+  "overview": "Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands. Lavenders is a digital market system that brings together 120 businesses and brands in one market; each business runs its own order-management app (OMS), and their real orders feed one live consumer index called LAVNDR120. Lavenders is the brand; LAVNDR120 is the index. Unrelated to lavender plants or oil.",
+  "disclaimers": [
+    "No buying, selling or trading of shares on the platform.",
+    "Informational only: not investment advice and no promise of profit or returns.",
+    "Terms and agreements are drafts pending legal review.",
+    "Prices are as of 1 November 2026; the home page is the source of truth."
+  ],
+  "packages": [
+    {
+      "id": "lava",
+      "name": "Lava",
+      "path": "Join Up",
+      "summary": "Market data, read-only: the index card, monthly archive and most-requested products and services.",
+      "price": "$1.4 per day (24 hours) or $249 per year (365 days)",
+      "seats": null,
+      "url": "https://lavndrs120.github.io/en/lava.html"
+    },
+    {
+      "id": "vindex",
+      "name": "Vindex (Lavenders Oracle)",
+      "path": "Join Up",
+      "summary": "Oracle forecasting report: orders, trend, projection, top activities and locations; monthly, half-yearly and yearly.",
+      "price": "$1,287 per year",
+      "seats": 120,
+      "url": "https://lavndrs120.github.io/en/vindex.html"
+    },
+    {
+      "id": "magma",
+      "name": "Magma",
+      "path": "Join Up",
+      "summary": "Market directory and internal market membership.",
+      "price": "$100 per year",
+      "seats": 500,
+      "url": "https://lavndrs120.github.io/en/magma.html"
+    },
+    {
+      "id": "oms",
+      "name": "OMS",
+      "path": "Economic Movement",
+      "summary": "Order-management system (web and Android) giving a business or brand its own order system.",
+      "price": "$429 for services, $492 for products",
+      "seats": null,
+      "url": "https://lavndrs120.github.io/en/oms.html"
+    },
+    {
+      "id": "reseller",
+      "name": "Reseller",
+      "path": "Economic Movement",
+      "summary": "8 order apps to offer to 8 businesses.",
+      "price": "$1,354.8",
+      "seats": 38,
+      "url": "https://lavndrs120.github.io/en/reseller.html"
+    },
+    {
+      "id": "franchise",
+      "name": "Franchise",
+      "path": "Economic Movement",
+      "summary": "Your own market of 120 businesses and brands with training and ongoing support.",
+      "price": "$2,709 (reservation $90, then installments of $22.58 per business or brand)",
+      "seats": 19,
+      "url": "https://lavndrs120.github.io/en/franchise.html"
+    },
+    {
+      "id": "tycoon",
+      "name": "Tycoon",
+      "path": "Economic Movement",
+      "summary": "Lead a whole field (20 markets) or sector (400 indices).",
+      "price": "$51,480 per field, $1,029,600 per sector",
+      "seats": "1 per field / sector",
+      "url": "https://lavndrs120.github.io/en/tycoon.html"
+    }
+  ],
+  "faq": [
+    {
+      "q": "What is Lavenders?",
+      "a": "Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands. It is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS)."
+    },
+    {
+      "q": "What consumer behaviour does Lavenders reveal?",
+      "a": "Lavenders reads the real orders of the 120 businesses and brands in a market: which products and services are requested most, how order activity moves over time, and how the market behaves as a whole. This is shown as a live consumer index (LAVNDR120), read-only market data (Lava) and a forecasting report on market behaviour (Vindex). It is descriptive information only, with no promise of profit or returns."
+    },
+    {
+      "q": "What is the difference between Lavenders and LAVNDR120?",
+      "a": "Lavenders is the name of the system and the brand. LAVNDR120 is the name of its consumer index."
+    },
+    {
+      "q": "What does the number 120 mean?",
+      "a": "It is the number of businesses and brands in each market."
+    },
+    {
+      "q": "Is Lavenders a trading platform?",
+      "a": "No. There is no buying, selling or trading of shares inside the platform. The index measures the real order activity of the businesses."
+    },
+    {
+      "q": "Is this investment advice or a promise of returns?",
+      "a": "No. The information is descriptive only. There is no promise of profit or returns, and any participation is subject to the platform's terms and agreements."
+    },
+    {
+      "q": "Is Lavenders related to lavender plants?",
+      "a": "No. The name is a brand for a digital market system and has nothing to do with lavender plants or oil."
+    },
+    {
+      "q": "Is there an Android app?",
+      "a": "Yes. It is downloaded directly from the official site, lavndrs120.github.io. It is not currently on Google Play."
+    },
+    {
+      "q": "What do visitors who have not subscribed see?",
+      "a": "Only the real index card. Other screens show demo data for visitors and real data for subscribers."
+    },
+    {
+      "q": "What is OMS?",
+      "a": "An order-management system on web and Android that gives each business or brand (services or products) its own order system."
+    },
+    {
+      "q": "What is Lava?",
+      "a": "The market data itself, read-only. You do not have to be one of the 120 businesses."
+    },
+    {
+      "q": "What is Vindex (the Oracle)?",
+      "a": "A forecasting report on market behaviour for a limited number of members (120)."
+    },
+    {
+      "q": "What is Magma?",
+      "a": "A limited membership (500) to explore the market and its activities through the Magma directory and internal market."
+    },
+    {
+      "q": "What is a Reseller?",
+      "a": "A membership for offering 8 order apps to 8 different businesses, with a limited number of seats (38)."
+    },
+    {
+      "q": "What is a Franchise?",
+      "a": "A franchise to build your own market of 120 businesses and brands, with a limited number of franchise owners (19)."
+    },
+    {
+      "q": "What is a Tycoon?",
+      "a": "An agency to lead a whole field (20 markets) or a whole geographic sector (400 indices), one per field or sector."
+    },
+    {
+      "q": "Can I try before subscribing?",
+      "a": "Yes. Full demo previews of several screens with sample data open from the home page without signing in."
+    },
+    {
+      "q": "How does a business or brand join?",
+      "a": "See the OMS package and the Economic Movement path on the packages page."
+    }
+  ],
+  "pages": {
+    "home": "https://lavndrs120.github.io/",
+    "about": "https://lavndrs120.github.io/en/about.html",
+    "packages": "https://lavndrs120.github.io/en/packages.html",
+    "faq": "https://lavndrs120.github.io/en/faq.html",
+    "llms": "https://lavndrs120.github.io/llms.txt",
+    "llmsFull": "https://lavndrs120.github.io/llms-full.txt",
+    "openapi": "https://lavndrs120.github.io/openapi.json"
   },
-  {
-   "id": "vindex",
-   "name": "Vindex (Lavenders Oracle)",
-   "path": "Join Up",
-   "summary": "Oracle forecasting report: orders, trend, projection, top activities and locations; monthly, half-yearly and yearly.",
-   "price": "$1,287 per year",
-   "seats": 120,
-   "url": "https://lavndrs120.github.io/en/vindex.html"
-  },
-  {
-   "id": "magma",
-   "name": "Magma",
-   "path": "Join Up",
-   "summary": "Market directory and internal market membership.",
-   "price": "$100 per year",
-   "seats": 500,
-   "url": "https://lavndrs120.github.io/en/magma.html"
-  },
-  {
-   "id": "oms",
-   "name": "OMS",
-   "path": "Economic Movement",
-   "summary": "Order-management system (web and Android) giving a business or brand its own order system.",
-   "price": "$429 for services, $492 for products",
-   "seats": null,
-   "url": "https://lavndrs120.github.io/en/oms.html"
-  },
-  {
-   "id": "reseller",
-   "name": "Reseller",
-   "path": "Economic Movement",
-   "summary": "8 order apps to offer to 8 businesses.",
-   "price": "$1,354.8",
-   "seats": 38,
-   "url": "https://lavndrs120.github.io/en/reseller.html"
-  },
-  {
-   "id": "franchise",
-   "name": "Franchise",
-   "path": "Economic Movement",
-   "summary": "Your own market of 120 businesses and brands with training and ongoing support.",
-   "price": "$2,709 (reservation $90, then installments of $22.58 per business or brand)",
-   "seats": 19,
-   "url": "https://lavndrs120.github.io/en/franchise.html"
-  },
-  {
-   "id": "tycoon",
-   "name": "Tycoon",
-   "path": "Economic Movement",
-   "summary": "Lead a whole field (20 markets) or sector (400 indices).",
-   "price": "$51,480 per field, $1,029,600 per sector",
-   "seats": "1 per field / sector",
-   "url": "https://lavndrs120.github.io/en/tycoon.html"
-  }
- ],
- "faq": [
-  {
-   "q": "What is Lavenders?",
-   "a": "Lavenders (Arabic: لاڤندرز) is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS), and their real orders feed one live consumer index called LAVNDR120."
-  },
-  {
-   "q": "What is the difference between Lavenders and LAVNDR120?",
-   "a": "Lavenders is the name of the system and the brand. LAVNDR120 is the name of its consumer index."
-  },
-  {
-   "q": "What does the number 120 mean?",
-   "a": "It is the number of businesses and brands in each market."
-  },
-  {
-   "q": "Is Lavenders a trading platform?",
-   "a": "No. There is no buying, selling or trading of shares inside the platform. The index measures the real order activity of the businesses."
-  },
-  {
-   "q": "Is this investment advice or a promise of returns?",
-   "a": "No. The information is descriptive only. There is no promise of profit or returns, and any participation is subject to the platform's terms and agreements."
-  },
-  {
-   "q": "Is Lavenders related to lavender plants?",
-   "a": "No. The name is a brand for a digital market system and has nothing to do with lavender plants or oil."
-  },
-  {
-   "q": "Is there an Android app?",
-   "a": "Yes. It is downloaded directly from the official site, lavndrs120.github.io. It is not currently on Google Play."
-  },
-  {
-   "q": "What do visitors who have not subscribed see?",
-   "a": "Only the real index card. Other screens show demo data for visitors and real data for subscribers."
-  },
-  {
-   "q": "What is OMS?",
-   "a": "An order-management system on web and Android that gives each business or brand (services or products) its own order system."
-  },
-  {
-   "q": "What is Lava?",
-   "a": "The market data itself, read-only. You do not have to be one of the 120 businesses."
-  },
-  {
-   "q": "What is Vindex (the Oracle)?",
-   "a": "A forecasting report on market behaviour for a limited number of members (120)."
-  },
-  {
-   "q": "What is Magma?",
-   "a": "A limited membership (500) to explore the market and its activities through the Magma directory and internal market."
-  },
-  {
-   "q": "What is a Reseller?",
-   "a": "A membership for offering 8 order apps to 8 different businesses, with a limited number of seats (38)."
-  },
-  {
-   "q": "What is a Franchise?",
-   "a": "A franchise to build your own market of 120 businesses and brands, with a limited number of franchise owners (19)."
-  },
-  {
-   "q": "What is a Tycoon?",
-   "a": "An agency to lead a whole field (20 markets) or a whole geographic sector (400 indices), one per field or sector."
-  },
-  {
-   "q": "Can I try before subscribing?",
-   "a": "Yes. Full demo previews of several screens with sample data open from the home page without signing in."
-  },
-  {
-   "q": "How does a business or brand join?",
-   "a": "See the OMS package and the Economic Movement path on the packages page."
-  }
- ],
- "pages": {
-  "home": "https://lavndrs120.github.io/",
-  "about": "https://lavndrs120.github.io/en/about.html",
-  "packages": "https://lavndrs120.github.io/en/packages.html",
-  "faq": "https://lavndrs120.github.io/en/faq.html",
-  "llms": "https://lavndrs120.github.io/llms.txt",
-  "llmsFull": "https://lavndrs120.github.io/llms-full.txt",
-  "openapi": "https://lavndrs120.github.io/openapi.json"
- }
+  "coreMessage": "Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands."
 }

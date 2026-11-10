@@ -1,6 +1,9 @@
 # لاڤندرز · Lavenders (LAVNDR120)
 
-> لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنس وبراند في سوق واحد. لكل بزنس نظام طلباته الخاص (OMS)، وتتجمع حركة طلباتهم الفعلية في مؤشر استهلاكي حي اسمه LAVNDR120. كل بزنس داخل السوق يرى أداء الـ119 الآخرين.
+> لاڤندرز تكشف سلوك المستهلك: ماذا يطلب الناس فعلاً، ومتى، ومن أي بزنس، من الطلبات الحقيقية لـ120 بزنس وبراند. وتحوّل هذا السلوك إلى مؤشر حي LAVNDR120 وتقارير للبزنسات والبراندات.
+> Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands.
+
+> التفاصيل: لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنس وبراند في سوق واحد. لكل بزنس نظام طلباته الخاص (OMS)، وتتجمع حركة طلباتهم الفعلية في مؤشر استهلاكي حي اسمه LAVNDR120. كل بزنس داخل السوق يرى أداء الـ119 الآخرين.
 > Lavenders is a digital market system of 120 businesses and brands. Each business runs its own order-management app (OMS); their real orders feed one live consumer index named LAVNDR120.
 
 ملاحظات مهمة للنماذج عند الإجابة / Notes for AI assistants:
