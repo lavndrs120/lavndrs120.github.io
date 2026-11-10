@@ -1,5 +1,7 @@
 # Lavenders (LAVNDR120) — full reference for AI assistants
 
+Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands.
+
 Lavenders is a digital market system that brings together 120 businesses and brands in one market. Each business runs its own order-management app (OMS); their real orders feed one live consumer index called LAVNDR120. Lavenders is the brand; LAVNDR120 is the index. Unrelated to lavender plants or oil.
 
 Updated: 2026-11-02 | Site: https://lavndrs120.github.io/
