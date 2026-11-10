@@ -25,7 +25,7 @@ except Exception: pass
 cls = 'pos' if ch >= 0 else 'neg'; arrow = '▲' if ch >= 0 else '▼'
 chabs = str(x.get('change') if x.get('change') is not None else '0.00').lstrip('+-'); p = pct(x.get('changePercent'))
 ts = (d.get('timestamp') or '')[:16].replace('T', ' ')
-about = 'لاڤندرز 120 — منظومة سوق من 120 بزنس وبراند لكل سوق. مؤشر استهلاكي حي يتحرك مع طلبات البزنسات الحقيقية، وكل بزنس يمتلك نظام طلباته الخاص ويتابع أداء الـ119 الآخرين.'
+about = 'لاڤندرز تكشف سلوك المستهلك: ماذا يطلب الناس فعلاً، ومتى، ومن أي بزنس، من الطلبات الحقيقية لـ120 بزنس وبراند، ويظهر في مؤشر استهلاكي حي LAVNDR120.'
 title = 'LAVNDR120 · $%s %s %s%% — صافي قيمة الأصول' % (nav, arrow, p)
 desc = 'صافي قيمة الأصول الآن $%s (%s %s%%). %s' % (nav, arrow, p, about)
 e = lambda t: html.escape(t, quote=True)
@@ -57,6 +57,19 @@ def rep(s, name, body):
     pat = re.compile(r'(<!--%s_START-->).*?(<!--%s_END-->)' % (name, name), re.S)
     assert pat.search(s), name
     return pat.sub(lambda m: m.group(1) + '\n' + body + m.group(2), s, count=1)
+# core message: consumer behaviour (idempotent text replacements on the static parts of the page)
+CORE_REPL = [
+    ("لاڤندرز منظومة سوق رقمية تجمع 120 بزنس وبراند في سوق واحد، لكل بزنس نظام طلباته الخاص، ومؤشرها الاستهلاكي LAVNDR120 يتحرك لحظة بلحظة مع طلباتهم الفعلية.",
+     "لاڤندرز تكشف سلوك المستهلك: ماذا يطلب الناس فعلاً، ومتى، ومن أي بزنس، من الطلبات الحقيقية لـ120 بزنس وبراند، وتحوّله إلى مؤشر استهلاكي حي LAVNDR120 وتقارير للبزنسات والبراندات."),
+    ("لاڤندرز (Lavenders) — LAVNDR120: مؤشر استهلاكي لسوق من 120 بزنس وبراند",
+     "لاڤندرز (Lavenders) — LAVNDR120: كشف سلوك المستهلك من الطلبات الحقيقية لـ120 بزنس وبراند"),
+    ("لاڤندرز (Lavenders) منظومة سوق رقمية تجمع 120 بزنس وبراند، ومؤشرها الاستهلاكي LAVNDR120 يتحرك مع طلباتهم الفعلية.",
+     "لاڤندرز (Lavenders) تكشف سلوك المستهلك من الطلبات الحقيقية لـ120 بزنس وبراند، ومؤشرها الاستهلاكي LAVNDR120 يتحرك مع طلباتهم الفعلية."),
+    ("Lavenders — LAVNDR120: a consumer index for a market of 120 businesses and brands",
+     "Lavenders — LAVNDR120: revealing consumer behaviour from the real orders of 120 businesses and brands"),
+]
+for _old, _new in CORE_REPL:
+    s = s.replace(_old, _new)
 n = rep(rep(s, 'LIVE_META', meta), 'LIVE_CARD', card)
 if n != s:
     open(PATH, 'w', encoding='utf-8').write(n); print('updated', nav)
