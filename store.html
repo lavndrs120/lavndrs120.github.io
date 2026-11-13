@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>المتجر</title>
+<style>
+:root{--gold:#E6C46A;--text:#fff;--dim:rgba(255,255,255,.72);--gb:rgba(255,255,255,.2)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{background:#0a0a10;color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.6;overflow-x:hidden}
+#bg{position:fixed;inset:-30px;z-index:-2;background:#0a0a10 center/cover no-repeat;filter:blur(18px) brightness(.55);transform:scale(1.05)}
+#shade{position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.45))}
+.wrap{max-width:520px;margin:0 auto;padding:22px 16px 60px;min-height:100vh}
+h1{font-size:28px;text-align:center;margin:18px 0 6px;font-weight:800;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.tag{text-align:center;font-size:12px;color:var(--dim);margin-bottom:22px}
+.note{background:rgba(230,196,106,.16);border:1px solid rgba(230,196,106,.45);color:var(--gold);font-size:12px;text-align:center;padding:8px 12px;border-radius:12px;margin-bottom:16px}
+.grid{display:flex;flex-direction:column;gap:12px}
+.itm{display:flex;align-items:center;gap:14px;width:100%;text-align:right;color:#fff;font:inherit;font-size:17px;font-weight:700;background:rgba(255,255,255,.12);border:1px solid var(--gb);border-radius:18px;padding:10px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.itm:active{transform:scale(.98)}
+.itm img{width:68px;height:68px;border-radius:14px;object-fit:cover;background:rgba(255,255,255,.1);flex:none}
+.itm span{flex:1}
+.panel{background:rgba(15,15,24,.72);border:1px solid var(--gb);border-radius:20px;padding:16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.hero{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;background:rgba(255,255,255,.08);margin-bottom:12px}
+.price{font-size:22px;font-weight:800;color:var(--gold);margin:6px 0}
+.desc{color:var(--dim);font-size:14px;white-space:pre-wrap}
+label{display:block;font-size:12px;color:var(--dim);margin:12px 0 4px}
+input,textarea{width:100%;background:rgba(255,255,255,.1);border:1px solid var(--gb);border-radius:12px;color:#fff;font:inherit;font-size:15px;padding:11px 12px;outline:none}
+input:focus,textarea:focus{border-color:var(--gold)}
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:13px;margin-top:14px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#C9A84C,#E6C46A);color:#1a1405}
+.btn.sec{background:rgba(255,255,255,.12);color:#fff;border:1px solid var(--gb)}
+.btn:disabled{opacity:.5}
+.qty{display:flex;align-items:center;justify-content:center;gap:18px;margin:12px 0}
+.qty button{width:42px;height:42px;border-radius:50%;border:1px solid var(--gb);background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer}
+.qty b{font-size:20px;min-width:30px;text-align:center}
+.pay{background:rgba(255,255,255,.08);border:1px dashed var(--gb);border-radius:12px;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin-top:8px}
+.msg{font-size:13px;margin-top:12px;padding:9px 12px;border-radius:10px;display:none}
+.msg.err{display:block;background:rgba(244,63,94,.2);color:#ffd0d8}
+.center{text-align:center;padding:50px 10px;color:var(--dim)}
+.ok{font-size:52px;text-align:center}
+.foot{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:26px}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="shade"></div>
+<div class="wrap" id="root"><div class="center">جاري التحميل…</div></div>
+<script>
+const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
+const APP=(new URLSearchParams(location.search).get('app')||'').trim();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'$'+(Math.round(Number(n)*1000)/1000);
+let ST=null,CUR=null,QTY=1;
+async function get(action,p){
+  try{const q=new URLSearchParams(Object.assign({action:action,app:APP},p||{}));const r=await fetch(WORKER_URL+'?'+q);return await r.json()}
+  catch(e){return {error:'فشل الاتصال — تحقق من الإنترنت'}}
+}
+async function post(body){
+  try{const r=await fetch(WORKER_URL+'?action='+body.action,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});return await r.json()}
+  catch(e){return {error:'فشل الاتصال — تحقق من الإنترنت'}}
+}
+function setBg(u){if(u){const i=new Image();i.onload=()=>{$('bg').style.backgroundImage='url("'+u+'")'};i.src=u}}
+function gone(m){$('root').innerHTML='<div class="center"><div style="font-size:40px">🛍️</div><p style="margin-top:10px">'+esc(m||'هذا المتجر غير متاح حالياً')+'</p></div>'}
+async function init(){
+  if(!/^APP-[0-9A-F]{8}$/.test(APP)){gone('رابط المتجر غير صحيح');return}
+  const j=await get('appb_store');
+  if(j.error==='not_found'){gone('المتجر غير موجود');return}
+  if(j.error){$('root').innerHTML='<div class="center">'+esc(j.error)+'<button class="btn sec" onclick="init()">إعادة المحاولة</button></div>';return}
+  if(j.status==='locked'){gone(j.message);return}
+  ST=j;document.title=j.name;setBg(j.bizImage);home();
+}
+function home(){
+  CUR=null;QTY=1;
+  let h='<h1>'+esc(ST.name)+'</h1><div class="tag">'+(ST.kind==='products'?'اختر المنتج':'اختر الخدمة')+'</div>';
+  if(ST.trialNote)h+='<div class="note">'+esc(ST.trialNote)+'</div>';
+  h+='<div class="grid">'+ST.items.map(it=>'<button class="itm" onclick="openItem('+it.idx+')"><img src="'+esc(it.imageUrl)+'" alt="" onerror="this.style.visibility=\'hidden\'"><span>'+esc(it.name)+'</span></button>').join('')+'</div>';
+  h+='<div class="foot">مدعوم من لاڤندرز</div>';
+  $('root').innerHTML=h;window.scrollTo(0,0);
+}
+async function openItem(i){
+  $('root').innerHTML='<div class="center">جاري التحميل…</div>';
+  const j=await get('appb_item',{idx:i});
+  if(j.error){gone(j.error==='not_found'?'الصنف غير متاح':j.error);return}
+  CUR=j;QTY=1;renderItem();
+}
+function renderItem(){
+  const it=CUR;
+  let h='<button class="btn sec" style="margin:0 0 12px;width:auto;padding:8px 14px;font-size:13px" onclick="home()">→ رجوع</button><div class="panel">';
+  h+='<img class="hero" src="'+esc(it.imageUrl)+'" alt="" onerror="this.style.visibility=\'hidden\'"><h1 style="font-size:22px;margin:0;text-align:right">'+esc(it.name)+'</h1>';
+  if(it.packLabel)h+='<div class="tag" style="text-align:right;margin:2px 0">'+esc(it.packLabel)+(it.packQty>1?' ('+esc(it.packQty)+' وحدات)':'')+'</div>';
+  h+='<div class="price">'+money(it.value)+'</div>';
+  if(it.desc)h+='<div class="desc">'+esc(it.desc)+'</div>';
+  h+='<div class="qty"><button onclick="chg(-1)">−</button><b id="q">'+QTY+'</b><button onclick="chg(1)">+</button></div>';
+  h+='<div class="price" style="text-align:center" id="tot">'+money(it.value*QTY)+'</div>';
+  h+='<button class="btn" onclick="checkout()">متابعة للدفع</button></div>';
+  $('root').innerHTML=h;window.scrollTo(0,0);
+}
+function chg(d){QTY=Math.min(10,Math.max(1,QTY+d));$('q').textContent=QTY;$('tot').textContent=money(CUR.value*QTY)}
+async function checkout(){
+  $('root').innerHTML='<div class="center">جاري التحميل…</div>';
+  const c=await get('appb_checkout',{idx:CUR.idx,qty:QTY});
+  if(c.error){gone(c.error==='not_found'?'الصنف غير متاح':c.error);return}
+  let h='<button class="btn sec" style="margin:0 0 12px;width:auto;padding:8px 14px;font-size:13px" onclick="renderItem()">→ رجوع</button><div class="panel">';
+  h+='<h1 style="font-size:20px;margin:0;text-align:right">'+esc(c.item)+' × '+esc(c.qty)+'</h1><div class="price">الإجمالي '+money(c.total)+'</div>';
+  if(c.payInfo)h+='<label>حوّل المبلغ ثم اكتب رقم العملية</label><div class="pay">'+esc(c.payInfo)+'</div>';
+  h+='<label>الاسم</label><input id="cn" maxlength="60" autocomplete="name">';
+  h+='<label>رقم الهاتف</label><input id="cp" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="+249…">';
+  h+='<label>المدينة / الموقع</label><input id="cc" maxlength="40">';
+  h+='<label>رقم عملية الدفع</label><input id="ct" maxlength="80" dir="ltr">';
+  h+='<div class="msg" id="em"></div><button class="btn" id="sb" onclick="submitOrder()">إرسال الطلب</button></div>';
+  $('root').innerHTML=h;window.scrollTo(0,0);
+}
+async function submitOrder(){
+  const em=$('em');em.className='msg';$('sb').disabled=true;
+  const j=await post({action:'appb_order',app:APP,idx:CUR.idx,qty:QTY,name:$('cn').value,phone:$('cp').value,city:$('cc').value,txnRef:$('ct').value});
+  if(j.error){$('sb').disabled=false;em.className='msg err';em.textContent=j.error;return}
+  $('root').innerHTML='<div class="panel center"><div class="ok">✅</div><h1 style="font-size:20px;margin-top:8px">'+esc(j.message||'وصل طلبك')+'</h1><p style="margin-top:8px">رقم الطلب: <span dir="ltr">'+esc(j.orderId)+'</span></p><p>الإجمالي '+money(j.total)+'</p><button class="btn" onclick="home()">العودة للمتجر</button></div>';
+}
+init();
+</script>
+</body>
+</html>
