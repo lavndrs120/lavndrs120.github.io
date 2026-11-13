@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>المتجر</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--gold:#E6C46A;--text:#fff;--dim:rgba(255,255,255,.72);--gb:rgba(255,255,255,.2)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0a10;color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.6;overflow-x:hidden;min-height:100vh}
+#bg{position:fixed;inset:-30px;z-index:-2;background:#0a0a10 center/cover no-repeat;filter:blur(18px) brightness(.55);transform:scale(1.05)}
+#shade{position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.45))}
+.wrap{max-width:520px;margin:0 auto;padding:18px 16px 60px;min-height:100vh}
+.top{display:flex;justify-content:flex-end}
+.lang{background:rgba(255,255,255,.14);border:1px solid var(--gb);color:#fff;border-radius:10px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+h1{font-size:28px;text-align:center;margin:12px 0 6px;font-weight:800;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.tag{text-align:center;font-size:13px;color:var(--dim);margin-bottom:18px}
+.note{background:rgba(230,196,106,.16);border:1px solid rgba(230,196,106,.45);color:var(--gold);font-size:12px;text-align:center;padding:8px 12px;border-radius:12px;margin-bottom:16px}
+.grid{display:flex;flex-direction:column;gap:12px}
+.itm{border:1px solid var(--gb);border-radius:18px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);overflow:hidden}
+.itm.open{background:rgba(15,15,24,.72)}
+.hd{display:flex;align-items:center;gap:14px;width:100%;text-align:start;color:#fff;font:inherit;font-size:17px;font-weight:700;background:none;border:none;padding:10px;cursor:pointer}
+.hd img{width:68px;height:68px;border-radius:14px;object-fit:cover;background:rgba(255,255,255,.1);flex:none}
+.hd span{flex:1}.hd i{font-style:normal;opacity:.6;transition:transform .2s}
+.itm.open .hd i{transform:rotate(180deg)}
+.bd{display:none;padding:4px 14px 16px}
+.itm.open .bd{display:block}
+.hero{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;background:rgba(255,255,255,.08);margin-bottom:10px}
+.price{font-size:22px;font-weight:800;color:var(--gold);margin:4px 0}
+.desc{color:var(--dim);font-size:14px;white-space:pre-wrap}
+.pk{font-size:12px;color:var(--dim)}
+label{display:block;font-size:12px;color:var(--dim);margin:12px 0 4px}
+input{width:100%;background:rgba(255,255,255,.1);border:1px solid var(--gb);border-radius:12px;color:#fff;font:inherit;font-size:15px;padding:11px 12px;outline:none}
+input:focus{border-color:var(--gold)}
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:13px;margin-top:14px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#C9A84C,#E6C46A);color:#1a1405}
+.btn.sec{background:rgba(255,255,255,.12);color:#fff;border:1px solid var(--gb);margin-top:8px;padding:9px;font-size:14px}
+.btn:disabled{opacity:.5}
+.qty{display:flex;align-items:center;justify-content:center;gap:18px;margin:10px 0}
+.qty button{width:40px;height:40px;border-radius:50%;border:1px solid var(--gb);background:rgba(255,255,255,.1);color:#fff;font-size:22px;cursor:pointer}
+.qty b{font-size:20px;min-width:30px;text-align:center}
+.pay{background:rgba(255,255,255,.08);border:1px dashed var(--gb);border-radius:12px;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin-top:8px}
+.map{height:210px;border-radius:12px;margin-top:8px;border:1px solid var(--gb)}
+.msg{font-size:13px;margin-top:12px;padding:9px 12px;border-radius:10px;display:none}
+.msg.err{display:block;background:rgba(244,63,94,.2);color:#ffd0d8}
+.center{text-align:center;padding:50px 10px;color:var(--dim)}
+.foot{text-align:center;font-size:11px;color:rgba(255,255,255,.4);margin-top:26px}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+#ov.on{display:flex}
+.card{background:#14141f;border:1px solid var(--gb);border-radius:20px;padding:20px;width:100%;max-width:380px;text-align:center}
+.otp{font-size:26px;letter-spacing:8px;text-align:center;direction:ltr}
+.okk{font-size:52px}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="shade"></div>
+<div class="wrap"><div class="top"><button class="lang" id="lg" onclick="toggleLang()">EN</button></div><div id="root"><div class="center">…</div></div></div>
+<div id="ov"><div class="card" id="ovc"></div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
+const OKURL=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>'$'+(Math.round(Number(n)*1000)/1000);
+const T={ar:{pickP:'اختر المنتج',pickS:'اختر الخدمة',pack:'وحدات',name:'الاسم',phone:'رقم الهاتف',email:'البريد الإلكتروني (لاستلام رمز التحقق)',loc:'الموقع',locPh:'اضغط على الخريطة أو اكتب العنوان',gps:'📍 موقعي الحالي',time:'الوقت المفضل (اختياري)',txn:'رقم عملية الدفع',pay:'حوّل المبلغ ثم اكتب رقم العملية',total:'الإجمالي',send:'إرسال الطلب',code:'أدخل رمز التحقق المرسل إلى بريدك',verify:'تأكيد',cancel:'إلغاء',done:'تم استلام طلبك',oid:'رقم الطلب',back:'العودة للمتجر',gone:'هذا المتجر غير متاح حالياً',bad:'رابط المتجر غير صحيح',net:'فشل الاتصال — تحقق من الإنترنت',retry:'إعادة المحاولة',by:'مدعوم من لاڤندرز',sent:'تم إرسال الرمز إلى'},
+ en:{pickP:'Choose a product',pickS:'Choose a service',pack:'units',name:'Name',phone:'Phone',email:'Email (to receive the verification code)',loc:'Location',locPh:'Tap the map or type the address',gps:'📍 My location',time:'Preferred time (optional)',txn:'Payment reference',pay:'Transfer the amount then enter the reference',total:'Total',send:'Send order',code:'Enter the code sent to your email',verify:'Confirm',cancel:'Cancel',done:'Your order was received',oid:'Order ID',back:'Back to store',gone:'This store is currently unavailable',bad:'Invalid store link',net:'Connection failed — check your internet',retry:'Retry',by:'Powered by LAVNDR',sent:'Code sent to'}};
+let LG=localStorage.getItem('st_lang')||'ar',ST=null,OPEN=-1,QTY=1,SESSION='',MAP=null,MK=null,LAT='',LON='';
+const t=k=>T[LG][k];
+function toggleLang(){LG=LG==='ar'?'en':'ar';try{localStorage.setItem('st_lang',LG)}catch(e){}applyLang();if(ST)home()}
+function applyLang(){document.documentElement.lang=LG;document.documentElement.dir=LG==='ar'?'rtl':'ltr';$('lg').textContent=LG==='ar'?'EN':'عربي'}
+let cbN=0;
+function call(params){return new Promise(res=>{
+  const cb='__cb'+(++cbN)+'_'+Date.now(),s=document.createElement('script');let done=false;
+  const fin=r=>{if(done)return;done=true;clearTimeout(tm);delete window[cb];s.remove();res(r)};
+  window[cb]=fin;const tm=setTimeout(()=>fin({error:t('net')}),25000);
+  s.onerror=()=>fin({error:t('net')});
+  s.src=BACK+'?'+new URLSearchParams(Object.assign({callback:cb},params)).toString();document.head.appendChild(s);
+})}
+function setBg(u){if(u){const i=new Image();i.onload=()=>{$('bg').style.backgroundImage='url("'+u+'")'};i.src=u}}
+function gone(m){$('root').innerHTML='<div class="center"><div style="font-size:40px">🛍️</div><p style="margin-top:10px">'+esc(m||t('gone'))+'</p></div>'}
+async function init(){
+  applyLang();
+  if(!OKURL){gone(t('bad'));return}
+  const j=await call({action:'config'});
+  if(j.error){$('root').innerHTML='<div class="center">'+esc(j.error)+'<button class="btn sec" onclick="init()">'+t('retry')+'</button></div>';return}
+  if(j.status==='locked'){gone(j.message);return}
+  ST=j;document.title=j.name;setBg(j.bizImage);home();
+}
+function home(){
+  OPEN=-1;QTY=1;if(MAP){MAP.remove();MAP=null;MK=null}LAT=LON='';
+  let h='<h1>'+esc(ST.name)+'</h1><div class="tag">'+t(ST.kind==='products'?'pickP':'pickS')+'</div>';
+  if(ST.trialNote)h+='<div class="note">'+esc(ST.trialNote)+'</div>';
+  h+='<div class="grid">'+ST.items.map(it=>'<div class="itm" id="it'+it.idx+'"><button class="hd" onclick="toggle('+it.idx+')"><img src="'+esc(it.imageUrl)+'" alt="" onerror="this.style.visibility=\'hidden\'"><span>'+esc(it.name)+'</span><i>⌄</i></button><div class="bd" id="bd'+it.idx+'"></div></div>').join('')+'</div>';
+  h+='<div class="foot">'+t('by')+'</div>';
+  $('root').innerHTML=h;window.scrollTo(0,0);
+}
+function toggle(i){
+  if(OPEN===i){close_();return}
+  close_();OPEN=i;QTY=1;LAT=LON='';
+  const it=ST.items[i];$('it'+i).classList.add('open');
+  let h='<img class="hero" src="'+esc(it.imageUrl)+'" alt="" onerror="this.style.display=\'none\'">';
+  if(it.packLabel)h+='<div class="pk">'+esc(it.packLabel)+(it.packQty>1?' ('+esc(it.packQty)+' '+t('pack')+')':'')+'</div>';
+  h+='<div class="price">'+money(it.value)+'</div>';
+  if(it.desc)h+='<div class="desc">'+esc(it.desc)+'</div>';
+  h+='<div class="qty"><button onclick="chg(-1)">−</button><b id="q">1</b><button onclick="chg(1)">+</button></div>';
+  h+='<div class="price" style="text-align:center">'+t('total')+' <span id="tot">'+money(it.value)+'</span></div>';
+  if(ST.payInfo)h+='<label>'+t('pay')+'</label><div class="pay">'+esc(ST.payInfo)+'</div>';
+  h+='<label>'+t('txn')+'</label><input id="ct" maxlength="80" dir="ltr">';
+  h+='<label>'+t('name')+'</label><input id="cn" maxlength="60" autocomplete="name">';
+  h+='<label>'+t('phone')+'</label><input id="cp" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="+249…">';
+  h+='<label>'+t('email')+'</label><input id="ce" type="email" dir="ltr" autocomplete="email">';
+  h+='<label>'+t('loc')+'</label><input id="cl" maxlength="120" placeholder="'+esc(t('locPh'))+'"><button class="btn sec" onclick="gps()">'+t('gps')+'</button><div class="map" id="map"></div>';
+  h+='<label>'+t('time')+'</label><input id="ctm" maxlength="30">';
+  h+='<div class="msg" id="em"></div><button class="btn" id="sb" onclick="submitOrder()">'+t('send')+'</button>';
+  $('bd'+i).innerHTML=h;
+  initMap();
+  setTimeout(()=>$('it'+i).scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+function close_(){if(OPEN>=0){const e=$('it'+OPEN);if(e)e.classList.remove('open');const b=$('bd'+OPEN);if(b)b.innerHTML=''}if(MAP){MAP.remove();MAP=null;MK=null}OPEN=-1}
+function chg(d){QTY=Math.min(10,Math.max(1,QTY+d));$('q').textContent=QTY;$('tot').textContent=money(ST.items[OPEN].value*QTY)}
+function initMap(){
+  if(!window.L){return}
+  const Lf=window.L;MAP=Lf.map('map').setView([15.5,32.55],11);
+  Lf.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP);
+  MAP.on('click',e=>pin(e.latlng.lat,e.latlng.lng));
+}
+function pin(a,o){LAT=a;LON=o;if(MAP){if(MK)MK.setLatLng([a,o]);else MK=window.L.marker([a,o]).addTo(MAP)}const c=$('cl');if(c&&!c.value.trim()||c&&/^-?\d+\.\d+, ?-?\d+\.\d+$/.test(c.value))c.value=a.toFixed(5)+', '+o.toFixed(5)}
+function gps(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{pin(p.coords.latitude,p.coords.longitude);if(MAP)MAP.setView([p.coords.latitude,p.coords.longitude],15)},()=>{},{timeout:10000})}
+function payload(){return {idx:OPEN,qty:QTY,name:$('cn').value,phone:$('cp').value,email:$('ce').value,location:$('cl').value,time:$('ctm').value,txnRef:$('ct').value,lat:LAT,lon:LON}}
+function newSession(){const a=new Uint8Array(18);crypto.getRandomValues(a);return Array.from(a,b=>('0'+b.toString(16)).slice(-2)).join('')}
+async function submitOrder(){
+  const em=$('em');em.className='msg';$('sb').disabled=true;SESSION=newSession();
+  const j=await call(Object.assign({action:'send',session:SESSION},payload()));
+  $('sb').disabled=false;
+  if(j.error){em.className='msg err';em.textContent=j.error;return}
+  if(j.status==='sent')showOtp(j,$('ce').value);else showDone(j);
+}
+function showOtp(j,mail){
+  $('ovc').innerHTML='<h3>'+esc(t('code'))+'</h3><p class="pk" style="margin:6px 0 12px" dir="ltr">'+esc(mail)+'</p><input class="otp" id="co" inputmode="numeric" maxlength="6" autocomplete="one-time-code"><div class="msg" id="oe"></div><button class="btn" id="ob" onclick="verify()">'+t('verify')+'</button><button class="btn sec" onclick="$(\'ov\').classList.remove(\'on\')">'+t('cancel')+'</button>';
+  $('ov').classList.add('on');setTimeout(()=>$('co').focus(),50);
+}
+async function verify(){
+  const oe=$('oe');oe.className='msg';$('ob').disabled=true;
+  const j=await call({action:'verify',session:SESSION,otp:$('co').value});
+  $('ob').disabled=false;
+  if(j.error){oe.className='msg err';oe.textContent=j.error;return}
+  $('ov').classList.remove('on');showDone(j);
+}
+function showDone(j){
+  if(MAP){MAP.remove();MAP=null;MK=null}
+  $('root').innerHTML='<div class="card" style="margin:60px auto"><div class="okk">✅</div><h2 style="margin-top:8px">'+esc(t('done'))+'</h2><p style="margin-top:8px">'+esc(t('oid'))+': <span dir="ltr">'+esc(j.orderId)+'</span></p><p>'+esc(t('total'))+' '+money(j.total)+'</p><button class="btn" onclick="home()">'+t('back')+'</button></div>';
+  window.scrollTo(0,0);
+}
+init();
+</script>
+</body>
+</html>
