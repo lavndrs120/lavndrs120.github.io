@@ -208,6 +208,16 @@ button {
     <div id="brList"><div class="empty">جاري التحميل...</div></div>
   </div>
 
+  <!-- متاجر المستخدمين (بناء التطبيقات) -->
+  <div class="glass section">
+    <h2>🛍️ طلبات إدراج شيت متجر في المؤشر <span class="badge" id="asrCount">0</span></h2>
+    <div id="asrList"><div class="empty">جاري التحميل...</div></div>
+  </div>
+  <div class="glass section">
+    <h2>🏪 متاجر المستخدمين (بناء التطبيقات) <span class="badge" id="abCount">0</span></h2>
+    <div id="abList"><div class="empty">جاري التحميل...</div></div>
+  </div>
+
   <!-- الاشتراكات الفعّالة + إلغاء عضوية محددة -->
   <div class="glass section">
     <h2>✅ الاشتراكات الفعّالة <span class="badge" id="activeSubCount">0</span></h2>
@@ -358,7 +368,7 @@ async function boot() {
       const j = await res.json(); m.textContent = j.error ? ('❌ ' + j.error) : ('✅ ' + (j.message || 'تم'));
     } catch (e) { m.textContent = '❌ تعذّر الاتصال'; }
   };
-  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadBusinessRequests(); loadDonations(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
+  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadBusinessRequests(); loadAppSheetReqs(); loadAppBuilds(); loadDonations(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
 }
 function redirectToDashboard(msg) {
   try { sessionStorage.setItem('lavndr_flash', msg || ''); sessionStorage.removeItem('lavndr_stay_dash'); } catch (e) {}
@@ -394,7 +404,7 @@ async function loadApEarnings() {
 // السقف الخام (baseMax)، بنوضح السبب تحت الشريط.
 // ── ترقيم البطاقات: كل بطاقة تعرض 6 صفوف، وأي زيادة تُقسَّم على صفحات (أزرار أرقام أسفل البطاقة) ──
 const PAGE_SIZE = 6;
-const PAGED_LISTS = ['stageValList', 'waitlistList', 'omsList', 'brList', 'fundList', 'activeSubList', 'subsList', 'franchiseList', 'participantsList', 'auditLogList', 'businessListEl', 'entitlementsList'];
+const PAGED_LISTS = ['stageValList', 'waitlistList', 'omsList', 'brList', 'asrList', 'abList', 'fundList', 'activeSubList', 'subsList', 'franchiseList', 'participantsList', 'auditLogList', 'businessListEl', 'entitlementsList'];
 const pageState = {};
 function renderPager(id) {
   const el = document.getElementById(id); if (!el) return;
@@ -586,6 +596,7 @@ const NOTIF_DEFS = [
   { a: 'admin_oms_members',           t: 'أعضاء OMS مفعّلون بانتظار ربط الشيت',      el: 'omsList',  n: d => (d.rows || []).filter(r => r.status === 'active' && !r.linked).length },
   { a: 'admin_donations',          t: 'تبرعات الشهادات (طلبات/صفقات جارية)',       el: 'donAdminList', n: d => (d.openRequests || []).length + (d.offers || []).filter(o => o.status === 'pending' || o.status === 'accepted').length },
   { a: 'admin_business_requests',     t: 'طلبات بزنسات (اتفاقية / شهادة ذهبية)',      el: 'brList',   n: d => (d.rows || []).filter(r => r.status === 'submitted' || r.status === 'pending').length },
+  { a: 'admin_appb_sheet_requests', t: 'طلبات إدراج شيت متجر في المؤشر', el: 'asrList', n: d => (d.rows || []).filter(r => r.status === 'pending').length },
   { a: 'admin_funding_forms',         t: 'نماذج اعتماد تمويل/امتياز مقدَّمة',          el: 'fundList', n: d => (d.rows || []).filter(r => r.status === 'submitted').length },
   { a: 'admin_pending_subscriptions', t: 'اشتراكات بانتظار المراجعة',                 el: 'subsList', n: d => (d.rows || []).filter(r => r.state === 'review').length },
   { a: 'admin_verification',          t: 'بزنسات بانتظار التوثيق',                    el: 'vfList',   n: d => (d.rows || []).filter(r => r.pending).length },
@@ -792,6 +803,41 @@ async function loadBusinessRequests() {
     el.querySelectorAll('[data-br]').forEach(b => b.onclick = () => decideBusinessRequest(rows[+b.dataset.br], b.dataset.d));
     el.querySelectorAll('[data-form]').forEach(l => l.onclick = (ev) => { ev.preventDefault(); const r = rows[+l.dataset.form]; AgreementForm.open({ sheetId: r.sheetId, name: r.name }); });
   } catch (e) { }
+}
+async function adminPost(body) {
+  const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({}, body, { token: AUTH_TOKEN })) });
+  return res.json();
+}
+async function loadAppSheetReqs() {
+  const el = document.getElementById('asrList');
+  try {
+    const data = await authGet('admin_appb_sheet_requests'), rows = data.rows || [];
+    document.getElementById('asrCount').textContent = rows.filter(r => r.status === 'pending').length;
+    if (!rows.length) { el.innerHTML = '<div class="empty">لا توجد طلبات</div>'; return; }
+    el.innerHTML = rows.slice(0, 50).map((r, i) => `<div class="row"><div class="info"><div class="email">${esc(r.name)} <span style="opacity:.6">(${esc(r.email)})</span></div>
+      <div class="meta" dir="ltr" style="word-break:break-all">${esc(r.sheetId)} · ${esc(r.status)}</div></div><div class="btns">${r.status === 'pending' ? `<button class="approve" data-asr="${i}" data-d="accepted">قبول وإدراج</button><button class="reject" data-asr="${i}" data-d="rejected">رفض</button>` : ''}</div></div>`).join('');
+    el.querySelectorAll('[data-asr]').forEach(b => b.onclick = async () => {
+      const r = rows[+b.dataset.asr]; b.disabled = true;
+      const j = await adminPost({ action: 'admin_appb_sheet_decide', row: r.row, decision: b.dataset.d });
+      showToast(j.error ? j.error : '✓ تم'); loadAppSheetReqs();
+    });
+  } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
+}
+async function loadAppBuilds() {
+  const el = document.getElementById('abList');
+  try {
+    const data = await authGet('admin_appb_list'), rows = data.rows || [];
+    document.getElementById('abCount').textContent = rows.length;
+    if (!rows.length) { el.innerHTML = '<div class="empty">لا توجد متاجر</div>'; return; }
+    el.innerHTML = rows.slice(0, 100).map((r, i) => `<div class="row"><div class="info"><div class="email">${esc(r.name)} <span style="opacity:.6">(${esc(r.owner)})</span></div>
+      <div class="meta">${esc(r.appId)} · ${esc(r.status)}</div></div><div class="btns"><button class="reject" data-ab="${i}">🗑 حذف</button></div></div>`).join('');
+    el.querySelectorAll('[data-ab]').forEach(b => b.onclick = async () => {
+      const r = rows[+b.dataset.ab];
+      if (!confirm('حذف متجر «' + r.name + '» (' + r.owner + ')؟ لا يمكن التراجع.')) return;
+      const j = await adminPost({ action: 'admin_appb_delete', appId: r.appId });
+      showToast(j.error ? j.error : '✓ حُذف'); loadAppBuilds();
+    });
+  } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
 }
 async function loadActiveSubs() {
   const el = document.getElementById('activeSubList');
