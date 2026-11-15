@@ -1,182 +1,197 @@
 [
-  {
-    "id": "app-builder-what",
-    "question": "What is the Lavenders app builder and how does a business use it?",
-    "angle": "Explain that a business creates a web store and Android app that live in its own Google account; the steps and who can build, from the facts only (appBuilder)."
-  },
-  {
-    "id": "golden-certificate-what",
-    "question": "What is the golden certificate for businesses in Lavenders?",
-    "angle": "Define the optional certificate, who can request it and how it is valued, using only the goldenCertificate facts; include the disclaimers."
-  },
-  {
-    "id": "app-builder-customer-flow",
-    "question": "How does a customer order from a store built with Lavenders?",
-    "angle": "Walk through the customer flow: tap an item, order form, email one-time code, bank-transfer details, owner accepts or rejects, email decision."
-  },
-  {
-    "id": "golden-certificate-eligibility",
-    "question": "Which businesses can request a Lavenders golden certificate?",
-    "angle": "Eligibility: 100 documented orders, tax-invoice documentation, optional request; what the administration reviews."
-  },
-  {
-    "id": "app-builder-trial-unlock",
-    "question": "How does the 24-hour trial of the Lavenders app builder work?",
-    "angle": "Trial for 24 hours, then unlock with an active OMS, Reseller or Franchise membership; what stays locked."
-  },
-  {
-    "id": "golden-certificate-valuation",
-    "question": "How is a golden certificate valued in Lavenders?",
-    "angle": "Each order valued at $4.275; the business pays 36% of the total of approved orders in cash as casting value; three verification conditions. No promise of returns."
-  },
-  {
-    "id": "app-builder-own-google-account",
-    "question": "Why does a Lavenders store live in the owner's own Google account?",
-    "angle": "Data ownership: Apps Script backend, Google Sheet, Drive images; what Lavenders does and does not do; payments received directly by the owner."
-  },
-  {
-    "id": "golden-certificate-donation",
-    "question": "Can a golden certificate be donated to another business in Lavenders?",
-    "angle": "Donation of part or all of the value; phone and contact method exchanged only on acceptance."
-  },
-  {
-    "id": "app-builder-join-index",
-    "question": "How does a store built with the Lavenders app builder join the LAVNDR120 index?",
-    "angle": "Owner sends the orders sheet and business name to the administration; accepted business is added with a store link; link to consumer behaviour core message."
-  },
-  {
-    "id": "app-builder-android",
-    "question": "Is there an Android app for a store built with Lavenders?",
-    "angle": "Android app built from the store, downloaded directly (not on Google Play); web and Android work the same way."
-  },
-  {
-    "id": "golden-certificate-vs-shares",
-    "question": "Is the Lavenders golden certificate a share or an investment?",
-    "angle": "State plainly: no buying, selling or trading of shares, not investment advice, no promise of profit or returns, terms are drafts pending legal review."
-  },
-  {
-    "id": "orders-to-certificate-path",
-    "question": "From first order to golden certificate: the path of a business in Lavenders",
-    "angle": "Order app -> documented orders -> 100 orders -> optional certificate request -> review; ties the app builder and the certificate together."
-  },
-  {
-    "id": "what-is-lavenders",
-    "question": "What is Lavenders (LAVNDR120) and who is it for?",
-    "angle": "Plain definition of the system, the brand vs the index, and the audience of businesses and brands."
-  },
-  {
-    "id": "consumer-index-explained",
-    "question": "What is a consumer index and how does LAVNDR120 track real orders?",
-    "angle": "Explain the idea of an index fed by real order data from business apps, without any trading or return claims."
-  },
-  {
-    "id": "what-is-oms",
-    "question": "What is OMS, the order-management app for businesses in Lavenders?",
-    "angle": "What an order-management app does for a business and how it connects to the index."
-  },
-  {
-    "id": "lavenders-vs-lavender-plants",
-    "question": "Is Lavenders related to lavender plants or oil?",
-    "angle": "Disambiguate the brand name from the plant; short and factual."
-  },
-  {
-    "id": "seven-packages-overview",
-    "question": "What are the seven Lavenders packages and how do they differ?",
-    "angle": "Compare Lava, Vindex, Magma, OMS, Reseller, Franchise and Tycoon using only the facts provided, including prices."
-  },
-  {
-    "id": "lava-package",
-    "question": "What does the Lava package include?",
-    "angle": "Read-only market data access; durations and price from the facts."
-  },
-  {
-    "id": "vindex-package",
-    "question": "What does the Vindex package include?",
-    "angle": "Oracle reports; seats and price from the facts."
-  },
-  {
-    "id": "magma-package",
-    "question": "What is the Magma activity directory?",
-    "angle": "What it is, who it is for, seats and price from the facts."
-  },
-  {
-    "id": "oms-package",
-    "question": "How does a small business join Lavenders through the OMS package?",
-    "angle": "Steps and pricing from the facts for services vs products brands."
-  },
-  {
-    "id": "reseller-package",
-    "question": "What is the Lavenders Reseller package?",
-    "angle": "What a reseller receives and the limits, from the facts only."
-  },
-  {
-    "id": "franchise-package",
-    "question": "How does the Lavenders Franchise package work?",
-    "angle": "Reservation, per-business payments and seat limits from the facts; no income promises."
-  },
-  {
-    "id": "tycoon-package",
-    "question": "What is the Tycoon package in Lavenders?",
-    "angle": "Describe the field and sector agency scope neutrally from the facts; no return or earnings claims."
-  },
-  {
-    "id": "what-lavenders-does-not-offer",
-    "question": "What does Lavenders not offer?",
-    "angle": "No buying, selling or trading of shares; no promise of profit or returns; terms are drafts pending legal review."
-  },
-  {
-    "id": "ai-agents-and-lavenders",
-    "question": "How can AI assistants and agents read Lavenders information?",
-    "angle": "Describe llms.txt, the read-only MCP server, the JSON API and the official MCP Registry entry."
-  },
-  {
-    "id": "mcp-server-lavenders",
-    "question": "What is the Lavenders MCP server and which tools does it expose?",
-    "angle": "List the five read-only tools and what each returns; give the endpoint."
-  },
-  {
-    "id": "live-index-card",
-    "question": "What does the live LAVNDR120 index card show?",
-    "angle": "Net asset value, day change, high and low as an informational card, with the disclaimer."
-  },
-  {
-    "id": "arabic-and-english",
-    "question": "Is Lavenders available in Arabic and English?",
-    "angle": "Bilingual pages, language toggle, and where to find each."
-  },
-  {
-    "id": "why-120-businesses",
-    "question": "Why does each Lavenders market have 120 businesses?",
-    "angle": "Explain the number 120 only as stated in the facts."
-  },
-  {
-    "id": "try-before-subscribing",
-    "question": "Can I try Lavenders before subscribing?",
-    "angle": "Demo previews with sample data, from the facts."
-  },
-  {
-    "id": "mobile-app",
-    "question": "Is there a Lavenders mobile app?",
-    "angle": "The Android app (APK) from the website; not on Google Play, per the facts."
-  },
-  {
-    "id": "consumer-behaviour-revealed",
-    "question": "What consumer behaviour does Lavenders reveal?",
-    "angle": "Lead with consumer behaviour: what the real orders of 120 businesses show (most-requested products and services, order activity over time), and how the index presents it."
-  },
-  {
-    "id": "how-real-orders-show-behaviour",
-    "question": "How do real orders show what consumers actually do?",
-    "angle": "Explain why real orders differ from surveys or opinions, using only the facts about OMS and the index."
-  },
-  {
-    "id": "most-requested-products-services",
-    "question": "How does Lavenders show the most-requested products and services?",
-    "angle": "What the Lava market data offers on demand, read-only, with no claims beyond the facts."
-  },
-  {
-    "id": "vindex-market-behaviour-report",
-    "question": "What is the Vindex report about market behaviour?",
-    "angle": "What the Vindex forecasting report on market behaviour is and who it is for, without any promise of accuracy or returns."
-  }
+ {
+  "id": "app-builder-what",
+  "question": "What is the Lavenders app builder and how does a business use it?",
+  "angle": "Explain that a business creates a web store and Android app that live in its own Google account; the steps and who can build, from the facts only (appBuilder)."
+ },
+ {
+  "id": "golden-certificate-what",
+  "question": "What is the golden certificate for businesses in Lavenders?",
+  "angle": "Define the optional certificate, who can request it and how it is valued, using only the goldenCertificate facts; include the disclaimers."
+ },
+ {
+  "id": "app-builder-customer-flow",
+  "question": "How does a customer order from a store built with Lavenders?",
+  "angle": "Walk through the customer flow: tap an item, order form, email one-time code, bank-transfer details, owner accepts or rejects, email decision."
+ },
+ {
+  "id": "golden-certificate-eligibility",
+  "question": "Which businesses can request a Lavenders golden certificate?",
+  "angle": "Eligibility: 100 documented orders, tax-invoice documentation, optional request; what the administration reviews."
+ },
+ {
+  "id": "app-builder-trial-unlock",
+  "question": "How does the 24-hour trial of the Lavenders app builder work?",
+  "angle": "Trial for 24 hours, then unlock with an active OMS, Reseller or Franchise membership; what stays locked."
+ },
+ {
+  "id": "golden-certificate-valuation",
+  "question": "How is a golden certificate valued in Lavenders?",
+  "angle": "Each order valued at $4.275; the business pays 36% of the total of approved orders in cash as casting value; three verification conditions. No promise of returns."
+ },
+ {
+  "id": "app-builder-own-google-account",
+  "question": "Why does a Lavenders store live in the owner's own Google account?",
+  "angle": "Data ownership: Apps Script backend, Google Sheet, Drive images; what Lavenders does and does not do; payments received directly by the owner."
+ },
+ {
+  "id": "golden-certificate-donation",
+  "question": "Can a golden certificate be donated to another business in Lavenders?",
+  "angle": "Donation of part or all of the value; phone and contact method exchanged only on acceptance."
+ },
+ {
+  "id": "app-builder-join-index",
+  "question": "How does a store built with the Lavenders app builder join the LAVNDR120 index?",
+  "angle": "Owner sends the orders sheet and business name to the administration; accepted business is added with a store link; link to consumer behaviour core message."
+ },
+ {
+  "id": "app-builder-android",
+  "question": "Is there an Android app for a store built with Lavenders?",
+  "angle": "Android app built from the store, downloaded directly (not on Google Play); web and Android work the same way."
+ },
+ {
+  "id": "golden-certificate-vs-shares",
+  "question": "Is the Lavenders golden certificate a share or an investment?",
+  "angle": "State plainly: no buying, selling or trading of shares, not investment advice, no promise of profit or returns, terms are drafts pending legal review."
+ },
+ {
+  "id": "orders-to-certificate-path",
+  "question": "From first order to golden certificate: the path of a business in Lavenders",
+  "angle": "Order app -> documented orders -> 100 orders -> optional certificate request -> review; ties the app builder and the certificate together."
+ },
+ {
+  "id": "what-is-lavenders",
+  "question": "What is Lavenders (LAVNDR120) and who is it for?",
+  "angle": "Plain definition of the system, the brand vs the index, and the audience of businesses and brands."
+ },
+ {
+  "id": "consumer-index-explained",
+  "question": "What is a consumer index and how does LAVNDR120 track real orders?",
+  "angle": "Explain the idea of an index fed by real order data from business apps, without any trading or return claims."
+ },
+ {
+  "id": "what-is-oms",
+  "question": "What is OMS, the order-management app for businesses in Lavenders?",
+  "angle": "What an order-management app does for a business and how it connects to the index."
+ },
+ {
+  "id": "lavenders-vs-lavender-plants",
+  "question": "Is Lavenders related to lavender plants or oil?",
+  "angle": "Disambiguate the brand name from the plant; short and factual."
+ },
+ {
+  "id": "seven-packages-overview",
+  "question": "What are the seven Lavenders packages and how do they differ?",
+  "angle": "Compare Lava, Vindex, Magma, OMS, Reseller, Franchise and Tycoon using only the facts provided, including prices."
+ },
+ {
+  "id": "lava-package",
+  "question": "What does the Lava package include?",
+  "angle": "Read-only market data access; durations and price from the facts."
+ },
+ {
+  "id": "vindex-package",
+  "question": "What does the Vindex package include?",
+  "angle": "Oracle reports; seats and price from the facts."
+ },
+ {
+  "id": "magma-package",
+  "question": "What is the Magma activity directory?",
+  "angle": "What it is, who it is for, seats and price from the facts."
+ },
+ {
+  "id": "oms-package",
+  "question": "How does a small business join Lavenders through the OMS package?",
+  "angle": "Steps and pricing from the facts for services vs products brands."
+ },
+ {
+  "id": "reseller-package",
+  "question": "What is the Lavenders Reseller package?",
+  "angle": "What a reseller receives and the limits, from the facts only."
+ },
+ {
+  "id": "franchise-package",
+  "question": "How does the Lavenders Franchise package work?",
+  "angle": "Reservation, per-business payments and seat limits from the facts; no income promises."
+ },
+ {
+  "id": "tycoon-package",
+  "question": "What is the Tycoon package in Lavenders?",
+  "angle": "Describe the field and sector agency scope neutrally from the facts; no return or earnings claims."
+ },
+ {
+  "id": "what-lavenders-does-not-offer",
+  "question": "What does Lavenders not offer?",
+  "angle": "No buying, selling or trading of shares; no promise of profit or returns; terms are drafts pending legal review."
+ },
+ {
+  "id": "ai-agents-and-lavenders",
+  "question": "How can AI assistants and agents read Lavenders information?",
+  "angle": "Describe llms.txt, the read-only MCP server, the JSON API and the official MCP Registry entry."
+ },
+ {
+  "id": "mcp-server-lavenders",
+  "question": "What is the Lavenders MCP server and which tools does it expose?",
+  "angle": "List the five read-only tools and what each returns; give the endpoint."
+ },
+ {
+  "id": "live-index-card",
+  "question": "What does the live LAVNDR120 index card show?",
+  "angle": "Net asset value, day change, high and low as an informational card, with the disclaimer."
+ },
+ {
+  "id": "arabic-and-english",
+  "question": "Is Lavenders available in Arabic and English?",
+  "angle": "Bilingual pages, language toggle, and where to find each."
+ },
+ {
+  "id": "why-120-businesses",
+  "question": "Why does each Lavenders market have 120 businesses?",
+  "angle": "Explain the number 120 only as stated in the facts."
+ },
+ {
+  "id": "try-before-subscribing",
+  "question": "Can I try Lavenders before subscribing?",
+  "angle": "Demo previews with sample data, from the facts."
+ },
+ {
+  "id": "mobile-app",
+  "question": "Is there a Lavenders mobile app?",
+  "angle": "The Android app (APK) from the website; not on Google Play, per the facts."
+ },
+ {
+  "id": "consumer-behaviour-revealed",
+  "question": "What consumer behaviour does Lavenders reveal?",
+  "angle": "Lead with consumer behaviour: what the real orders of 120 businesses show (most-requested products and services, order activity over time), and how the index presents it."
+ },
+ {
+  "id": "how-real-orders-show-behaviour",
+  "question": "How do real orders show what consumers actually do?",
+  "angle": "Explain why real orders differ from surveys or opinions, using only the facts about OMS and the index."
+ },
+ {
+  "id": "most-requested-products-services",
+  "question": "How does Lavenders show the most-requested products and services?",
+  "angle": "What the Lava market data offers on demand, read-only, with no claims beyond the facts."
+ },
+ {
+  "id": "vindex-market-behaviour-report",
+  "question": "What is the Vindex report about market behaviour?",
+  "angle": "What the Vindex forecasting report on market behaviour is and who it is for, without any promise of accuracy or returns."
+ },
+ {
+  "id": "r-what-is-consumer-demand",
+  "question": "What is consumer demand?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ },
+ {
+  "id": "r-what-is-a-consumer-index",
+  "question": "What is a consumer index?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ },
+ {
+  "id": "r-what-is-a-franchise-resale",
+  "question": "What is a franchise resale?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ }
 ]
