@@ -112,6 +112,14 @@ Yes. Full demo previews of several screens with sample data open from the home p
 **How does a business or brand join?**
 See the OMS package and the Economic Movement path on the packages page.
 
+## App builder (web store + Android app)
+Pages: https://lavndrs120.github.io/en/app-builder.html · https://lavndrs120.github.io/app-builder.html
+A business creates its own order store: it enters the business name, chooses services or products, adds up to 9 items (each needs an image and a price times pack quantity of at least $4.275) and its bank-transfer payment details. After one Google sign-in the system creates, inside the owner's own Google account, an Apps Script backend, a Google Sheet for orders and a Drive folder for images. The result is a web store and an Android app. Customers order with a one-time code sent by email (with the bank-transfer details); the owner accepts or rejects from a dashboard and the customer is emailed the decision; the owner receives a notification per order. Each store runs for 24 hours as a trial; the publishable version unlocks with an active OMS, Reseller or Franchise membership. Lavenders does not hold or process customers' money. After unlocking, the owner can send the orders sheet and business name to the Lavenders administration to join the index (accepted businesses appear with a link to their store). The Android app is downloaded directly, not from Google Play.
+
+## Golden certificate for businesses
+Pages: https://lavndrs120.github.io/en/golden-certificate.html · https://lavndrs120.github.io/golden-certificate.html
+An optional certificate a business may request from the index operating fund. Eligibility: at least 100 documented orders (documented by a tax invoice from the approved ledger). Valuation: each order is valued at $4.275; the business pays 36% of the total of its approved orders in cash, the casting value of its certificate. The administration reviews the request; the value is shown after three verification conditions (financial, guarantee, documentary). A business may donate part or all of its certificate value to another business; contact details are revealed only on acceptance. It is not a share: no buying, selling or trading of shares, not investment advice, no promise of profit or returns; terms and agreements are drafts pending legal review.
+
 ## Machine-readable endpoints
 - Official MCP Registry name: io.github.lavndrs120/lavenders
 - MCP (read-only, no auth): https://lavndr.omssolutionorders.workers.dev/mcp

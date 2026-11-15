@@ -25,3 +25,7 @@ https://lavndrs120.github.io/en/franchise.html
 https://lavndrs120.github.io/en/tycoon.html
 https://lavndrs120.github.io/privacy.html
 https://lavndrs120.github.io/en/privacy.html
+https://lavndrs120.github.io/app-builder.html
+https://lavndrs120.github.io/golden-certificate.html
+https://lavndrs120.github.io/en/app-builder.html
+https://lavndrs120.github.io/en/golden-certificate.html
