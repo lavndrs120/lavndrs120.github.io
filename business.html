@@ -223,13 +223,14 @@ async function loadPortal() {
   try {
     const res = await fetch(WORKER_URL + '?action=my_business_portal&token=' + encodeURIComponent(AUTH_TOKEN));
     const data = await res.json();
+    if (data.error === 'builder_scope') { location.replace('builder.html'); return; }
     if (data.code === 401) { clearSessionAndReset(); return; }
     if (data.error) { el.innerHTML = '<div class="empty">' + esc(data.error) + '</div>'; return; }
 
     if (!data.linked) {
       // حساب غير مربوط ببزنس: نوجّهه لمكانه المسموح (الداشبورد) مع توضيح
       try { sessionStorage.setItem('lavndr_flash', 'حسابك غير مربوط ببزنس بعد — تواصل مع الإدارة لربطه'); } catch (e) {}
-      setTimeout(() => location.replace('dashboard.html'), 2500);
+      setTimeout(() => location.replace('builder.html'), 2500);
       el.innerHTML = `
         <div class="glass card" style="text-align:center;">
           <div style="font-size:32px;margin-bottom:10px;">🔗</div>

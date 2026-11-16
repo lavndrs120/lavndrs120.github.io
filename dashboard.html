@@ -827,7 +827,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-16T23:44:22"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "171.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "171.00", "dayLow": "171.00", "volatility": "0.00"}, "timestamp": "2026-11-14T22:02:41"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1836,6 +1836,8 @@ async function loadData(isRetry) {
     const data = await res.json();
     // ✅ إصلاح جوهري: التوكن غير الصالح (منتهي/مزوّر) ما بيرجّعش لبوابة دخول إجبارية
     // تاني — يرجع لوضع التصفح التجريبي زي أي زائر مجهول (نفس فلسفة clearSessionAndReset)
+    // حساب مسجَّل دخوله لكنه غير مشترك: لا داشبورد له — مكانه واجهة بناء التطبيقات فقط
+    if (data.error === 'builder_scope') { location.replace('builder.html'); return; }
     if (data.code === 401) { clearSessionAndReset('انتهت الجلسة — سجّلت خروجك تلقائيًا'); return; }
     // ✅ إصلاح جوهري: 402 = سجّل دخول بنجاح بس لسه ما اشترك (role=visitor) — ما بقاش
     // بيمنع التصفح خالص؛ نعرض بيانات تجريبية + بانر + مودال اشتراك قابل للإغلاق
