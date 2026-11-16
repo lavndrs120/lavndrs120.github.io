@@ -827,7 +827,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-16T23:33:58"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "171.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "171.00", "dayLow": "171.00", "volatility": "0.00"}, "timestamp": "2026-11-14T22:02:41"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1841,6 +1841,9 @@ async function loadData(isRetry) {
     // بيمنع التصفح خالص؛ نعرض بيانات تجريبية + بانر + مودال اشتراك قابل للإغلاق
     // (بدل استبدال الداشبورد بالكامل بشاشة اشتراك زي الأول)
     if (data.code === 402) {
+      // غير مشترك مسجّل دخوله: لا يرى الداشبورد ولا بياناته التجريبية — مكانه الوحيد واجهة بناء التطبيقات
+      // (الزائر غير المسجّل يبقى يتصفح التجربة كما كان؛ هذا خاص بمن سجّل دخولًا فعليًا)
+      if (data.role !== 'movement') { location.replace('builder.html'); return; }
       currentRole = (data.role === 'movement') ? 'movement' : 'visitor';
       globalData = demoData();
       document.getElementById('loadingWrap').style.display = 'none';

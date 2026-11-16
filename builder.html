@@ -53,7 +53,7 @@ textarea{resize:vertical;min-height:60px}select option{background:#12121c}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="logo">LAVNDR120</div><a class="back" href="dashboard.html">← لوحتي</a></div>
+  <div class="top"><div class="logo">LAVNDR120</div><a class="back" href="index.html?home=1">← الرئيسية</a></div>
   <div id="app"></div>
 </div>
 <script>
@@ -61,7 +61,7 @@ const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
 const GSI_CLIENT_ID='776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
 const STORE_PAGE='https://lavndrs120.github.io/store.html';
 const G_SCOPES='https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
-let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('appb_token')||sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('appb_email')||sessionStorage.getItem('lavndr_email')||''}catch(e){}
+let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('lavndr_email')||''}catch(e){}
 let S={rules:{minValue:4.275,maxItems:9},ents:[],builds:[],cur:null,tick:null,active:{}};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -69,7 +69,6 @@ const round3=n=>Math.round(n*1000)/1000;
 const money=n=>'$'+(Math.round(Number(n)*1000)/1000);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function showMsg(id,t,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'err');e.textContent=t}
-function showHtml(id,h,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'info');e.innerHTML=h}
 function copyTxt(t){try{navigator.clipboard.writeText(t)}catch(e){}}
 
 // ───── لاڤندرز: الأهلية والرمز فقط ─────
@@ -83,7 +82,7 @@ async function api(action,params,post){
     return j||{error:'رد فارغ'};
   }catch(e){return {error:'فشل الاتصال — تحقق من الإنترنت'}}
 }
-function logout(){TOKEN='';EMAIL='';try{sessionStorage.removeItem('appb_token');sessionStorage.removeItem('appb_email')}catch(e){}showLogin('سجّل دخولك للمتابعة')}
+function logout(){TOKEN='';EMAIL='';try{sessionStorage.removeItem('lavndr_token');sessionStorage.removeItem('lavndr_email')}catch(e){}showLogin('سجّل دخولك للمتابعة')}
 function showLogin(m){
   $('app').innerHTML='<div class="card" style="text-align:center"><h1>بناء تطبيقك</h1><p class="sub">'+esc(m||'سجّل دخولك بحساب Google')+'</p><div id="gsi"></div></div>';
   if(window.LavndrApp&&typeof window.LavndrApp.signIn==='function'){window.handleCredentialResponse=onCred;$('gsi').innerHTML='<button class="btn" onclick="LavndrApp.signIn()">تسجيل الدخول بحساب Google</button>';return}
@@ -92,10 +91,10 @@ function showLogin(m){
 async function onCred(resp){
   $('app').innerHTML='<div class="card sub">جاري التحقق…</div>';
   try{
-    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential,scope:'builder'})});
+    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential})});
     const j=await r.json();
     if(!j.token){showLogin('فشل تسجيل الدخول — حاول مرة أخرى');return}
-    TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('appb_token',TOKEN);sessionStorage.setItem('appb_email',EMAIL)}catch(e){}
+    TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('lavndr_token',TOKEN);sessionStorage.setItem('lavndr_email',EMAIL)}catch(e){}
     boot();
   }catch(e){showLogin('فشل الاتصال — حاول مرة أخرى')}
 }
@@ -188,7 +187,7 @@ async function boot(){
   $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
   const j=await api('appb_my_builds');
   if(j.error){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(j.error)+'</div><button class="btn sec" onclick="boot()">إعادة المحاولة</button></div>';return}
-  S.rules=j.rules||S.rules;S.ents=j.entitlements||[];S.builds=j.builds||[];SHEETREQ=j.sheetRequests||{};SHAREWITH=j.shareWith||'';renderList();
+  S.rules=j.rules||S.rules;S.ents=j.entitlements||[];S.builds=j.builds||[];renderList();
 }
 function statusPill(b){const m={draft:'قيد الإنشاء',trial:'تجربة',paid:'قابل للنشر',expired:'انتهت التجربة'};return '<span class="pill '+esc(b.status)+'">'+(m[b.status]||esc(b.status))+'</span>'}
 function renderList(){
@@ -379,7 +378,7 @@ function renderDash(banner){
   clearInterval(S.tick);const b=S.cur;
   let h='<h1>'+esc(b.name)+'</h1><p class="sub">'+statusPill(b)+'</p>';
   if(banner)h+='<div class="msg good" style="display:block">'+esc(banner)+'</div>';
-  if(b.status==='trial')h+='<div class="msg info" style="display:block"><span id="left"></span><br>'+esc(b.note)+'<br>عضويتك تغطي الفتح — اضغط «فتح النسخة القابلة للنشر» بدون أي دفع إضافي.</div>';
+  if(b.status==='trial')h+='<div class="msg info" style="display:block"><span id="left"></span><br>'+esc(b.note)+'</div>';
   if(b.status==='expired')h+='<div class="msg err" style="display:block">'+esc(b.note)+'</div>';
   if(b.status==='trial'||b.status==='expired')h+='<button class="btn ok" id="unlBtn" onclick="unlock()">فتح النسخة القابلة للنشر</button><div id="m4" class="msg"></div>';
   if(b.backendUrl&&b.status!=='draft'){
@@ -389,7 +388,7 @@ function renderDash(banner){
     h+='<div class="card"><h2>الطلبات</h2><div id="ords" class="small">جاري التحميل…</div></div>';
     h+='<div class="card"><h2>شيت الطلبات</h2><a class="link" href="https://docs.google.com/spreadsheets/d/'+esc(b.sheetId)+'" target="_blank" rel="noopener">فتح الشيت في حسابك</a>'+
       '<div class="small" style="margin-top:14px">رمز الشيت (للانضمام إلى مؤشر لاڤندرز)</div><div class="link" dir="ltr" style="word-break:break-all;margin-top:6px">'+esc(b.sheetId)+'</div><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(b.sheetId)+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرمز</button>'+
-      (b.status!=='paid'?'<p class="small" style="margin-top:10px">بعد فتح النسخة القابلة للنشر يمكنك إرسال الشيت لإدراج بزنسك في المؤشر.</p>':SHEETREQ[b.appId]==='accepted'?'<div class="msg good" style="display:block;margin-top:10px">بزنسك مُدرج في مؤشر لاڤندرز ✅</div>':SHEETREQ[b.appId]==='pending'?'<div class="msg info" style="display:block;margin-top:10px">أُرسل الطلب — بانتظار قبول الإدارة</div>':'<button class="btn ok sm" style="margin-top:8px" id="shBtn" onclick="sendSheet()">إرسال الشيت إلى الإدارة</button><div id="m5" class="msg"></div><p class="small" style="margin-top:10px">يُرسَل الشيت مع اسم البزنس إلى لوحة إدارة لاڤندرز، ويُدرج في المؤشر إذا قُبل.</p>')+'</div>';
+      '<p class="small" style="margin-top:10px">إن أردت أن يُدرج بزنسك في المؤشر: انسخ هذا الرمز وأرسله مع اسم البزنس إلى الإدارة من داخل لاڤندرز (بوابة البزنس). يُدرج إذا قُبل.</p></div>';
   }
   h+='<button class="btn sec" onclick="editBuild()">تعديل الأصناف والصور</button><button class="btn sec" style="border-color:#e05656;color:#ff9aa8" onclick="deleteBuild()">حذف المتجر</button><button class="btn sec" onclick="boot()">رجوع للقائمة</button>';
   $('app').innerHTML=h;
@@ -432,16 +431,6 @@ async function deleteBuild(){
     boot();
   }catch(err){alert(err.message||'تعذّر الحذف')}
 }
-let SHEETREQ={},SHAREWITH='';
-async function sendSheet(){
-  const b=S.cur;$('shBtn').disabled=true;showMsg('m5','جاري الإرسال…','info');
-  try{
-    if(SHAREWITH){await gAuth();await gf('https://www.googleapis.com/drive/v3/files/'+b.sheetId+'/permissions?sendNotificationEmail=false',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:'writer',type:'user',emailAddress:SHAREWITH})})}
-    const j=await api('appb_submit_sheet',{appId:b.appId,name:b.name},true);
-    if(j.error)throw new Error(j.message||j.error);
-    SHEETREQ[b.appId]='pending';renderDash('أُرسل الشيت إلى الإدارة.');
-  }catch(err){$('shBtn').disabled=false;showMsg('m5',err.message||'تعذّر الإرسال','err')}
-}
 async function unlock(){
   const b=S.cur;$('unlBtn').disabled=true;showMsg('m4','جاري الفتح…','info');
   const j=await api('appb_unlock',{appId:b.appId},true);
@@ -455,84 +444,9 @@ let apkPoll=null;
 async function loadApk(){
   clearTimeout(apkPoll);const j=await api('appb_download',{appId:S.cur.appId});const el=$('apk');if(!el)return;
   if(j.error){el.textContent=j.message||j.error;return}
-  if(j.status==='ready'){
-    const central=String(j.url).indexOf('github.com/'+CENTRAL_REPO)>-1;
-    if(central&&GHT&&lsGet('ghRepo:'+S.cur.appId)&&!HOSTING){el.textContent='جاري تحديث تطبيقك في حسابك على GitHub…';hostApk(true);return}
-    const short=shortFromUrl(j.url);
-    el.innerHTML='<a class="btn ok" href="'+esc(j.url)+'">تنزيل APK</a>'+(j.note?'<div class="small" style="margin-top:8px">'+esc(j.note)+'</div>':'')+
-      (central?'<div style="margin-top:14px"><div class="small">اسم الرابط القصير (حروف إنجليزية صغيرة وأرقام وشرطة):</div><input id="ghName" dir="ltr" value="'+esc(lsGet('ghRepo:'+S.cur.appId)||slugG(S.cur.name))+'" style="margin-top:6px"><button class="btn sec" id="ghBtn" style="margin-top:8px" onclick="hostApk()">نقل التطبيق وأكوادي إلى حسابي في GitHub</button><div id="m6" class="msg"></div><div class="small" style="margin-top:6px">يُنشأ لك ريبو بهذا الاسم فيه الأكواد والتطبيق، ويصير رابط متجرك القصير: github.io/اسمك/الاسم. ويُحذف من ريبو لاڤندرز.</div></div>':
-        '<div class="small" style="margin-top:12px">رابطك القصير:</div><a class="link" dir="ltr" href="'+esc(short)+'" target="_blank" rel="noopener">'+esc(short)+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(short)+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button><div class="msg good" style="display:block;margin-top:10px">📣 شارك هذا الرابط مع عملائك المحتملين والمفضلين.</div><div class="msg info" style="display:block;margin-top:8px">⏳ إن لم يفتح الرابط فورًا فانتظر دقيقة أو دقيقتين حتى تُبنى صفحاتك على GitHub، ثم أعد المحاولة.</div><div class="small" style="margin-top:10px">التطبيق والأكواد محفوظة في حسابك على GitHub: <a class="link" dir="ltr" href="'+esc(short.replace(/^https:\/\/([^.]+)\.github\.io\/(.+)$/,'https://github.com/$1/$2'))+'" target="_blank" rel="noopener">فتح الريبو</a> · <a href="#" onclick="ghLogout();return false" style="color:inherit">فصل الحساب</a></div>');
-    return}
+  if(j.status==='ready'){el.innerHTML='<a class="btn ok" href="'+esc(j.url)+'">تنزيل APK</a>'+(j.note?'<div class="small" style="margin-top:8px">'+esc(j.note)+'</div>':'');return}
   if(j.status==='building'){el.textContent='جاري بناء التطبيق… يستغرق عدة دقائق وتتحدث الصفحة تلقائياً.';apkPoll=setTimeout(loadApk,15000);return}
   el.innerHTML=(j.status==='failed'?'<div class="small" style="color:#ffb3c0;margin-bottom:6px">فشلت المحاولة السابقة.</div>':'')+'<button class="btn" id="apkBtn" onclick="buildApk()">بناء تطبيق الأندرويد</button><div id="m5" class="msg"></div>';
-}
-// ───────────── ريبو المستخدم في GitHub ─────────────
-const CENTRAL_REPO='lavndrs120/lavndrs120.github.io';
-let GHT='';try{GHT=localStorage.getItem('ghT')||''}catch(e){}
-let HOSTING=false;
-function lsGet(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
-function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function shortFromUrl(u){const m=/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/raw\//.exec(String(u||''));return m?'https://'+m[1].toLowerCase()+'.github.io/'+m[2]:''}
-function ghLogout(){GHT='';try{localStorage.removeItem('ghT')}catch(e){}loadApk()}
-function slugG(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)}
-async function ghPost(path,body){const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body||{})});return r.json()}
-async function ghAuth(){
-  if(GHT)return GHT;
-  const d=await ghPost('/gh/device');if(!d.device_code)throw new Error(d.error_description||d.error||'تعذّر بدء الربط بـ GitHub');
-  showHtml('m6','افتح <a href="'+esc(d.verification_uri)+'?user_code='+esc(d.user_code)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">github.com/login/device</a> وأدخل الرمز: <b dir="ltr" style="font-size:18px">'+esc(d.user_code)+'</b> — ثم ارجع هنا.','info');
-  let wait=(d.interval||5)*1000;const end=Date.now()+(d.expires_in||900)*1000;
-  while(Date.now()<end){
-    await new Promise(r=>setTimeout(r,wait));
-    const t=await ghPost('/gh/token',{device_code:d.device_code});
-    if(t.access_token){GHT=t.access_token;lsSet('ghT',GHT);return GHT}
-    if(t.error==='slow_down')wait+=5000;
-    else if(t.error&&t.error!=='authorization_pending')throw new Error(t.error_description||t.error);
-  }
-  throw new Error('انتهت مهلة الربط، حاول مرة أخرى');
-}
-async function ghApi(path,opt){
-  opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+GHT,Accept:'application/vnd.github+json'},opt.headers||{});
-  const r=await fetch('https://api.github.com'+path,opt);let j={};try{j=await r.json()}catch(e){}
-  if(r.status===401){GHT='';try{localStorage.removeItem('ghT')}catch(e){}}
-  if(!r.ok&&r.status!==404)throw new Error(j.message||('GitHub '+r.status));
-  return{status:r.status,json:j}
-}
-function b64u(s){return btoa(unescape(encodeURIComponent(s)))}
-function b64buf(buf){const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
-async function ghPut(user,repo,path,b64,msg){
-  const g=await ghApi('/repos/'+user+'/'+repo+'/contents/'+path);
-  const body={message:msg,content:b64,branch:'main'};if(g.status===200&&g.json.sha)body.sha=g.json.sha;
-  const p=await ghApi('/repos/'+user+'/'+repo+'/contents/'+path,{method:'PUT',body:JSON.stringify(body)});
-  if(p.status===404)throw new Error('تعذّر الكتابة في الريبو');
-}
-async function hostApk(auto){
-  if(HOSTING)return;const b=S.cur;let name=auto===true?lsGet('ghRepo:'+b.appId):(($('ghName')||{}).value||'').trim().toLowerCase();
-  if(!name)name=slugG(b.name)||'store';
-  if(!/^[a-z0-9][a-z0-9-]{2,38}$/.test(name)){showMsg('m6','الاسم القصير: حروف إنجليزية صغيرة وأرقام وشرطة، من 3 إلى 39 حرفاً','err');return}
-  HOSTING=true;const bt=$('ghBtn');if(bt)bt.disabled=true;
-  try{
-    showMsg('m6',auto===true?'جاري تحديث تطبيقك في حسابك على GitHub…':'جاري الربط بحساب GitHub…','info');await ghAuth();
-    const me=(await ghApi('/user')).json;const user=me.login,repo=name;
-    showMsg('m6','جاري تجهيز الريبو…','info');
-    const ex=await ghApi('/repos/'+user+'/'+repo);
-    if(ex.status===404){const c=await ghApi('/user/repos',{method:'POST',body:JSON.stringify({name:repo,description:'Store & Android app for '+b.name+' — built with Lavenders (LAVNDR120)',private:false,auto_init:true})});if(c.status>=300)throw new Error('تعذّر إنشاء الريبو');await new Promise(r=>setTimeout(r,2000))}
-    else{const sj=await ghApi('/repos/'+user+'/'+repo+'/contents/store.json');if(sj.status===404||!sj.json.content||atob(sj.json.content.replace(/\n/g,'')).indexOf(b.appId)<0)throw new Error('هذا الاسم مستخدم عندك لمشروع آخر، اختر اسماً مختلفاً')}
-    const tpl=await fetch('user-backend.gs.txt',{cache:'no-cache'}).then(r=>r.text());
-    const short='https://'+user.toLowerCase()+'.github.io/'+repo;
-    const readme='# '+b.name+'\n\nمتجر طلبات وتطبيق أندرويد أنشأهما نظام **لاڤندرز (Lavenders · LAVNDR120)** لهذا البزنس.\n\nStore and Android app generated for this business by Lavenders.\n\n- Short link: '+short+'\n- Store: '+storeLink(b)+'\n- Android app: [apk/store.apk](apk/store.apk)\n- Backend template: [backend/Code.gs](backend/Code.gs) (Google Apps Script; the live copy runs in the owner\'s own Google account)\n- Orders sheet and images live in the owner\'s Google account, not here.\n\nNo payment details, keys or customer data are stored in this repository.\n';
-    const page='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>'+esc(b.name)+'</title><meta name="description" content="'+esc(b.name)+'"><meta property="og:title" content="'+esc(b.name)+'"><meta property="og:type" content="website"><meta name="theme-color" content="#06060c"><style>html,body{margin:0;height:100%;background:#06060c}iframe{position:fixed;inset:0;width:100%;height:100%;border:0}</style></head><body><iframe src="'+esc(storeLink(b))+'" allow="geolocation" title="'+esc(b.name)+'"></iframe><noscript><a href="'+esc(storeLink(b))+'">Open the store</a></noscript></body></html>';
-    await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
-    await ghPut(user,repo,'backend/Code.gs',b64u(tpl),'Lavenders: backend template');
-    await ghPut(user,repo,'store.json',b64u(JSON.stringify({name:b.name,kind:b.kind,appId:b.appId,store:storeLink(b),generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: store info');
-    await ghPut(user,repo,'index.html',b64u(page),'Lavenders: short link page');
-    try{await ghApi('/repos/'+user+'/'+repo+'/pages',{method:'POST',body:JSON.stringify({source:{branch:'main',path:'/'}})})}catch(e){}
-    showMsg('m6','جاري نقل التطبيق إلى ريبوك…','info');
-    const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(b.appId));if(!ar.ok)throw new Error('تعذّر جلب ملف التطبيق');
-    await ghPut(user,repo,'apk/store.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
-    const url='https://github.com/'+user+'/'+repo+'/raw/main/apk/store.apk';
-    const j=await api('appb_apk_hosted',{appId:b.appId,url:url},true);if(j.error)throw new Error(j.message||j.error);
-    lsSet('ghRepo:'+b.appId,repo);HOSTING=false;loadApk();
-  }catch(err){HOSTING=false;const bt2=$('ghBtn');if(bt2)bt2.disabled=false;showMsg('m6',err.message||'تعذّر النقل','err')}
 }
 async function buildApk(){
   $('apkBtn').disabled=true;const j=await api('appb_build_apk',{appId:S.cur.appId},true);
@@ -574,6 +488,5 @@ async function decide(row,d,btn){
 }
 boot();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
