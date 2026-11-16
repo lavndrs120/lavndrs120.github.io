@@ -282,4 +282,16 @@
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://lavndrs120.github.io/insights/what-is-the-lavenders-app-builder-and-how-does-a-business-use-it.html</loc>
+    <lastmod>2026-11-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://lavndrs120.github.io/insights/ar/what-is-the-lavenders-app-builder-and-how-does-a-business-use-it.html</loc>
+    <lastmod>2026-11-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>

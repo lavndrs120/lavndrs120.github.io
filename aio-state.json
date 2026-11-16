@@ -77,6 +77,19 @@
     "description": "حزمة لافا توفر بيانات السوق للقراءة فقط",
     "date": "2026-11-10"
    }
+  },
+  {
+   "id": "app-builder-what",
+   "title": "What is the Lavenders app builder and how does a business use it?",
+   "description": "A tool to build a web store and Android app",
+   "slug": "what-is-the-lavenders-app-builder-and-how-does-a-business-use-it",
+   "date": "2026-11-16",
+   "devto": null,
+   "ar": {
+    "title": "ما هو بناء التطبيق لاڤندرز؟",
+    "description": "بناء التطبيق لاڤندرز هو أداة داخل لاڤندرز تبني متجرًا عبر الإنترنت وتطبيق أندرويد للعملاء.",
+    "date": "2026-11-16"
+   }
   }
  ],
  "failed": {
