@@ -61,7 +61,7 @@ const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
 const GSI_CLIENT_ID='776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
 const STORE_PAGE='https://lavndrs120.github.io/store.html';
 const G_SCOPES='https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
-let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('lavndr_email')||''}catch(e){}
+let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('appb_token')||sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('appb_email')||sessionStorage.getItem('lavndr_email')||''}catch(e){}
 let S={rules:{minValue:4.275,maxItems:9},ents:[],builds:[],cur:null,tick:null,active:{}};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -83,7 +83,7 @@ async function api(action,params,post){
     return j||{error:'رد فارغ'};
   }catch(e){return {error:'فشل الاتصال — تحقق من الإنترنت'}}
 }
-function logout(){TOKEN='';EMAIL='';try{sessionStorage.removeItem('lavndr_token');sessionStorage.removeItem('lavndr_email')}catch(e){}showLogin('سجّل دخولك للمتابعة')}
+function logout(){TOKEN='';EMAIL='';try{sessionStorage.removeItem('appb_token');sessionStorage.removeItem('appb_email')}catch(e){}showLogin('سجّل دخولك للمتابعة')}
 function showLogin(m){
   $('app').innerHTML='<div class="card" style="text-align:center"><h1>بناء تطبيقك</h1><p class="sub">'+esc(m||'سجّل دخولك بحساب Google')+'</p><div id="gsi"></div></div>';
   if(window.LavndrApp&&typeof window.LavndrApp.signIn==='function'){window.handleCredentialResponse=onCred;$('gsi').innerHTML='<button class="btn" onclick="LavndrApp.signIn()">تسجيل الدخول بحساب Google</button>';return}
@@ -92,10 +92,10 @@ function showLogin(m){
 async function onCred(resp){
   $('app').innerHTML='<div class="card sub">جاري التحقق…</div>';
   try{
-    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential})});
+    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential,scope:'builder'})});
     const j=await r.json();
     if(!j.token){showLogin('فشل تسجيل الدخول — حاول مرة أخرى');return}
-    TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('lavndr_token',TOKEN);sessionStorage.setItem('lavndr_email',EMAIL)}catch(e){}
+    TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('appb_token',TOKEN);sessionStorage.setItem('appb_email',EMAIL)}catch(e){}
     boot();
   }catch(e){showLogin('فشل الاتصال — حاول مرة أخرى')}
 }
