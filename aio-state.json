@@ -92,7 +92,5 @@
    }
   }
  ],
- "failed": {
-  "golden-certificate-what": 2
- }
+ "failed": {}
 }

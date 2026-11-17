@@ -105,6 +105,9 @@ def call_llm(topic, facts, lang="en"):
 # ───────────────────────── validation ─────────────────────────
 BANNED = re.compile(r"\b(guarantee[sd]?|risk[- ]free|get rich|passive income|double your|high returns?|roi|yield|earnings?|earn)\b", re.I)
 PROFIT = re.compile(r"\b(profits?|returns?)\b", re.I)
+# "guarantee" is the real name of one of the three verification conditions (financial, guarantee, documentary):
+# allow it only in that context so facts quoted from the reference data are not rejected.
+GUAR_OK = re.compile(r"\b(financial|documentary|verification|conditions?)\b[^.\n]{0,40}\bguarantee\b|\bguarantee\b[^.\n]{0,40}\b(financial|documentary|verification|conditions?)\b", re.I)
 ALLOWED_NEG = re.compile(r"(no|not|without|nor|never)[^.]{0,40}\b(profit|returns?)\b|\b(profit|returns?)\b[^.]{0,25}(not|never|no promise)", re.I)
 NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
@@ -126,8 +129,9 @@ def validate(draft, facts):
     words = len(draft["body_md"].split())
     if not DRY and (words < 140 or words > 900):
         errors.append("body length %d words" % words)
-    if BANNED.search(text):
-        errors.append("banned word: " + BANNED.search(text).group(0))
+    scan = GUAR_OK.sub(lambda m: re.sub(r"(?i)guarantee", "assurance", m.group(0)), text)
+    if BANNED.search(scan):
+        errors.append("banned word: " + BANNED.search(scan).group(0))
     for m in PROFIT.finditer(text):
         s = text[max(0, m.start() - 60):m.end() + 40]
         if not ALLOWED_NEG.search(s):
@@ -335,6 +339,7 @@ Return ONLY a JSON object: {"title": "...", "description": "...", "body_md": "..
 AR_BANNED = re.compile(r"(ضمان|مضمون|مضمونة|مخاطر\s*(?:منعدمة|معدومة)|دخل\s*سلبي|أرباح|ارباح|ربحية|مربح|مربحة|عوائد|عائد|اغتن|ثراء|تضاعف)")
 AR_PROFIT = re.compile(r"(ربح|أرباح|عائد|عوائد)")
 AR_NEG = re.compile(r"(لا|لن|ليس|ليست|دون|بدون|غير|عدم)[^.\n]{0,40}(ربح|أرباح|عائد|عوائد)|(ربح|أرباح|عائد|عوائد)[^.\n]{0,25}(غير مضمون|لا يُ|لا ي|ليس)")
+AR_GUAR_OK = re.compile(r"(شروط|شرط|مالي|المالي|توثيق|التوثيق|وثائق|المستندي)[^.\n]{0,30}ضمان|ضمان[^.\n]{0,30}(شروط|شرط|مالي|المالي|توثيق|التوثيق|وثائق|المستندي)")
 AR_DIG = str.maketrans("٠١٢٣٤٥٦٧٨٩٬٫", "0123456789,.")
 
 
@@ -355,9 +360,10 @@ def validate_ar(draft, facts):
     words = len(draft["body_md"].split())
     if not DRY and (words < 110 or words > 600):
         errors.append("body length %d words" % words)
-    if AR_BANNED.search(text):
-        m = AR_BANNED.search(text)
-        s = text[max(0, m.start() - 50):m.end() + 30]
+    scan = AR_GUAR_OK.sub(lambda m: m.group(0).replace("ضمان", "تأمين"), text)
+    if AR_BANNED.search(scan):
+        m = AR_BANNED.search(scan)
+        s = scan[max(0, m.start() - 50):m.end() + 30]
         if not AR_NEG.search(s):
             errors.append("banned wording: " + s.replace("\n", " "))
     for m in AR_PROFIT.finditer(text):
