@@ -22,11 +22,13 @@
 - [الشهادة الذهبية للبزنسات](https://lavndrs120.github.io/golden-certificate.html): شهادة اختيارية من الصندوق التشغيلي بعد 100 طلب موثّق؛ الطلب بـ 4.275 دولار وسبكها 36% من جملة الطلبات المعتمدة؛ بلا وعد بربح أو عائد.
 - [المؤشر الاستهلاكي](https://lavndrs120.github.io/consumer-index.html): ما هو المؤشر الاستهلاكي، وكيف يتحرك LAVNDR120، وكيف تقرأ بطاقته.
 - [أسئلة شائعة](https://lavndrs120.github.io/faq.html): 18 سؤالاً وجواباً عن المنظومة والباقات والتطبيق وما لا تقدمه المنصة.
+- [البيان الصحفي](https://lavndrs120.github.io/press.html): بيان صحفي عن المؤشر LAVNDR120 ومنشئ التطبيقات والشهادة الذهبية.
 
 ## English
 - [About Lavenders (LAVNDR120)](https://lavndrs120.github.io/en/about.html): what Lavenders is, how the index moves, terms, FAQ.
 - [The seven packages](https://lavndrs120.github.io/en/packages.html): Lava, Vindex, Magma, OMS, Reseller, Franchise, Tycoon with prices and seats.
 - [FAQ](https://lavndrs120.github.io/en/faq.html): short answers, including what the platform does not offer.
+- [Press release](https://lavndrs120.github.io/en/press.html): Lavenders reveals consumer behaviour from the real orders of 120 businesses; the app builder and golden certificate; what Lavenders is not.
 - [Privacy policy](https://lavndrs120.github.io/en/privacy.html): what data is collected, why, who processes it, and how to request deletion.
 - [App builder](https://lavndrs120.github.io/en/app-builder.html): builds a web store and Android app for a business inside its own Google account; 24-hour trial; customers order with an email code, the owner accepts or rejects.
 - [Golden certificate](https://lavndrs120.github.io/en/golden-certificate.html): an optional operating-fund certificate after 100 documented orders; each order valued at $4.275, minted with 36% of approved orders; no promise of profit or returns.
