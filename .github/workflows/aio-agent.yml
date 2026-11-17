@@ -1,7 +1,7 @@
 name: Lavenders AIO agent
 on:
   schedule:
-    - cron: '0 7 * * 1'   # every Monday 07:00 UTC
+    - cron: '0 7 * * *'   # every day 07:00 UTC (was Mondays only): one new insight per day
   workflow_dispatch: {}
 permissions:
   contents: write
