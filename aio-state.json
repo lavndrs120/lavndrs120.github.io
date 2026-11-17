@@ -90,6 +90,19 @@
     "description": "بناء التطبيق لاڤندرز هو أداة داخل لاڤندرز تبني متجرًا عبر الإنترنت وتطبيق أندرويد للعملاء.",
     "date": "2026-11-16"
    }
+  },
+  {
+   "id": "golden-certificate-what",
+   "title": "What is the golden certificate for businesses in Lavenders?",
+   "description": "Optional certificate for businesses in Lavenders",
+   "slug": "what-is-the-golden-certificate-for-businesses-in-lavenders",
+   "date": "2026-11-17",
+   "devto": "https://dev.to/lavenders/what-is-the-golden-certificate-for-businesses-in-lavenders-1o8p",
+   "ar": {
+    "title": "الشهادة الذهبية في لاڤندرز",
+    "description": "تعرف على الشهادة الذهبية في لاڤندرز وطريقة الحصول عليها",
+    "date": "2026-11-17"
+   }
   }
  ],
  "failed": {}
