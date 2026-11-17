@@ -191,9 +191,14 @@ async function boot(){
   S.rules=j.rules||S.rules;S.ents=j.entitlements||[];S.builds=j.builds||[];SHEETREQ=j.sheetRequests||{};SHAREWITH=j.shareWith||'';renderList();
 }
 function statusPill(b){const m={draft:'قيد الإنشاء',trial:'تجربة',paid:'قابل للنشر',expired:'انتهت التجربة'};return '<span class="pill '+esc(b.status)+'">'+(m[b.status]||esc(b.status))+'</span>'}
+function privCard(){return '<div class="card" style="border-color:rgba(143,240,200,.35)"><h2 style="margin-top:0">بياناتك لك</h2><div class="small" style="line-height:2">'+
+'• كل ما تُدخله (الصور، الأصناف، الأسعار، بيانات الدفع، الطلبات) يُنشأ ويُحفظ داخل <b>حساب جوجل الخاص بك</b>: الشيت، ومجلد الصور، والخلفية. أنت وحدك تتحكم فيه وتحذفه متى شئت.<br>'+
+'• لاڤندرز لا تحتفظ بنسخة من صورك أو أصنافك أو طلباتك. ما نقدّمه نسخة جاهزة من نظام الطلبات تعمل من حسابك أنت.<br>'+
+'• يبقى لدينا سجل تشغيلي صغير فقط ليعمل التفعيل والربط: بريد الدخول، واسم المتجر ونوعه، ورابط الخلفية ورمز الشيت، وحالة العضوية. وصورة البزنس تُستخدم كأيقونة أثناء بناء تطبيق الأندرويد فقط.<br>'+
+'• الانضمام إلى مؤشر السوق اختياري، ولا يحدث إلا حين ترسل الشيت بنفسك. عندها نجمع بيانات الطلبات فقط، دون كشف مصدرها في المؤشر العام.</div></div>'}
 function renderList(){
   clearInterval(S.tick);
-  let h='<h1>بناء تطبيقك</h1><p class="sub">متجر طلبات وتطبيق أندرويد باسم بزنسك، يعمل من حسابك أنت.</p>';
+  let h='<h1>بناء تطبيقك</h1><p class="sub">متجر طلبات وتطبيق أندرويد باسم بزنسك، يعمل من حسابك أنت.</p>'+privCard();
   if(!S.ents.length&&!S.builds.length){
     h+='<div class="card"><div class="msg info">بناء التطبيقات متاح لأعضاء OMS والريسلر والفرانشايز الفعّالين.</div><a class="btn sec" href="packages.html">عرض الباقات</a></div>';
     $('app').innerHTML=h;return;
@@ -214,7 +219,7 @@ function newBuild(){
 function renderEditor(){
   clearInterval(S.tick);
   const b=S.cur,slotKind=((S.ents.find(e=>e.slot===b.slot)||{}).kind)||'';
-  let h='<h1>'+(b.appId?'تعديل المتجر':'تطبيق جديد')+'</h1><p class="sub">بيانات البزنس والأصناف</p><div class="card">';
+  let h='<h1>'+(b.appId?'تعديل المتجر':'تطبيق جديد')+'</h1><p class="sub">بيانات البزنس والأصناف</p>'+privCard()+'<div class="card">';
   if(!slotKind&&!b.appId)h+='<label>نوع البزنس</label><select id="f_kind"><option value="services"'+(b.kind==='services'?' selected':'')+'>خدمات</option><option value="products"'+(b.kind==='products'?' selected':'')+'>منتجات</option></select>';
   h+='<label>اسم البزنس أو البراند</label><input id="f_name" maxlength="60" value="'+esc(b.name)+'">';
   const pay=b.pay||{};
