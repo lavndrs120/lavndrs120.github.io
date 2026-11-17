@@ -85,6 +85,36 @@ for fn in ("index.html", "about.html", "llms.txt"):
         t = t.replace("- Wikidata item: " + WD, "- Wikidata item: " + WD + "\n- Instagram: " + IG, 1)
     open(pth, "w", encoding="utf-8").write(t)
     nav += 1
+# link the new publishing profiles from the entity data (idempotent; runs after the Instagram link exists)
+EXTRA_PROFILES = [
+    ("Dev.to", "https://dev.to/lavenders"),
+    ("Hashnode", "https://lavenders120.hashnode.dev/"),
+]
+for fn in ("index.html", "about.html", "llms.txt"):
+    pth = os.path.join(ROOT, fn)
+    try:
+        t = open(pth, encoding="utf-8").read()
+    except Exception:  # noqa
+        continue
+    t0 = t
+    prev = IG
+    for label, url in EXTRA_PROFILES:
+        if url in t:
+            prev = url
+            continue
+        if fn.endswith(".html"):
+            if '"' + prev + '"' not in t:
+                break
+            t = t.replace('"' + prev + '"', '"' + prev + '", "' + url + '"', 1)
+        else:
+            line = "- " + ("Instagram" if prev == IG else dict((u, l) for l, u in EXTRA_PROFILES)[prev]) + ": " + prev
+            if line not in t:
+                break
+            t = t.replace(line, line + "\n- " + label + ": " + url, 1)
+        prev = url
+    if t != t0:
+        open(pth, "w", encoding="utf-8").write(t)
+        nav += 1
 # core message: consumer behaviour, applied to the main static pages (idempotent exact-text replacements)
 CORE_AR = "لاڤندرز تكشف سلوك المستهلك: ماذا يطلب الناس فعلاً، ومتى، ومن أي بزنس، من الطلبات الحقيقية لـ120 بزنس وبراند، وتحوّل ذلك إلى مؤشر حي LAVNDR120 وتقارير للبزنسات والبراندات."
 CORE_EN = "Lavenders reveals consumer behaviour: what people actually order, when, and from which businesses, drawn from the real orders of 120 businesses and brands, turned into a live index (LAVNDR120) and reports for businesses and brands."
