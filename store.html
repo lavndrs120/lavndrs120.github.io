@@ -96,7 +96,17 @@ const t=k=>TX[LG][k];
 function toggleLang(){LG=LG==='ar'?'en':'ar';try{localStorage.setItem('st_lang',LG)}catch(e){}applyLang();if(ST)home()}
 function applyLang(){document.documentElement.lang=LG;document.documentElement.dir=LG==='ar'?'rtl':'ltr';$('lg').textContent=LG==='ar'?'EN':'عربي';$('ft').textContent=t('by');const b=$('inst');b.textContent=t('inst');b.style.display=(window.matchMedia('(display-mode: standalone)').matches||/LavndrApp|; wv\)/i.test(navigator.userAgent))?'none':'block'}
 let cbN=0;
-function call(params){return new Promise(res=>{
+async function callF(params){
+  const cb='__f'+(++cbN);
+  const r=await fetch(BACK+'?'+new URLSearchParams(Object.assign({callback:cb},params)).toString(),{credentials:'omit',redirect:'follow'});
+  const tx=await r.text(),i=tx.indexOf('('),k=tx.lastIndexOf(')');
+  if(i<0||k<i)throw new Error('bad');
+  return JSON.parse(tx.slice(i+1,k));
+}
+async function call(params){
+  try{return await callF(params)}catch(e){return await callJ(params)}
+}
+function callJ(params){return new Promise(res=>{
   const cb='__cb'+(++cbN)+'_'+Date.now(),s=document.createElement('script');let done=false;
   const fin=r=>{if(done)return;done=true;clearTimeout(tm);delete window[cb];s.remove();res(r)};
   window[cb]=fin;const tm=setTimeout(()=>fin({error:t('net')}),25000);
