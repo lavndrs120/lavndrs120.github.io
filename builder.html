@@ -198,7 +198,7 @@ function privCard(){return '<div class="card" style="border-color:rgba(143,240,2
 '• الانضمام إلى مؤشر السوق اختياري، ولا يحدث إلا حين ترسل الشيت بنفسك. عندها نجمع بيانات الطلبات فقط، دون كشف مصدرها في المؤشر العام.</div></div>'}
 function renderList(){
   clearInterval(S.tick);
-  let h='<h1>بناء تطبيقك</h1><p class="sub">متجر طلبات وتطبيق أندرويد باسم بزنسك، يعمل من حسابك أنت.</p>'+privCard();
+  let h='<h1>بناء تطبيقك</h1><p class="sub">متجر طلبات وتطبيق أندرويد باسم بزنسك، يعمل من حسابك أنت.</p>'+privCard()+'<div class="card"><b>عضو فرانشايز أو تايكون؟</b><div class="small" style="margin:6px 0 10px">أنشئ مؤشر سوقك المستقل (نسخة من LAVNDR120) داخل حسابك، وأضف إليه بزنساتك.</div><a class="btn sec" href="market-builder.html">مؤشر سوقك</a></div>';
   if(!S.ents.length&&!S.builds.length){
     h+='<div class="card"><div class="msg info">بناء التطبيقات متاح لأعضاء OMS والريسلر والفرانشايز الفعّالين.</div><a class="btn sec" href="packages.html">عرض الباقات</a></div>';
     $('app').innerHTML=h;return;

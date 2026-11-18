@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>فحص الجلسة — لاڤندرز</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>body{background:#04040A;color:#fff;font-family:system-ui,sans-serif;padding:16px;line-height:1.8}pre{background:#111;border:1px solid #333;border-radius:10px;padding:10px;white-space:pre-wrap;word-break:break-all;font-size:12px;direction:ltr;text-align:left}button{padding:10px 16px;border-radius:20px;border:0;background:#C9A84C;color:#111;font-weight:700;margin:4px 0}h1{font-size:18px}.s{color:#9a9a9a;font-size:13px}</style></head>
+<body>
+<h1>فحص الجلسة (للتشخيص فقط)</h1>
+<p class="s">سجّل الدخول بزر جوجل، وسيجرّب الطلبات التالية ويعرض ردّ الخادم الخام. لا يظهر الرمز السري. صوّر الشاشة وأرسلها لي.</p>
+<div id="gsi"></div>
+<div id="out"></div>
+<script>
+const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
+const CID='776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
+const out=document.getElementById('out');
+function log(t,o){const h=document.createElement('div');h.innerHTML='<b>'+t+'</b><pre></pre>';h.querySelector('pre').textContent=typeof o==='string'?o:JSON.stringify(o,null,1);out.appendChild(h)}
+async function get(action,tok,extra){try{const r=await fetch(WORKER_URL+'?'+new URLSearchParams(Object.assign({action:action,token:tok},extra||{})));const t=await r.text();return 'HTTP '+r.status+' → '+t.slice(0,300)}catch(e){return 'FETCH ERROR '+e.message}}
+async function run(scope,resp){
+  out.innerHTML='';log('وضع الدخول',scope||'(عادي)');
+  let j;try{const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential,scope:scope})});const t=await r.text();try{j=JSON.parse(t)}catch(e){}log('login','HTTP '+r.status+' → '+(j?JSON.stringify({email:j.email,role:j.role,hasToken:!!j.token,error:j.error}):t.slice(0,300)))}catch(e){log('login','FETCH ERROR '+e.message);return}
+  if(!j||!j.token)return;
+  const t=j.token;
+  log('1) appb_my_builds',await get('appb_my_builds',t));
+  log('2) my_subscriptions',await get('my_subscriptions',t));
+  log('3) subscription_status',await get('subscription_status',t));
+  log('4) data',await get('data',t));
+  await new Promise(r=>setTimeout(r,2000));
+  log('5) appb_my_builds بعد ثانيتين',await get('appb_my_builds',t));
+  try{log('مفاتيح الجلسة بالمتصفح',Object.keys(sessionStorage).filter(k=>/lavndr|appb/.test(k)).map(k=>k+(sessionStorage.getItem(k)?' = (موجود)':' = (فارغ)')))}catch(e){}
+}
+let mode='';
+function start(m){mode=m;document.getElementById('gsi').innerHTML='';google.accounts.id.initialize({client_id:CID,callback:r=>run(mode,r)});google.accounts.id.renderButton(document.getElementById('gsi'),{theme:'filled_black',size:'large',shape:'pill',locale:'ar'})}
+</script>
+<button onclick="start('')">فحص بدخول عادي (مثل الداشبورد)</button><br>
+<button onclick="start('builder')">فحص بدخول البناء</button>
+</body></html>
