@@ -1,0 +1,24 @@
+Copyright (c) 2026 Lavenders (LAVNDR120). All rights reserved.
+حقوق النشر © 2026 لاڤندرز (LAVNDR120). جميع الحقوق محفوظة.
+
+This repository is made publicly viewable only so that the website can be served
+and so that people and AI tools can read its public information.
+No licence is granted to copy, reproduce, modify, redistribute, host, resell or
+create derivative works from the code, designs, text, brand names, logos or
+other materials in this repository, in whole or in part, without prior written
+permission from the owner.
+
+يُتاح هذا المستودع للاطلاع العام فقط ليعمل الموقع وليقرأ الناس وأدوات الذكاء
+الاصطناعي المعلومات المنشورة فيه. لا يُمنح أي ترخيص بنسخ الكود أو التصاميم أو
+النصوص أو أسماء العلامات والشعارات أو غيرها من المواد، أو تعديلها أو إعادة
+نشرها أو استضافتها أو بيعها أو إنشاء أعمال مشتقة منها، كلياً أو جزئياً، دون
+إذن كتابي مسبق من المالك.
+
+The templates that the Lavenders tools copy into a user's own Google account
+(for example the order-system backend and the market-index backend) may be used
+only through those tools, for the user's own business.
+القوالب التي تنسخها أدوات لاڤندرز إلى حساب جوجل الخاص بالمستخدم (مثل خلفية
+نظام الطلبات وخلفية مؤشر السوق) تُستخدم عبر تلك الأدوات فقط ولنشاط المستخدم نفسه.
+
+Contact / للتواصل: https://lavndrs120.github.io/
+Security reports: see SECURITY.md

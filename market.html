@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>مؤشر سوق — لاڤندرز</title>
+<style>
+:root{--void:#04040A;--gold:#C9A84C;--gold2:#F0D080;--em:#10B981;--red:#F43F5E;--dim:rgba(255,255,255,.55)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+.card{width:100%;max-width:420px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:26px 22px;text-align:center}
+.eb{font-size:11px;letter-spacing:2px;color:var(--gold2)}
+.nm{font-size:22px;font-weight:900;margin:6px 0 2px}
+.lbl{font-size:12px;color:var(--dim);margin-top:2px}
+.nav{font-size:52px;font-weight:900;margin:14px 0 2px;direction:ltr}
+.pos{color:var(--em)}.neg{color:var(--red)}
+.ch{font-size:15px;direction:ltr}
+.meta{display:flex;justify-content:space-around;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+.meta div{font-size:11px;color:var(--dim)}.meta b{display:block;font-size:15px;color:#fff;margin-top:2px;direction:ltr}
+.ft{font-size:11px;color:var(--dim);margin-top:16px;line-height:1.8}
+.err{color:#ffb3c0;font-size:14px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="card" id="c"><div class="lbl">جاري التحميل…</div></div>
+<script>
+const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
+const OK=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let n=0;
+function jsonp(params){return new Promise((res,rej)=>{const cb='__m'+(++n)+'_'+Date.now(),s=document.createElement('script');const t=setTimeout(()=>{x();rej(1)},30000);function x(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{x();res(r)};s.onerror=()=>{x();rej(1)};s.src=BACK+'?'+new URLSearchParams(Object.assign({callback:cb},params));document.head.appendChild(s)})}
+async function get(){
+  try{const r=await fetch(BACK+'?'+new URLSearchParams({callback:'cb'}),{credentials:'omit'});const t=await r.text(),i=t.indexOf('('),k=t.lastIndexOf(')');if(i<0||k<i)throw 0;return JSON.parse(t.slice(i+1,k))}
+  catch(e){return await jsonp({})}
+}
+function draw(d){
+  const x=d.index||{},ch=parseFloat(x.change)||0,c=ch>=0?'pos':'neg',a=ch>=0?'▲':'▼',ts=(d.timestamp||'').slice(0,16).replace('T',' ');
+  $('c').innerHTML='<div class="eb">المؤشر الاستهلاكي</div><div class="nm">'+esc(d.market||'')+'</div><div class="lbl">قيمة الطلبات لحظة بلحظة</div>'+
+  '<div class="nav '+c+'">$'+esc(x.NAV||'0.00')+'</div><div class="ch '+c+'">'+a+' '+esc(String(x.change||'0.00').replace(/^[+-]/,''))+' ('+esc(String(x.changePercent||'0.00').replace(/^[+-]/,''))+'%)</div>'+
+  '<div class="meta"><div>High<b>$'+esc(x.dayHigh||'0.00')+'</b></div><div>Low<b>$'+esc(x.dayLow||'0.00')+'</b></div><div>Volatility<b>'+esc(x.volatility||'0.00')+'%</b></div></div>'+
+  '<div class="ft">'+(d.businesses?esc(d.businesses)+' بزنس وبراند · ':'')+(ts?'آخر تحديث '+esc(ts)+' UTC<br>':'')+'مؤشر مستقل مبني من طلبات حقيقية. ليس أداة تداول ولا نصيحة استثمارية، ولا يتضمن وعداً بربح أو عائد.<br>مبني بأداة لاڤندرز · LAVNDR120</div>';
+}
+async function load(){
+  if(!OK){$('c').innerHTML='<div class="err">الرابط غير صحيح.</div>';return}
+  try{const d=await get();if(d&&d.index)draw(d);else $('c').innerHTML='<div class="err">'+esc((d&&d.error)||'المؤشر غير متاح الآن')+'</div>'}
+  catch(e){$('c').innerHTML='<div class="err">تعذّر الاتصال. أعد المحاولة بعد قليل.</div>'}
+}
+load();setInterval(load,120000);
+</script>
+</body>
+</html>

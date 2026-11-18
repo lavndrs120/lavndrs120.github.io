@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>مؤشر سوقك — لاڤندرز</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+
+:root{--void:#04040A;--glass:rgba(255,255,255,.04);--gb:rgba(255,255,255,.09);--gold:#C9A84C;--gold2:#F0D080;--em:#10B981;--red:#F43F5E;--text:rgba(255,255,255,.92);--dim:rgba(255,255,255,.5);--faint:rgba(255,255,255,.18)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--void);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;min-height:100vh;overflow-x:hidden;line-height:1.6}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background:linear-gradient(rgba(6,6,12,.88),rgba(6,6,12,.7) 40%,rgba(6,6,12,.85)),url(bg-m.jpg) center/cover no-repeat}
+@media(min-width:900px){body::after{background:linear-gradient(rgba(6,6,12,.8),rgba(6,6,12,.72)),url(bg-d.jpg) center/cover no-repeat}}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 90px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.logo{font-size:20px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+a.back{color:var(--dim);font-size:13px;text-decoration:none}
+h1{font-size:22px;margin-bottom:4px}h2{font-size:16px;margin-bottom:10px;color:var(--gold2)}
+.sub{color:var(--dim);font-size:13px;margin-bottom:16px}
+.card{background:var(--glass);border:1px solid var(--gb);border-radius:16px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--dim);margin:10px 0 4px}
+input,textarea,select{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--gb);border-radius:10px;color:#fff;font:inherit;font-size:14px;padding:10px 12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:60px}select option{background:#12121c}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:12px;padding:11px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#C9A84C,#E6C46A);color:#1a1405;width:100%;margin-top:12px;text-decoration:none}
+.btn.sec{background:var(--glass);border:1px solid var(--gb);color:var(--text)}
+.btn.ok{background:var(--em);color:#04150e}.btn.bad{background:rgba(244,63,94,.16);border:1px solid rgba(244,63,94,.4);color:#ffb3c0}
+.btn.sm{width:auto;padding:7px 12px;font-size:12px;margin-top:0}.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:13px;margin-top:10px;padding:9px 12px;border-radius:10px;display:none;line-height:1.7}
+.msg.err{display:block;background:rgba(244,63,94,.12);color:#ffb3c0;border:1px solid rgba(244,63,94,.3)}
+.msg.good{display:block;background:rgba(16,185,129,.12);color:#8ff0c8;border:1px solid rgba(16,185,129,.3)}
+.msg.info{display:block;background:rgba(201,168,76,.1);color:var(--gold2);border:1px solid rgba(201,168,76,.28)}
+.pill{display:inline-block;font-size:11px;padding:2px 10px;border-radius:99px;border:1px solid var(--gb);color:var(--dim)}
+.pill.trial{color:var(--gold2);border-color:rgba(201,168,76,.5)}.pill.paid{color:#8ff0c8;border-color:rgba(16,185,129,.5)}.pill.expired{color:#ffb3c0;border-color:rgba(244,63,94,.5)}
+.item{border:1px solid var(--gb);border-radius:14px;padding:12px;margin-bottom:10px;background:rgba(255,255,255,.02)}
+.item-h{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--gold2);margin-bottom:4px}
+.val{font-size:12px;margin-top:6px;color:var(--dim)}.val.low{color:#ffb3c0}.val.good{color:#8ff0c8}
+.thumb{width:64px;height:64px;border-radius:12px;object-fit:cover;background:rgba(255,255,255,.06);border:1px solid var(--gb);flex:none}
+.imgrow{display:flex;gap:10px;align-items:center;margin-top:10px}
+.imgrow .fbtn{font-size:12px;color:var(--gold2);cursor:pointer;border:1px dashed rgba(201,168,76,.5);padding:8px 12px;border-radius:10px}
+.imgrow input{display:none}
+.build{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.small{font-size:12px;color:var(--dim)}
+.link{color:var(--gold2);word-break:break-all;direction:ltr;display:block;font-size:13px}
+.ord{border-bottom:1px solid var(--gb);padding:10px 0}.ord:last-child{border:none}
+.step{display:flex;gap:10px;align-items:center;padding:7px 0;font-size:14px;color:var(--dim)}
+.step.run{color:var(--gold2)}.step.done{color:#8ff0c8}.step.fail{color:#ffb3c0}
+.dot{width:18px;text-align:center}
+#gsi{display:flex;justify-content:center;margin-top:16px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="logo">LAVNDR120</div><a class="back" href="index.html?home=1">← الرئيسية</a></div>
+  <div id="app"></div>
+</div>
+<script>
+
+const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
+const GSI_CLIENT_ID='776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
+const G_SCOPES='https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const LIMITS={franchise:1,tycoon:20,tycoon_sector:400};
+const PREFIX='LAVNDR Market — ';
+let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('appb_token')||sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('appb_email')||sessionStorage.getItem('lavndr_email')||''}catch(e){}
+let S={allowed:0,tiers:[],markets:[],cur:null};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function showMsg(id,t,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'err');e.textContent=t}
+function copyTxt(t){try{navigator.clipboard.writeText(t)}catch(e){}}
+async function api(action,params){
+  try{const r=await fetch(WORKER_URL+'?'+new URLSearchParams(Object.assign({},params||{},{action:action,token:TOKEN})));const j=await r.json();
+    if(j&&(j.code===401||j.error==='Invalid token')){logout();return {error:'انتهت الجلسة'}}return j||{error:'رد فارغ'}}
+  catch(e){return {error:'فشل الاتصال — تحقق من الإنترنت'}}
+}
+function logout(){TOKEN='';EMAIL='';try{sessionStorage.removeItem('appb_token');sessionStorage.removeItem('appb_email')}catch(e){}showLogin('سجّل دخولك للمتابعة')}
+function showLogin(m){
+  $('app').innerHTML='<div class="card" style="text-align:center"><h1>مؤشر سوقك</h1><p class="sub">'+esc(m||'سجّل دخولك بحساب Google')+'</p><div id="gsi"></div></div>';
+  if(window.LavndrApp&&typeof window.LavndrApp.signIn==='function'){window.handleCredentialResponse=onCred;$('gsi').innerHTML='<button class="btn" onclick="LavndrApp.signIn()">تسجيل الدخول بحساب Google</button>';return}
+  const go=()=>{if(window.google&&google.accounts&&google.accounts.id){google.accounts.id.initialize({client_id:GSI_CLIENT_ID,callback:onCred});google.accounts.id.renderButton($('gsi'),{theme:'filled_black',size:'large',shape:'pill',locale:'ar'})}else setTimeout(go,300)};go();
+}
+async function onCred(resp){
+  $('app').innerHTML='<div class="card sub">جاري التحقق…</div>';
+  try{
+    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential,scope:'builder'})});
+    const j=await r.json();
+    if(!j.token){showLogin('فشل تسجيل الدخول — حاول مرة أخرى');return}
+    TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('appb_token',TOKEN);sessionStorage.setItem('appb_email',EMAIL)}catch(e){}
+    boot();
+  }catch(e){showLogin('فشل الاتصال — حاول مرة أخرى')}
+}
+
+
+let gTok='',gExp=0,gClient=null;
+function gAuth(){
+  return new Promise((res,rej)=>{
+    if(gTok&&Date.now()<gExp-60000)return res(gTok);
+    // داخل تطبيق الأندرويد: Google تمنع الموافقة داخل WebView، فنستعمل النافذة الأصلية عبر الجسر LavndrApp
+    if(window.LavndrApp){
+      if(typeof window.LavndrApp.authorize!=='function')return rej(new Error('حدّث تطبيق لاڤندرز إلى آخر إصدار لإكمال هذه الخطوة'));
+      window.__lvnAuth=function(r){
+        try{if(typeof r==='string')r=JSON.parse(r)}catch(e){r={error:'bad'}}
+        if(!r||r.error||!r.accessToken)return rej(new Error('لم تتم الموافقة على الصلاحيات'));
+        gTok=r.accessToken;gExp=Date.now()+(Number(r.expiresIn)||3000)*1000;res(gTok)};
+      try{window.LavndrApp.authorize(G_SCOPES)}catch(e){rej(new Error('تعذّر فتح نافذة الموافقة'))}
+      return;
+    }
+    if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error('تعذّر تحميل خدمة جوجل — حدّث الصفحة'));
+    gClient=google.accounts.oauth2.initTokenClient({client_id:GSI_CLIENT_ID,scope:G_SCOPES,hint:EMAIL||undefined,callback:r=>{
+      if(r.error)return rej(new Error('لم تتم الموافقة على الصلاحيات'));
+      try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(e){}gTok=r.access_token;gExp=Date.now()+(Number(r.expires_in)||3000)*1000;res(gTok)},
+      error_callback:e=>rej(new Error('أُغلقت نافذة الموافقة'))});
+    var seen=false;try{seen=localStorage.getItem('lvn_g_ok')===EMAIL&&!!EMAIL}catch(e){}gClient.requestAccessToken({prompt:seen?'':'consent'});
+  });
+}
+async function gf(url,opt){
+  const t=await gAuth();opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+t},opt.headers||{});
+  const r=await fetch(url,opt);let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok){
+    const m=(j.error&&j.error.message)||('خطأ '+r.status);
+    if(/Apps Script API|has not enabled|not been used in project|accessNotConfigured/i.test(m)){const e=new Error('apiOff');e.apiOff=true;e.detail=m;throw e}
+    const e=new Error(m);e.status=r.status;throw e;
+  }
+  return j;
+}
+
+async function listMarkets(){
+  const q="name contains '"+PREFIX.replace(/'/g,"\\'")+"' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false";
+  const j=await gf('https://www.googleapis.com/drive/v3/files?pageSize=500&fields=files(id,name)&q='+encodeURIComponent(q));
+  return (j.files||[]).filter(f=>f.name.indexOf(PREFIX)===0).map(f=>({sheetId:f.id,name:f.name.slice(PREFIX.length)}));
+}
+async function getVals(sheetId,range){const j=await gf('https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/'+encodeURIComponent(range));return j.values||[]}
+async function putVals(sheetId,range,values){await gf('https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/'+encodeURIComponent(range)+'?valueInputOption=RAW',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:values})})}
+async function clearVals(sheetId,range){await gf('https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values/'+encodeURIComponent(range)+':clear',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})}
+function jsonp(url,params,timeout){
+  return new Promise((resolve,reject)=>{
+    const cb='cb_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),s=document.createElement('script');
+    const t=setTimeout(()=>{clean();reject(new Error('timeout'))},timeout||15000);
+    function clean(){try{delete window[cb]}catch(e){window[cb]=undefined}if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t)}
+    window[cb]=r=>{clean();resolve(r)};s.onerror=()=>{clean();reject(new Error('load'))};
+    s.src=url+(url.indexOf('?')>-1?'&':'?')+new URLSearchParams(Object.assign({},params,{callback:cb}));document.body.appendChild(s);
+  });
+}
+async function callBack(url,params){
+  try{const r=await fetch(url+'?'+new URLSearchParams(Object.assign({callback:'cb'},params)),{credentials:'omit'});const t=await r.text(),i=t.indexOf('('),k=t.lastIndexOf(')');if(i<0||k<i)throw 0;return JSON.parse(t.slice(i+1,k))}
+  catch(e){return await jsonp(url,params,25000)}
+}
+
+// ───── الصفحة الرئيسية ─────
+function privNote(){return '<div class="card" style="border-color:rgba(143,240,200,.35)"><h2 style="margin-top:0;font-size:16px">مؤشرك لك</h2><div class="small" style="line-height:2">• المؤشر يُنشأ داخل <b>حساب جوجل الخاص بك</b> (شيت وخلفية Apps Script). أنت وحدك تتحكم فيه وتحذفه متى شئت.<br>• هو <b>مؤشر مستقل</b>: لا يرتبط بمؤشر لاڤندرز الرئيسي ولا يرسل إليه شيئاً، ولاڤندرز لا تحتفظ بنسخة منه.<br>• يضم حتى 120 بزنساً وبراند، ولا يعرض الرابط العام أسماءهم ولا بيانات عملائهم.<br>• المؤشر يقيس نشاط الطلبات فقط، وليس أداة تداول، ولا يتضمن وعداً بربح أو عائد.</div></div>'}
+async function boot(){
+  if(!TOKEN){showLogin();return}
+  $('app').innerHTML='<div class="card sub">جاري التحقق من عضويتك…</div>';
+  const j=await api('my_subscriptions');
+  if(j.error){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(j.error)+'</div><button class="btn sec" onclick="boot()">إعادة المحاولة</button></div>';return}
+  const act=((j.items)||[]).filter(i=>i.stage==='active'&&LIMITS[i.tier]);
+  S.tiers=act.map(i=>i.tier);S.allowed=act.reduce((a,i)=>a+LIMITS[i.tier],0);
+  renderHome();
+}
+async function renderHome(){
+  let h='<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote();
+  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="packages.html">عرض الباقات</a></div>';$('app').innerHTML=h;return}
+  $('app').innerHTML=h+'<div class="card sub">جاري تحميل مؤشراتك… (قد تُطلب موافقة جوجل)</div>';
+  try{S.markets=await listMarkets()}catch(e){$('app').innerHTML=h+'<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">إعادة المحاولة</button></div>';return}
+  h+='<div class="card"><b>مؤشراتك: '+S.markets.length+' / '+S.allowed+'</b>';
+  if(S.markets.length<S.allowed)h+='<button class="btn" style="margin-top:12px" onclick="renderNew()">+ إنشاء مؤشر جديد</button>';
+  else h+='<div class="small" style="margin-top:8px">وصلت إلى الحد المسموح لعضويتك.</div>';
+  h+='</div>';
+  S.markets.forEach((m,i)=>{h+='<div class="card build" onclick="openMarket('+i+')"><div><b>'+esc(m.name)+'</b></div><span class="small">فتح ›</span></div>'});
+  $('app').innerHTML=h;
+}
+function renderNew(){
+  $('app').innerHTML='<h1>مؤشر جديد</h1><p class="sub">اسم المؤشر الذي سيظهر على بطاقته</p><div class="card"><label>اسم المؤشر</label><input id="mname" maxlength="60" placeholder="مثال: سوق المطاعم"><div class="small" style="margin-top:8px">يُنشأ المؤشر في حسابك: '+esc(EMAIL)+'</div><button class="btn" style="margin-top:12px" onclick="createMarket()">إنشاء</button><button class="btn sec" onclick="renderHome()">رجوع</button><div id="m1" class="msg"></div></div>';
+}
+const STEPS=['الموافقة على الصلاحيات','إنشاء شيت المؤشر','إنشاء الخلفية في Apps Script','نشر الخلفية','حفظ الإعدادات'];
+function stepsUI(n,state,msg){
+  let h='<h1>جاري إنشاء مؤشرك</h1><p class="sub">لا تُغلق الصفحة.</p><div class="card">';
+  STEPS.forEach((s,i)=>{const c=i<n?'done':(i===n?(state||'run'):'');h+='<div class="step '+c+'"><span class="dot">'+(i<n?'✓':(i===n?(state==='fail'?'✕':'…'):'○'))+'</span>'+esc(s)+'</div>'});
+  h+='</div>';if(msg)h+='<div class="msg err" style="display:block">'+esc(msg)+'</div><button class="btn sec" onclick="renderHome()">رجوع</button>';
+  $('app').innerHTML=h;
+}
+function rid(){const a=new Uint8Array(6);crypto.getRandomValues(a);return 'm'+Array.from(a).map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function createMarket(){
+  const name=($('mname').value||'').trim();
+  if(name.length<2){showMsg('m1','اكتب اسماً من حرفين على الأقل');return}
+  if(S.markets.length>=S.allowed){showMsg('m1','وصلت إلى الحد المسموح');return}
+  let n=0;
+  try{
+    stepsUI(0);await gAuth();n=1;stepsUI(1);
+    const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+name},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
+    const sheetId=s.spreadsheetId;
+    await gf('https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
+      {range:'Businesses!A1',values:[['Name','SheetId','Added']]},{range:'Totals!A1',values:[['SheetId','Sum','Count','UpdatedAt','Readable']]},{range:'Snapshots!A1',values:[['Time','NAV']]}]})});
+    n=2;stepsUI(2);
+    const [c,m]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب المؤشر');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
+    const cfg={id:rid(),name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
+    const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
+    const pr=await gf('https://script.googleapis.com/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:PREFIX+name})});
+    await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:m}]})});
+    const v=await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/versions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:'market '+new Date().toISOString()})});
+    n=3;stepsUI(3);
+    const d=await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({versionNumber:v.versionNumber,manifestFileName:'appsscript',description:'market'})});
+    const ep=(d.entryPoints||[]).find(e=>e.entryPointType==='WEB_APP');
+    const url=(ep&&ep.webApp&&ep.webApp.url)||('https://script.google.com/macros/s/'+d.deploymentId+'/exec');
+    n=4;stepsUI(4);
+    await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:pr.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
+    S.markets=await listMarkets();
+    const i=S.markets.findIndex(x=>x.sheetId===sheetId);openMarket(i<0?0:i);
+  }catch(e){
+    const msg=e.apiOff?'فعّل Apps Script API من إعدادات حسابك: script.google.com/home/usersettings ثم أعد المحاولة':(e.message||'فشل غير متوقع');
+    stepsUI(n,'fail',msg);
+  }
+}
+
+// ───── صفحة مؤشر واحد ─────
+const SHEETRX=/^[A-Za-z0-9_-]{20,80}$/;
+async function openMarket(i){
+  const m=S.markets[i];if(!m){renderHome();return}S.cur=m;
+  $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
+  try{
+    const cfg=JSON.parse(((await getVals(m.sheetId,'Config!A1'))[0]||[])[0]||'null');
+    if(!cfg)throw new Error('إعدادات المؤشر غير موجودة');
+    m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
+    renderMarket();checkHealth();
+  }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
+}
+function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
+function renderMarket(){
+  const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
+  let h='<h1>'+esc(m.name)+'</h1><p class="sub">مؤشر مستقل · '+n+' / 120 بزنس</p>';
+  h+='<div class="card" id="hcard"><h2>حالة المؤشر</h2><div class="small">جاري الفحص…</div></div>';
+  h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
+  h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
+  h+='<div class="card"><h2>البزنسات ('+n+')</h2>';
+  if(!n)h+='<div class="small">لم تُضف بزنسات بعد.</div>';
+  (m.biz||[]).forEach((r,i)=>{if(r&&r[1])h+='<div class="ord"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>'+esc(r[0]||'—')+'</span><button class="btn sec sm" onclick="rmBiz('+i+')">حذف</button></div></div>'});
+  h+='</div>';
+  h+='<div class="card"><h2>الشيت الكامل</h2><a class="link" href="https://docs.google.com/spreadsheets/d/'+esc(m.sheetId)+'" target="_blank" rel="noopener">فتح الشيت في حسابك</a></div>';
+  h+='<button class="btn sec" onclick="renderHome()">رجوع</button>';
+  $('app').innerHTML=h;
+}
+async function checkHealth(){
+  const m=S.cur,el=$('hcard');if(!el)return;
+  try{
+    const r=await callBack(m.cfg.url,{action:'health'});
+    if(r&&r.status==='ok'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل · بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات مقبولة '+r.orders+'</div><div class="small" style="margin-top:8px;line-height:1.9">إن ظهر بزنس غير مقروء فالسبب غالباً أن شيته لم يُشارك معك بعد.</div><button class="btn sec sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل التحديث التلقائي (مرة واحدة)</button>';return}
+    throw 0;
+  }catch(e){
+    el.innerHTML='<h2>تفعيل المؤشر</h2><div class="small" style="line-height:1.9">مرة واحدة فقط: اضغط الزر، ثم في صفحة جوجل اختر حسابك ← «متقدم» ← «الانتقال» ← «السماح». بعدها اضغط «تحديث».</div><button class="btn ok sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل</button> <button class="btn sec sm" onclick="checkHealth()">تحديث</button>';
+  }
+}
+async function writeBiz(){
+  const m=S.cur,rows=(m.biz||[]).filter(r=>r&&r[1]);
+  await clearVals(m.sheetId,'Businesses!A2:C121');
+  if(rows.length)await putVals(m.sheetId,'Businesses!A2',rows.map(r=>[r[0]||'',r[1],r[2]||'']));
+  m.biz=rows;
+}
+async function addBiz(){
+  const m=S.cur,name=($('bname').value||'').trim(),sid=($('bsid').value||'').trim();
+  if(!name){showMsg('m2','اكتب اسم البزنس');return}
+  if(!SHEETRX.test(sid)){showMsg('m2','رمز الشيت غير صحيح');return}
+  if((m.biz||[]).some(r=>r&&r[1]===sid)){showMsg('m2','هذا الشيت مضاف مسبقاً');return}
+  if((m.biz||[]).filter(r=>r&&r[1]).length>=120){showMsg('m2','وصل المؤشر إلى 120 بزنساً');return}
+  showMsg('m2','جاري الإضافة…','info');
+  try{(m.biz=m.biz||[]).push([name,sid,new Date().toISOString().slice(0,10)]);await writeBiz();renderMarket()}
+  catch(e){m.biz.pop();showMsg('m2',e.message||'تعذّرت الإضافة')}
+}
+async function rmBiz(i){
+  const m=S.cur;if(!confirm('حذف هذا البزنس من المؤشر؟'))return;
+  m.biz.splice(i,1);try{await writeBiz();renderMarket()}catch(e){alert(e.message||'تعذّر الحذف')}
+}
+
+boot();
+</script>
+</body>
+</html>
