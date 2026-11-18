@@ -827,7 +827,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T12:44:23"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T12:33:20"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1833,11 +1833,13 @@ async function loadData(isRetry) {
   _lastLoadAt = Date.now();
   try {
     const res = await fetch(WORKER_URL + '?action=data&token=' + encodeURIComponent(AUTH_TOKEN));
-    const data = await res.json();
+    let data = await res.json();
+    // ✅ من يريد الاشتراك (ضغط «اشترك» أو فتح بوابة الاشتراك) يبقى هنا للاشتراك ولا يُحوَّل إلى البناء
+    const subIntent = (function () { try { return !!sessionStorage.getItem('lavndr_gate_pending') || (Date.now() - (Number(sessionStorage.getItem('lavndr_sub_intent')) || 0) < 1800000); } catch (e) { return false; } })();
     // ✅ إصلاح جوهري: التوكن غير الصالح (منتهي/مزوّر) ما بيرجّعش لبوابة دخول إجبارية
     // تاني — يرجع لوضع التصفح التجريبي زي أي زائر مجهول (نفس فلسفة clearSessionAndReset)
     // حساب مسجَّل دخوله لكنه غير مشترك: لا داشبورد له — مكانه واجهة بناء التطبيقات فقط
-    if (data.error === 'builder_scope') { location.replace('builder.html'); return; }
+    if (data.error === 'builder_scope') { if (!subIntent) { location.replace('builder.html'); return; } data = { code: 402, role: 'visitor' }; }
     if (data.code === 401) { clearSessionAndReset('انتهت الجلسة — سجّلت خروجك تلقائيًا'); return; }
     // ✅ إصلاح جوهري: 402 = سجّل دخول بنجاح بس لسه ما اشترك (role=visitor) — ما بقاش
     // بيمنع التصفح خالص؛ نعرض بيانات تجريبية + بانر + مودال اشتراك قابل للإغلاق
@@ -1845,7 +1847,7 @@ async function loadData(isRetry) {
     if (data.code === 402) {
       // غير مشترك مسجّل دخوله: لا يرى الداشبورد ولا بياناته التجريبية — مكانه الوحيد واجهة بناء التطبيقات
       // (الزائر غير المسجّل يبقى يتصفح التجربة كما كان؛ هذا خاص بمن سجّل دخولًا فعليًا)
-      if (data.role !== 'movement') { location.replace('builder.html'); return; }
+      if (data.role !== 'movement' && !subIntent) { location.replace('builder.html'); return; }
       currentRole = (data.role === 'movement') ? 'movement' : 'visitor';
       globalData = demoData();
       document.getElementById('loadingWrap').style.display = 'none';
@@ -1914,6 +1916,7 @@ function routeSubscriptionStatus(status) {
 }
 
 async function showSubscribeGate(forcePicker) {
+  try { sessionStorage.setItem('lavndr_sub_intent', String(Date.now())); } catch (e) {}
   const modal = document.getElementById('subscribeGateModal');
   modal.style.display = 'block';
   subscribeGateDismissedByUser = false;
