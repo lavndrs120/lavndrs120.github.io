@@ -103,6 +103,19 @@
     "description": "تعرف على الشهادة الذهبية في لاڤندرز وطريقة الحصول عليها",
     "date": "2026-11-17"
    }
+  },
+  {
+   "id": "app-builder-customer-flow",
+   "title": "How does a customer order from a store built with Lavenders?",
+   "description": "Walkthrough of customer ordering from a Lavenders store",
+   "slug": "how-does-a-customer-order-from-a-store-built-with-lavenders",
+   "date": "2026-11-18",
+   "devto": "https://dev.to/lavenders/how-does-a-customer-order-from-a-store-built-with-lavenders-1j3c",
+   "ar": {
+    "title": "كيفية الطلب من متجر بنيت مع لاڤندرز",
+    "description": "سير عمل العميل: النقر على عنصر، نموذج الطلب، رمز البريد الإلكتروني لمرة واحدة، تفاصيل الحوالة البنكية، صاحب المتجر يقبل أو يرفض، البريد الإلكتروني للقرار",
+    "date": "2026-11-18"
+   }
   }
  ],
  "failed": {}
