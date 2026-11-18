@@ -55,7 +55,7 @@ textarea{resize:vertical;min-height:60px}select option{background:#12121c}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="logo">LAVNDR120</div><a class="back" href="index.html?home=1">← الرئيسية</a></div>
+  <div class="top"><div class="logo">LAVNDR120</div><span style="display:flex;gap:14px;align-items:center"><a class="back" href="#" id="lo" onclick="doLogout();return false" style="display:none">تسجيل الخروج</a><a class="back" href="index.html?home=1">← الرئيسية</a></span></div>
   <div id="app"></div>
 </div>
 <script>
@@ -163,7 +163,7 @@ async function boot(){
 }
 async function renderHome(){
   let h='<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote();
-  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="packages.html">عرض الباقات</a></div>';$('app').innerHTML=h;return}
+  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#c">اشترك في باقة</a></div>';$('app').innerHTML=h;return}
   $('app').innerHTML=h+'<div class="card sub">جاري تحميل مؤشراتك… (قد تُطلب موافقة جوجل)</div>';
   try{S.markets=await listMarkets()}catch(e){$('app').innerHTML=h+'<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">إعادة المحاولة</button></div>';return}
   h+='<div class="card"><b>مؤشراتك: '+S.markets.length+' / '+S.allowed+'</b>';
@@ -274,8 +274,16 @@ async function rmBiz(i){
   m.biz.splice(i,1);try{await writeBiz();renderMarket()}catch(e){alert(e.message||'تعذّر الحذف')}
 }
 
+
+function doLogout(){
+  try{['appb_token','appb_email','lavndr_token','lavndr_email','lavndr_role','lavndr_subs','lavndr_sub_intent','lavndr_gate_pending'].forEach(k=>{sessionStorage.removeItem(k);try{localStorage.removeItem(k)}catch(e){}})}catch(e){}
+  TOKEN='';EMAIL='';gTok='';
+  try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect()}catch(e){}
+  showLogin('تم تسجيل الخروج')
+}
+function syncLo(){const e=document.getElementById('lo');if(e)e.style.display=TOKEN?'':'none'}
+setInterval(syncLo,500);
 boot();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
