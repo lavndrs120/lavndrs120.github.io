@@ -153,6 +153,7 @@ async function callBack(url,params){
 // ───── الصفحة الرئيسية ─────
 function privNote(){return '<div class="card" style="border-color:rgba(143,240,200,.35)"><h2 style="margin-top:0;font-size:16px">مؤشرك لك</h2><div class="small" style="line-height:2">• المؤشر يُنشأ داخل <b>حساب جوجل الخاص بك</b> (شيت وخلفية Apps Script). أنت وحدك تتحكم فيه وتحذفه متى شئت.<br>• هو <b>مؤشر مستقل</b>: لا يرتبط بمؤشر لاڤندرز الرئيسي ولا يرسل إليه شيئاً، ولاڤندرز لا تحتفظ بنسخة منه.<br>• يضم حتى 120 بزنساً وبراند، ولا يعرض الرابط العام أسماءهم ولا بيانات عملائهم.<br>• المؤشر يقيس نشاط الطلبات فقط، وليس أداة تداول، ولا يتضمن وعداً بربح أو عائد.</div></div>'}
 async function boot(){
+  S.listed=false;S.markets=[];
   if(!TOKEN){showLogin();return}
   $('app').innerHTML='<div class="card sub">جاري التحقق من عضويتك…</div>';
   const j=await api('my_subscriptions');
@@ -161,12 +162,21 @@ async function boot(){
   S.tiers=act.map(i=>i.tier);S.allowed=act.reduce((a,i)=>a+LIMITS[i.tier],0);
   renderHome();
 }
+function saveCount(){try{localStorage.setItem('lavndr_mkt_'+String(EMAIL).toLowerCase(),JSON.stringify({n:S.markets.length,t:Date.now()}))}catch(e){}}
+function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote()}
 async function renderHome(){
-  let h='<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote();
-  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';$('app').innerHTML=h;return}
-  $('app').innerHTML=h+'<div class="card sub">جاري تحميل مؤشراتك… (قد تُطلب موافقة جوجل)</div>';
-  try{S.markets=await listMarkets()}catch(e){$('app').innerHTML=h+'<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">إعادة المحاولة</button></div>';return}
-  h+='<div class="card"><b>مؤشراتك: '+S.markets.length+' / '+S.allowed+'</b>';
+  const h=homeHead();
+  if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
+  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button><div id="m0" class="msg"></div></div>';return}
+  drawHome(h)
+}
+async function loadMarkets(){
+  showMsg('m0','جاري الاتصال… (قد تظهر نافذة موافقة من جوجل)','info');
+  try{S.markets=await listMarkets();S.listed=true;saveCount();renderHome()}
+  catch(e){showMsg('m0',(e.apiOff?'فعّل Apps Script API من script.google.com/home/usersettings ثم أعد المحاولة':(e.message||'تعذّر الاتصال')))}
+}
+function drawHome(h){
+  h+='<div class="card"><b>مؤشراتك الآن: '+S.markets.length+' من '+S.allowed+'</b>';
   if(S.markets.length<S.allowed)h+='<button class="btn" style="margin-top:12px" onclick="renderNew()">+ إنشاء مؤشر جديد</button>';
   else h+='<div class="small" style="margin-top:8px">وصلت إلى الحد المسموح لعضويتك.</div>';
   h+='</div>';
@@ -208,7 +218,7 @@ async function createMarket(){
     const url=(ep&&ep.webApp&&ep.webApp.url)||('https://script.google.com/macros/s/'+d.deploymentId+'/exec');
     n=4;stepsUI(4);
     await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:pr.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
-    S.markets=await listMarkets();
+    S.markets=await listMarkets();S.listed=true;saveCount();
     const i=S.markets.findIndex(x=>x.sheetId===sheetId);openMarket(i<0?0:i);
   }catch(e){
     const msg=e.apiOff?'فعّل Apps Script API من إعدادات حسابك: script.google.com/home/usersettings ثم أعد المحاولة':(e.message||'فشل غير متوقع');

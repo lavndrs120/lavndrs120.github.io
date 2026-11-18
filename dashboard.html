@@ -827,7 +827,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-19T00:04:23"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1172,10 +1172,17 @@ function bhAnchor() {
 function bhPlaceholder(tier, label) {
   return '<div id="bh_' + tier + '" class="glass" style="scroll-margin-top:70px;padding:30px 16px;border-radius:18px;margin-bottom:14px;text-align:center;color:var(--text-dim);font-size:13px;">' + label + '</div>';
 }
-function bhMarketCard() {
+function mktCountText(limit) {
+  try {
+    const j = JSON.parse(localStorage.getItem('lavndr_mkt_' + String(USER_EMAIL || '').toLowerCase()) || 'null');
+    if (j && typeof j.n === 'number') return 'مؤشراتك الآن: <b>' + j.n + '</b>' + (limit ? ' من ' + limit : '') + ' <span style="color:var(--text-faint);">(آخر تحديث ' + new Date(j.t).toLocaleDateString('ar') + ')</span>';
+  } catch (e) {}
+  return 'افتح «مؤشر سوقك» ليظهر هنا عدد مؤشراتك الحالية.';
+}
+function bhMarketCard(limit) {
   return '<a href="market-builder.html" class="glass" style="display:block;text-decoration:none;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);">' +
     '<div style="font-size:28px;">📈</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">مؤشر سوقك</div>' +
-    '<div style="font-size:12px;color:var(--text-dim);line-height:1.8;">أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.</div></a>';
+    '<div style="font-size:12px;color:var(--text-dim);line-height:1.8;">أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.</div><div style="font-size:12.5px;color:#6EE7B7;margin-top:8px;">' + mktCountText(limit) + '</div></a>';
 }
 async function renderBuilderHub(fresh) {
   const box = document.getElementById('builderHubBody');
@@ -1195,7 +1202,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:32px;">' + (meta.badge || '✅') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
-        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».</div>' : '') +
+        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».<br>' + mktCountText(i.tier === 'tycoon' ? 20 : 400) + '</div>' : '') +
         gateFormsBox(i.tier) +
         '<a href="' + gateHelpWhatsAppUrl(i.tier) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a></div>');
     });
@@ -1205,7 +1212,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:28px;">📱</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">ابنِ تطبيق طلباتك</div>' +
         '<div style="font-size:12px;color:var(--text-dim);">متجر ويب وتطبيق أندرويد باسم بزنسك — تجربة يوم كاملة</div></a>');
     }
-    if (has('franchise') || has('tycoon') || has('tycoon_sector')) parts.unshift(bhMarketCard());
+    if (has('franchise') || has('tycoon') || has('tycoon_sector')) parts.unshift(bhMarketCard(has('tycoon_sector') ? 400 : has('tycoon') ? 20 : 1));
     box.innerHTML = parts.join('') || '<div class="glass" style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px;">لا توجد عضوية فعّالة بعد.</div>';
     bhAnchor();
   };
