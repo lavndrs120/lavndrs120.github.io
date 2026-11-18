@@ -1799,6 +1799,7 @@ async function handleCredentialResponse(response) {
     USER_EMAIL = data.email;
     sessionStorage.setItem('lavndr_token', AUTH_TOKEN);
     sessionStorage.setItem('lavndr_email', USER_EMAIL);
+    try { sessionStorage.setItem('lavndr_fresh_login', String(Date.now())); } catch (e) {}
     boot();
   } catch(e) {
     document.getElementById('loginMsg').textContent = 'فشل الاتصال — حاول مرة أخرى';
@@ -1840,7 +1841,13 @@ async function loadData(isRetry) {
     // تاني — يرجع لوضع التصفح التجريبي زي أي زائر مجهول (نفس فلسفة clearSessionAndReset)
     // حساب مسجَّل دخوله لكنه غير مشترك: لا داشبورد له — مكانه واجهة بناء التطبيقات فقط
     if (data.error === 'builder_scope') { if (!subIntent) { location.replace('builder.html'); return; } data = { code: 402, role: 'visitor' }; }
-    if (data.code === 401) { clearSessionAndReset('انتهت الجلسة — سجّلت خروجك تلقائيًا'); return; }
+    if (data.code === 401) {
+      // جلسة صادرة قبل لحظات ثم رُفضت: نعيد المحاولة مرة واحدة قبل إنهائها
+      let fresh = false; try { fresh = Date.now() - (Number(sessionStorage.getItem('lavndr_fresh_login')) || 0) < 20000; } catch (e) {}
+      if (fresh && !isRetry) { await new Promise(r => setTimeout(r, 1500)); return loadData(true); }
+      clearSessionAndReset('انتهت الجلسة — سجّلت خروجك تلقائيًا [' + String(data.error || data.code || '').slice(0, 40) + ']');
+      return;
+    }
     // ✅ إصلاح جوهري: 402 = سجّل دخول بنجاح بس لسه ما اشترك (role=visitor) — ما بقاش
     // بيمنع التصفح خالص؛ نعرض بيانات تجريبية + بانر + مودال اشتراك قابل للإغلاق
     // (بدل استبدال الداشبورد بالكامل بشاشة اشتراك زي الأول)
