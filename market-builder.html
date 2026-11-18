@@ -163,7 +163,7 @@ async function boot(){
 }
 async function renderHome(){
   let h='<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote();
-  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#c">اشترك في باقة</a></div>';$('app').innerHTML=h;return}
+  if(!S.allowed){h+='<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';$('app').innerHTML=h;return}
   $('app').innerHTML=h+'<div class="card sub">جاري تحميل مؤشراتك… (قد تُطلب موافقة جوجل)</div>';
   try{S.markets=await listMarkets()}catch(e){$('app').innerHTML=h+'<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">إعادة المحاولة</button></div>';return}
   h+='<div class="card"><b>مؤشراتك: '+S.markets.length+' / '+S.allowed+'</b>';
