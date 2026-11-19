@@ -107,10 +107,10 @@ function gAuth(){
       if(typeof window.LavndrApp.authorize!=='function')return rej(new Error('حدّث تطبيق لاڤندرز إلى آخر إصدار لإكمال هذه الخطوة'));
       window.__lvnAuth=function(r){
         try{if(typeof r==='string')r=JSON.parse(r)}catch(e){r={error:'bad'}}
-        if(!r||r.error||!r.accessToken)return rej(new Error('لم تتم الموافقة على الصلاحيات'));
+        if(!r||r.error||!r.accessToken)return rej(new Error('لم تتم الموافقة على الصلاحيات ['+String((r&&(r.error||r.message||r.code))||'no_token').slice(0,120)+']'));
         gTok=r.accessToken;gExp=Date.now()+(Number(r.expiresIn)||3000)*1000;saveTok();res(gTok)};
       try{window.LavndrApp.authorize(G_SCOPES)}catch(e){rej(new Error('تعذّر فتح نافذة الموافقة'))}
-      setTimeout(()=>rej(new Error('لم تفتح نافذة جوجل داخل التطبيق. افتح هذه الصفحة في Chrome (زر «فتح في Chrome» أدناه) وأكمل الموافقة هناك مرة واحدة، ثم ارجع للتطبيق.')),45000);
+      setTimeout(()=>rej(new Error('لم تفتح نافذة جوجل داخل التطبيق. انسخ رابط الصفحة بالزر أدناه وافتحه في Chrome وأكمل الموافقة هناك مرة واحدة، ثم ارجع للتطبيق.')),45000);
       return;
     }
     if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error('تعذّر تحميل خدمة جوجل — حدّث الصفحة'));
@@ -173,7 +173,7 @@ async function renderHome(){
   const h=homeHead();
   if(!S.listed)loadCached();
   if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
-  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<a class="btn sec" style="display:block;text-align:center;margin-top:8px" href="intent://lavndrs120.github.io/market-builder.html#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Flavndrs120.github.io%2Fmarket-builder.html;end">فتح في Chrome لإكمال الموافقة</a>':'')+'<div id="m0" class="msg"></div></div>';return}
+  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<button class="btn sec" style="margin-top:8px" onclick="copyTxt(\'https://lavndrs120.github.io/market-builder.html\');this.textContent=\'تم نسخ الرابط ✓ الصقه في Chrome\'">نسخ الرابط لفتحه في Chrome</button>':'')+'<div id="m0" class="msg"></div></div>';return}
   drawHome(h)
 }
 async function loadMarkets(){
