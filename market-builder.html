@@ -417,7 +417,7 @@ async function hostMApk(){
   try{
     showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth();
     const user=(await ghApi('/user')).json.login,repo=(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1];
-    const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok)throw new Error('تعذّر جلب ملف التطبيق الآن. يمكنك تنزيله من الرابط الحالي.');
+    const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok){let bt='';try{bt=(await ar.text()).slice(0,80)}catch(e){}throw new Error('تعذّر جلب ملف التطبيق الآن ['+ar.status+(bt?' '+bt:'')+']. يمكنك تنزيله من الرابط الحالي.')}
     await ghPut(user,repo,'apk/market.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
     const u='https://github.com/'+user+'/'+repo+'/raw/main/apk/market.apk';
     await putVals(m.sheetId,'Config!D1',[[u]]);m.apkHosted=u;HOSTING=false;loadMApk();
