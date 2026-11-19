@@ -40,7 +40,7 @@ function draw(d){
   $('c').innerHTML='<div class="eb">المؤشر الاستهلاكي</div><div class="nm">'+esc(d.market||'')+'</div><div class="lbl">قيمة الطلبات لحظة بلحظة</div>'+
   '<div class="nav '+c+'">$'+esc(x.NAV||'0.00')+'</div><div class="ch '+c+'">'+a+' '+esc(String(x.change||'0.00').replace(/^[+-]/,''))+' ('+esc(String(x.changePercent||'0.00').replace(/^[+-]/,''))+'%)</div>'+
   '<div class="meta"><div>High<b>$'+esc(x.dayHigh||'0.00')+'</b></div><div>Low<b>$'+esc(x.dayLow||'0.00')+'</b></div><div>Volatility<b>'+esc(x.volatility||'0.00')+'%</b></div></div>'+
-  '<div class="ft">'+(d.businesses?esc(d.businesses)+' بزنس وبراند · ':'')+(ts?'آخر تحديث '+esc(ts)+' UTC<br>':'')+'مؤشر مستقل مبني من طلبات حقيقية. ليس أداة تداول ولا نصيحة استثمارية، ولا يتضمن وعداً بربح أو عائد.<br>مبني بأداة لاڤندرز · LAVNDR120</div>';
+  '<div class="ft">'+(d.businesses?esc(d.businesses)+' بزنس وبراند · ':'')+(ts?'آخر تحديث '+esc(ts)+' UTC<br>':'')+'مؤشر مستقل يكشف سلوك المستهلك من الطلبات الحقيقية، ويتحرك مع طلبات هذه الأنشطة الفعلية. لا يوجد بيع أو شراء أو تداول لحصص، ولا وعود بعوائد.<br>مبني بأداة لاڤندرز · LAVNDR120</div>';
 }
 async function load(){
   if(!OK){$('c').innerHTML='<div class="err">الرابط غير صحيح.</div>';return}
