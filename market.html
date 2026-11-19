@@ -35,7 +35,9 @@ async function get(){
   try{const r=await fetch(BACK+'?'+new URLSearchParams({callback:'cb'}),{credentials:'omit'});const t=await r.text(),i=t.indexOf('('),k=t.lastIndexOf(')');if(i<0||k<i)throw 0;return JSON.parse(t.slice(i+1,k))}
   catch(e){return await jsonp({})}
 }
+const IMGRX=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/;
 function draw(d){
+  if(d.image&&IMGRX.test(d.image)){document.body.style.background="linear-gradient(rgba(4,4,10,.72),rgba(4,4,10,.86)),url('"+d.image+"') center/cover fixed no-repeat #04040A"}
   const x=d.index||{},ch=parseFloat(x.change)||0,c=ch>=0?'pos':'neg',a=ch>=0?'▲':'▼',ts=(d.timestamp||'').slice(0,16).replace('T',' ');
   $('c').innerHTML='<div class="eb">المؤشر الاستهلاكي</div><div class="nm">'+esc(d.market||'')+'</div><div class="lbl">قيمة الطلبات لحظة بلحظة</div>'+
   '<div class="nav '+c+'">$'+esc(x.NAV||'0.00')+'</div><div class="ch '+c+'">'+a+' '+esc(String(x.change||'0.00').replace(/^[+-]/,''))+' ('+esc(String(x.changePercent||'0.00').replace(/^[+-]/,''))+'%)</div>'+
