@@ -96,8 +96,11 @@ async function onCred(resp){
 
 
 let gTok='',gExp=0,gClient=null;
+function saveTok(){try{sessionStorage.setItem('lvn_gt',JSON.stringify({t:gTok,x:gExp,e:String(EMAIL).toLowerCase()}))}catch(e){}}
+function loadTok(){try{const o=JSON.parse(sessionStorage.getItem('lvn_gt')||'null');if(o&&o.t&&o.e===String(EMAIL).toLowerCase()&&Date.now()<o.x-60000){gTok=o.t;gExp=o.x}}catch(e){}}
 function gAuth(){
   return new Promise((res,rej)=>{
+    if(!gTok)loadTok();
     if(gTok&&Date.now()<gExp-60000)return res(gTok);
     // داخل تطبيق الأندرويد: Google تمنع الموافقة داخل WebView، فنستعمل النافذة الأصلية عبر الجسر LavndrApp
     if(window.LavndrApp){
@@ -105,14 +108,14 @@ function gAuth(){
       window.__lvnAuth=function(r){
         try{if(typeof r==='string')r=JSON.parse(r)}catch(e){r={error:'bad'}}
         if(!r||r.error||!r.accessToken)return rej(new Error('لم تتم الموافقة على الصلاحيات'));
-        gTok=r.accessToken;gExp=Date.now()+(Number(r.expiresIn)||3000)*1000;res(gTok)};
+        gTok=r.accessToken;gExp=Date.now()+(Number(r.expiresIn)||3000)*1000;saveTok();res(gTok)};
       try{window.LavndrApp.authorize(G_SCOPES)}catch(e){rej(new Error('تعذّر فتح نافذة الموافقة'))}
       return;
     }
     if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error('تعذّر تحميل خدمة جوجل — حدّث الصفحة'));
     gClient=google.accounts.oauth2.initTokenClient({client_id:GSI_CLIENT_ID,scope:G_SCOPES,hint:EMAIL||undefined,callback:r=>{
       if(r.error)return rej(new Error('لم تتم الموافقة على الصلاحيات ['+r.error+(r.error_description?': '+String(r.error_description).slice(0,80):'')+']'));
-      try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(e){}gTok=r.access_token;gExp=Date.now()+(Number(r.expires_in)||3000)*1000;res(gTok)},
+      try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(e){}gTok=r.access_token;gExp=Date.now()+(Number(r.expires_in)||3000)*1000;saveTok();res(gTok)},
       error_callback:e=>{var t=(e&&e.type)||'unknown';if(t==='popup_closed'){try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(x){}rej(new Error('أُغلقت نافذة جوجل قبل رجوع النتيجة. إن كنت وافقت للتو فاضغط الزر مرة أخرى الآن، وستمرّ بدون إعادة الموافقة. ['+t+']'))}else rej(new Error('تعذّرت نافذة الموافقة ['+t+']'))}});
     var seen=false;try{seen=localStorage.getItem('lvn_g_ok')===EMAIL&&!!EMAIL}catch(e){}gClient.requestAccessToken({prompt:seen?'':'consent'});
   });
@@ -162,10 +165,12 @@ async function boot(){
   S.tiers=act.map(i=>i.tier);S.allowed=act.reduce((a,i)=>a+LIMITS[i.tier],0);
   renderHome();
 }
-function saveCount(){try{localStorage.setItem('lavndr_mkt_'+String(EMAIL).toLowerCase(),JSON.stringify({n:S.markets.length,t:Date.now()}))}catch(e){}}
+function saveCount(){try{const k=String(EMAIL).toLowerCase();localStorage.setItem('lavndr_mkt_'+k,JSON.stringify({n:S.markets.length,t:Date.now()}));localStorage.setItem('lavndr_mktl_'+k,JSON.stringify(S.markets.map(m=>({sheetId:m.sheetId,name:m.name}))))}catch(e){}}
+function loadCached(){try{const a=JSON.parse(localStorage.getItem('lavndr_mktl_'+String(EMAIL).toLowerCase())||'null');if(Array.isArray(a)){S.markets=a.filter(m=>m&&SHEETRX.test(m.sheetId||''));S.listed=true;return true}}catch(e){}return false}
 function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote()}
 async function renderHome(){
   const h=homeHead();
+  if(!S.listed)loadCached();
   if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
   if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button><div id="m0" class="msg"></div></div>';return}
   drawHome(h)
@@ -179,7 +184,7 @@ function drawHome(h){
   h+='<div class="card"><b>مؤشراتك الآن: '+S.markets.length+' من '+S.allowed+'</b>';
   if(S.markets.length<S.allowed)h+='<button class="btn" style="margin-top:12px" onclick="renderNew()">+ إنشاء مؤشر جديد</button>';
   else h+='<div class="small" style="margin-top:8px">وصلت إلى الحد المسموح لعضويتك.</div>';
-  h+='</div>';
+  h+='<div class="small" style="margin-top:8px"><a class="link" href="#" onclick="loadMarkets();return false">تحديث القائمة من جوجل</a></div></div>';
   S.markets.forEach((m,i)=>{h+='<div class="card build" onclick="openMarket('+i+')"><div><b>'+esc(m.name)+'</b></div><span class="small">فتح ›</span></div>'});
   $('app').innerHTML=h;
 }
@@ -310,6 +315,7 @@ async function rmBiz(i){
 
 function doLogout(){
   try{['appb_token','appb_email','lavndr_token','lavndr_email','lavndr_role','lavndr_subs','lavndr_sub_intent','lavndr_gate_pending'].forEach(k=>{sessionStorage.removeItem(k);try{localStorage.removeItem(k)}catch(e){}})}catch(e){}
+  try{var _e=String(EMAIL).toLowerCase();sessionStorage.removeItem('lvn_gt');localStorage.removeItem('lavndr_mktl_'+_e);localStorage.removeItem('lavndr_mkt_'+_e)}catch(e){}
   TOKEN='';EMAIL='';gTok='';
   try{if(window.google&&google.accounts&&google.accounts.id)google.accounts.id.disableAutoSelect()}catch(e){}
   showLogin('تم تسجيل الخروج')
