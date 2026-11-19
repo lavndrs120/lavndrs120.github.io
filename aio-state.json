@@ -116,6 +116,19 @@
     "description": "سير عمل العميل: النقر على عنصر، نموذج الطلب، رمز البريد الإلكتروني لمرة واحدة، تفاصيل الحوالة البنكية، صاحب المتجر يقبل أو يرفض، البريد الإلكتروني للقرار",
     "date": "2026-11-18"
    }
+  },
+  {
+   "id": "golden-certificate-eligibility",
+   "title": "Which businesses can request a Lavenders golden certificate?",
+   "description": "Eligibility and request process for businesses",
+   "slug": "which-businesses-can-request-a-lavenders-golden-certificate",
+   "date": "2026-11-19",
+   "devto": "https://dev.to/lavenders/which-businesses-can-request-a-lavenders-golden-certificate-2aom",
+   "ar": {
+    "title": "شروط شهادة لاڤندرز الذهبية",
+    "description": "شرح لشروط شهادة لاڤندرز الذهبية",
+    "date": "2026-11-19"
+   }
   }
  ],
  "failed": {}
