@@ -110,6 +110,7 @@ function gAuth(){
         if(!r||r.error||!r.accessToken)return rej(new Error('لم تتم الموافقة على الصلاحيات'));
         gTok=r.accessToken;gExp=Date.now()+(Number(r.expiresIn)||3000)*1000;saveTok();res(gTok)};
       try{window.LavndrApp.authorize(G_SCOPES)}catch(e){rej(new Error('تعذّر فتح نافذة الموافقة'))}
+      setTimeout(()=>rej(new Error('لم تفتح نافذة جوجل داخل التطبيق. افتح هذه الصفحة في Chrome (زر «فتح في Chrome» أدناه) وأكمل الموافقة هناك مرة واحدة، ثم ارجع للتطبيق.')),45000);
       return;
     }
     if(!(window.google&&google.accounts&&google.accounts.oauth2))return rej(new Error('تعذّر تحميل خدمة جوجل — حدّث الصفحة'));
@@ -172,7 +173,7 @@ async function renderHome(){
   const h=homeHead();
   if(!S.listed)loadCached();
   if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
-  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button><div id="m0" class="msg"></div></div>';return}
+  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<a class="btn sec" style="display:block;text-align:center;margin-top:8px" href="intent://lavndrs120.github.io/market-builder.html#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Flavndrs120.github.io%2Fmarket-builder.html;end">فتح في Chrome لإكمال الموافقة</a>':'')+'<div id="m0" class="msg"></div></div>';return}
   drawHome(h)
 }
 async function loadMarkets(){
@@ -413,6 +414,18 @@ async function hostMApk(){
     await putVals(m.sheetId,'Config!D1',[[u]]);m.apkHosted=u;HOSTING=false;loadMApk();
   }catch(err){HOSTING=false;showMsg('m5',err.message||'تعذّر النقل')}
 }
+
+async function recalcOrders(){
+  const m=S.cur;if(!m||!m.cfg)return;const b=$('rcBtn');if(b)b.disabled=true;
+  showMsg('m8','جاري إعادة قراءة طلبات كل البزنسات… قد يستغرق دقيقة أو أكثر','info');
+  try{
+    const r=await jsonp(m.cfg.url,{action:'recalc'},170000);
+    if(r&&r.status==='wait'){showMsg('m8',r.message||'انتظر دقيقة');}
+    else if(r&&r.status==='ok'&&r.index){showMsg('m8','تمت إعادة الحساب ✓ بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات '+r.orders+' · القيمة $'+r.index.NAV,'good');checkHealth()}
+    else showMsg('m8','اضغط «تحديث الخلفية» أولاً ثم أعد المحاولة');
+  }catch(e){showMsg('m8','تعذّر الاتصال بالمؤشر. حاول بعد قليل.')}
+  if(b)b.disabled=false;
+}
 function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
@@ -437,7 +450,7 @@ async function checkHealth(){
   const m=S.cur,el=$('hcard');if(!el)return;
   try{
     const r=await callBack(m.cfg.url,{action:'health'});
-    if(r&&r.status==='ok'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل · بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات مقبولة '+r.orders+'</div><div class="small" style="margin-top:8px;line-height:1.9">إن ظهر بزنس غير مقروء فالسبب غالباً أن شيته لم يُشارك معك بعد.</div><button class="btn sec sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل التحديث التلقائي (مرة واحدة)</button>';return}
+    if(r&&r.status==='ok'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل · بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات مقبولة '+r.orders+'</div><div class="small" style="margin-top:8px;line-height:1.9">إن ظهر بزنس غير مقروء فالسبب غالباً أن شيته لم يُشارك معك بعد.</div><button class="btn" id="rcBtn" style="margin-top:8px" onclick="recalcOrders()">إعادة حساب الطلبات</button><div id="m8" class="msg"></div><button class="btn sec sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل التحديث التلقائي (مرة واحدة)</button>';return}
     throw 0;
   }catch(e){
     el.innerHTML='<h2>تفعيل المؤشر</h2><div class="small" style="line-height:1.9">مرة واحدة فقط: اضغط الزر، ثم في صفحة جوجل اختر حسابك ← «متقدم» ← «الانتقال» ← «السماح». بعدها اضغط «تحديث».</div><button class="btn ok sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل</button> <button class="btn sec sm" onclick="checkHealth()">تحديث</button>';
@@ -476,6 +489,5 @@ function syncLo(){const e=document.getElementById('lo');if(e)e.style.display=TOK
 setInterval(syncLo,500);
 boot();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
