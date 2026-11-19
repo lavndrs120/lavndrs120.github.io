@@ -243,7 +243,7 @@ async function openMarket(i){
   const m=S.markets[i];if(!m){renderHome();return}S.cur=m;
   $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
   try{
-    const cv=await getVals(m.sheetId,'Config!A1:B1'),cr=cv[0]||[];const cfg=JSON.parse(cr[0]||'null');m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
+    const cv=await getVals(m.sheetId,'Config!A1:D1'),cr=cv[0]||[];m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
     m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
     renderMarket();checkHealth();loadMApk();
@@ -273,14 +273,14 @@ async function loadMApk(){
   try{m.apkId=m.apkId||await mktId(m.cfg.url)}catch(e){el.textContent='متصفحك لا يدعم هذه الميزة';return}
   const j=await api('appb_download',{appId:m.apkId});const e2=$('mapk');if(!e2||S.cur!==m)return;
   if(j.error){e2.textContent=j.message||j.error;return}
-  if(j.status==='ready'){e2.innerHTML='<a class="btn ok" href="'+esc(j.url)+'">تنزيل APK</a><div class="small" style="margin-top:8px;line-height:1.9">يفتح بطاقة مؤشرك داخل تطبيق. شاركه مع من تريد.</div><button class="btn sec sm" style="margin-top:8px" onclick="buildMApk(true)">إعادة بناء التطبيق</button><div id="m5" class="msg"></div>';return}
+  if(j.status==='ready'){e2.innerHTML='<a class="btn ok" href="'+esc(m.apkHosted||j.url)+'">تنزيل APK</a>'+(m.home&&!m.apkHosted?'<button class="btn sec sm" style="margin-top:8px" onclick="hostMApk()">نقل ملف التطبيق إلى حسابي في GitHub</button>':'')+'<div class="small" style="margin-top:8px;line-height:1.9">يفتح بطاقة مؤشرك داخل تطبيق. شاركه مع من تريد.</div><button class="btn sec sm" style="margin-top:8px" onclick="buildMApk(true)">إعادة بناء التطبيق</button><div id="m5" class="msg"></div>';return}
   if(j.status==='building'){e2.textContent='جاري بناء التطبيق… يستغرق عدة دقائق وتتحدث الصفحة تلقائياً.';mapkPoll=setTimeout(loadMApk,15000);return}
   e2.innerHTML=(j.status==='failed'?'<div class="small" style="color:#ffb3c0;margin-bottom:6px">فشلت المحاولة السابقة.</div>':'')+'<div style="line-height:1.9;margin-bottom:8px">تطبيق أندرويد (بأيقونة لاڤندرز120) يعرض بطاقة مؤشرك. يُبنى مرة واحدة ويصلك إشعار عند الجاهزية.</div><button class="btn" id="mapkBtn" onclick="buildMApk()">بناء تطبيق الأندرويد</button><div id="m5" class="msg"></div>';
 }
 async function buildMApk(rebuild){
   const m=S.cur;if(!m||!m.cfg)return;const b=$('mapkBtn');if(b)b.disabled=true;
   showMsg('m5','جاري إرسال طلب البناء…','info');
-  const j=await api('appb_build_apk',{appId:m.apkId,backendUrl:m.cfg.url,name:m.cfg.name||m.name,rebuild:rebuild?1:0},true);
+  const j=await api('appb_build_apk',{appId:m.apkId,backendUrl:m.cfg.url,name:m.cfg.name||m.name,rebuild:rebuild?1:0,homeUrl:m.home||''},true);
   if(j.error){if(b)b.disabled=false;showMsg('m5',j.message||j.error);return}
   loadMApk();
 }
@@ -335,6 +335,84 @@ async function delMarket(){
     S.markets=S.markets.filter(x=>x.sheetId!==m.sheetId);S.cur=null;saveCount();renderHome();
   }catch(e){$('dbtn').disabled=false;showMsg('m6',e.message||'تعذّر الحذف')}
 }
+
+// ───── نقل بطاقة المؤشر إلى حساب GitHub الخاص بالمستخدم ─────
+let GHT='';try{GHT=localStorage.getItem('ghT')||''}catch(e){}
+let HOSTING=false;
+function slugG(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)}
+async function ghPost(path,body){const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body||{})});return r.json()}
+function showHtml(id,h,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'info');e.innerHTML=h}
+async function ghAuth(){
+  if(GHT)return GHT;
+  const d=await ghPost('/gh/device');if(!d.device_code)throw new Error(d.error_description||d.error||'تعذّر بدء الربط بـ GitHub');
+  showHtml('m7','افتح <a href="'+esc(d.verification_uri)+'?user_code='+esc(d.user_code)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">github.com/login/device</a> وأدخل الرمز: <b dir="ltr" style="font-size:18px">'+esc(d.user_code)+'</b> — ثم ارجع هنا.','info');
+  let wait=(d.interval||5)*1000;const end=Date.now()+(d.expires_in||900)*1000;
+  while(Date.now()<end){
+    await new Promise(r=>setTimeout(r,wait));
+    const t=await ghPost('/gh/token',{device_code:d.device_code});
+    if(t.access_token){GHT=t.access_token;try{localStorage.setItem('ghT',GHT)}catch(e){}return GHT}
+    if(t.error==='slow_down')wait+=5000;
+    else if(t.error&&t.error!=='authorization_pending')throw new Error(t.error_description||t.error);
+  }
+  throw new Error('انتهت مهلة الربط، حاول مرة أخرى');
+}
+async function ghApi(path,opt){
+  opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+GHT,Accept:'application/vnd.github+json'},opt.headers||{});
+  const r=await fetch('https://api.github.com'+path,opt);let j={};try{j=await r.json()}catch(e){}
+  if(r.status===401){GHT='';try{localStorage.removeItem('ghT')}catch(e){}}
+  if(!r.ok&&r.status!==404)throw new Error(j.message||('GitHub '+r.status));
+  return{status:r.status,json:j}
+}
+function b64u(s){return btoa(unescape(encodeURIComponent(s)))}
+function b64buf(buf){const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+async function ghPut(user,repo,path,b64,msg){
+  const g=await ghApi('/repos/'+user+'/'+repo+'/contents/'+path);
+  const body={message:msg,content:b64,branch:'main'};if(g.status===200&&g.json.sha)body.sha=g.json.sha;
+  const p=await ghApi('/repos/'+user+'/'+repo+'/contents/'+path,{method:'PUT',body:JSON.stringify(body)});
+  if(p.status===404)throw new Error('تعذّر الكتابة في الريبو');
+}
+function ghBox(m){
+  if(m.home)return '<div class="small" style="line-height:1.9">بطاقة مؤشرك الآن في حسابك:</div><a class="link" dir="ltr" href="'+esc(m.home)+'" target="_blank" rel="noopener">'+esc(m.home)+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(m.home)+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button><button class="btn sec sm" style="margin-top:8px" onclick="hostMarket()">تحديث البطاقة في ريبوي</button><div id="m7" class="msg"></div>';
+  return '<div class="small" style="line-height:1.9;margin-bottom:8px">لاستقلال كامل: تُنسخ بطاقة مؤشرك (صفحة مستقلة بلا أي اتصال بموقع لاڤندرز) إلى ريبو في حسابك على GitHub، ويصير رابطك من حسابك أنت. لا نحصل على صلاحية دائمة على حسابك.</div><label>اسم الرابط القصير (إنجليزي صغير وأرقام وشرطة)</label><input id="ghName" dir="ltr" value="'+esc(slugG(m.name)||'market')+'"><button class="btn" style="margin-top:10px" onclick="hostMarket()">نقل البطاقة إلى حسابي في GitHub</button><div id="m7" class="msg"></div>';
+}
+async function hostMarket(){
+  if(HOSTING)return;const m=S.cur;if(!m||!m.cfg)return;
+  let name=(($('ghName')||{}).value||'').trim().toLowerCase();if(!name)name=m.home?(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1]||'':slugG(m.name)||'market';
+  if(!/^[a-z0-9][a-z0-9-]{2,38}$/.test(name)){showMsg('m7','الاسم القصير: حروف إنجليزية صغيرة وأرقام وشرطة، من 3 إلى 39 حرفاً');return}
+  HOSTING=true;
+  try{
+    showMsg('m7','جاري الربط بحساب GitHub…','info');await ghAuth();
+    const me=(await ghApi('/user')).json;const user=me.login,repo=name;
+    showMsg('m7','جاري تجهيز الريبو…','info');
+    const ex=await ghApi('/repos/'+user+'/'+repo);
+    if(ex.status===404){const c=await ghApi('/user/repos',{method:'POST',body:JSON.stringify({name:repo,description:'Independent market index card — built with Lavenders (LAVNDR120)',private:false,auto_init:true})});if(c.status>=300)throw new Error('تعذّر إنشاء الريبو');await new Promise(r=>setTimeout(r,2000))}
+    else{const mj=await ghApi('/repos/'+user+'/'+repo+'/contents/market.json');if(mj.status===404||!mj.json.content||atob(mj.json.content.replace(/\n/g,'')).indexOf(m.cfg.url)<0)throw new Error('هذا الاسم مستخدم عندك لمشروع آخر، اختر اسماً مختلفاً')}
+    const [pg,tpl]=await Promise.all([fetch('market.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب البطاقة');return r.text()}),fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>r.text())]);
+    const a="const BACK=(new URLSearchParams(location.search).get('b')||'').trim();";
+    if(pg.indexOf(a)<0)throw new Error('قالب البطاقة غير متوافق');
+    const page=pg.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace('<meta name="robots" content="noindex">','');
+    const short='https://'+user.toLowerCase()+'.github.io/'+repo+'/';
+    const readme='# '+m.name+'\n\nبطاقة مؤشر سوق مستقل أنشأتها أداة **لاڤندرز (Lavenders · LAVNDR120)**.\n\nAn independent market index card generated with Lavenders.\n\n- Card: '+short+'\n- Backend template: [backend/Code.gs](backend/Code.gs) (Google Apps Script; the live copy and its sheet run in the owner\'s own Google account)\n- Orders, business sheets and images are not stored here.\n\nThe index reflects real consumer orders. There is no buying, selling or trading of shares, and no promise of returns.\n';
+    await ghPut(user,repo,'index.html',b64u(page),'Lavenders: index card');
+    await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
+    await ghPut(user,repo,'backend/Code.gs',b64u(tpl),'Lavenders: backend template');
+    await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
+    try{await ghApi('/repos/'+user+'/'+repo+'/pages',{method:'POST',body:JSON.stringify({source:{branch:'main',path:'/'}})})}catch(e){}
+    await putVals(m.sheetId,'Config!C1',[[short]]);m.home=short;HOSTING=false;
+    renderMarket();checkHealth();loadMApk();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
+  }catch(err){HOSTING=false;showMsg('m7',err.message||'تعذّر النقل')}
+}
+async function hostMApk(){
+  const m=S.cur;if(!m||!m.home||HOSTING)return;HOSTING=true;
+  try{
+    showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth();
+    const user=(await ghApi('/user')).json.login,repo=(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1];
+    const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok)throw new Error('تعذّر جلب ملف التطبيق الآن. يمكنك تنزيله من الرابط الحالي.');
+    await ghPut(user,repo,'apk/market.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
+    const u='https://github.com/'+user+'/'+repo+'/raw/main/apk/market.apk';
+    await putVals(m.sheetId,'Config!D1',[[u]]);m.apkHosted=u;HOSTING=false;loadMApk();
+  }catch(err){HOSTING=false;showMsg('m5',err.message||'تعذّر النقل')}
+}
 function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
@@ -343,6 +421,7 @@ function renderMarket(){
   h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
   h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
   h+='<div class="card"><h2>خلفية المؤشر</h2>'+mImgBox(m)+'</div>';
+  h+='<div class="card"><h2>استقلالك الكامل: بطاقتك في حسابك</h2>'+ghBox(m)+'</div>';
   h+='<div class="card"><h2>تطبيق الأندرويد للمؤشر</h2><div id="mapk" class="small">…</div></div>';
   h+='<div class="card"><h2>البزنسات ('+n+')</h2>';
   if(!n)h+='<div class="small">لم تُضف بزنسات بعد.</div>';
