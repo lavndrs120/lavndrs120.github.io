@@ -113,7 +113,7 @@ function gAuth(){
     gClient=google.accounts.oauth2.initTokenClient({client_id:GSI_CLIENT_ID,scope:G_SCOPES,hint:EMAIL||undefined,callback:r=>{
       if(r.error)return rej(new Error('لم تتم الموافقة على الصلاحيات ['+r.error+(r.error_description?': '+String(r.error_description).slice(0,80):'')+']'));
       try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(e){}gTok=r.access_token;gExp=Date.now()+(Number(r.expires_in)||3000)*1000;res(gTok)},
-      error_callback:e=>rej(new Error('تعذّرت نافذة الموافقة ['+((e&&e.type)||'unknown')+']'))});
+      error_callback:e=>{var t=(e&&e.type)||'unknown';if(t==='popup_closed'){try{localStorage.setItem('lvn_g_ok',EMAIL)}catch(x){}rej(new Error('أُغلقت نافذة جوجل قبل رجوع النتيجة. إن كنت وافقت للتو فاضغط الزر مرة أخرى الآن، وستمرّ بدون إعادة الموافقة. ['+t+']'))}else rej(new Error('تعذّرت نافذة الموافقة ['+t+']'))}});
     var seen=false;try{seen=localStorage.getItem('lvn_g_ok')===EMAIL&&!!EMAIL}catch(e){}gClient.requestAccessToken({prompt:seen?'':'consent'});
   });
 }
