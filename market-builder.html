@@ -71,7 +71,16 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function showMsg(id,t,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'err');e.textContent=t}
-function copyTxt(t){try{navigator.clipboard.writeText(t)}catch(e){}}
+function copyTxt(t){
+  try{if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).catch(()=>{});}}catch(e){}
+  try{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');a.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(a);a.focus();a.select();a.setSelectionRange(0,t.length);const ok=document.execCommand('copy');a.remove();return ok}catch(e){return false}
+}
+function chromeLink(){
+  const u='https://lavndrs120.github.io/market-builder.html';
+  const ok=copyTxt(u),i=$('clink');if(i){i.style.display='block';i.focus();i.select();try{i.setSelectionRange(0,u.length)}catch(e){}}
+  showMsg('m0',ok?'تم نسخ الرابط. افتح Chrome والصقه في شريط العنوان.':'اضغط مطولاً على الرابط المحدّد أعلاه واختر «نسخ»، ثم الصقه في Chrome.','info');
+}
+function shareLink(){const u='https://lavndrs120.github.io/market-builder.html';if(navigator.share){navigator.share({title:'LAVNDR120',url:u}).catch(()=>{})}else chromeLink()}
 async function api(action,params,post){
   try{let r;if(post)r=await fetch(WORKER_URL+'?action='+action,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({},params||{},{action:action,token:TOKEN}))});else r=await fetch(WORKER_URL+'?'+new URLSearchParams(Object.assign({},params||{},{action:action,token:TOKEN})));const j=await r.json();
     if(j&&(j.code===401||j.error==='Invalid token')){logout();return {error:'انتهت الجلسة'}}return j||{error:'رد فارغ'}}
@@ -173,7 +182,7 @@ async function renderHome(){
   const h=homeHead();
   if(!S.listed)loadCached();
   if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
-  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<button class="btn sec" style="margin-top:8px" onclick="copyTxt(\'https://lavndrs120.github.io/market-builder.html\');this.textContent=\'تم نسخ الرابط ✓ الصقه في Chrome\'">نسخ الرابط لفتحه في Chrome</button>':'')+'<div id="m0" class="msg"></div></div>';return}
+  if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<div class="small" style="margin-top:10px;line-height:1.9">إن لم تفتح نافذة جوجل داخل التطبيق، أكمل الموافقة من Chrome:</div><input id="clink" dir="ltr" readonly value="https://lavndrs120.github.io/market-builder.html" style="display:none;margin-top:6px" onclick="this.select()"><button class="btn sec" style="margin-top:8px" onclick="chromeLink()">نسخ رابط الصفحة</button><button class="btn sec" style="margin-top:8px" onclick="shareLink()">مشاركة الرابط (لفتحه في Chrome)</button>':'')+'<div id="m0" class="msg"></div></div>';return}
   drawHome(h)
 }
 async function loadMarkets(){
