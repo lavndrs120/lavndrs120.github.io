@@ -187,10 +187,10 @@ function renderNew(){
   $('app').innerHTML='<h1>مؤشر جديد</h1><p class="sub">اسم المؤشر الذي سيظهر على بطاقته</p><div class="card"><label>اسم المؤشر</label><input id="mname" maxlength="60" placeholder="مثال: سوق المطاعم"><div class="small" style="margin-top:8px">يُنشأ المؤشر في حسابك: '+esc(EMAIL)+'</div><button class="btn" style="margin-top:12px" onclick="createMarket()">إنشاء</button><button class="btn sec" onclick="renderHome()">رجوع</button><div id="m1" class="msg"></div></div>';
 }
 const STEPS=['الموافقة على الصلاحيات','إنشاء شيت المؤشر','إنشاء الخلفية في Apps Script','نشر الخلفية','حفظ الإعدادات'];
-function stepsUI(n,state,msg){
+function stepsUI(n,state,msg,retry){
   let h='<h1>جاري إنشاء مؤشرك</h1><p class="sub">لا تُغلق الصفحة.</p><div class="card">';
   STEPS.forEach((s,i)=>{const c=i<n?'done':(i===n?(state||'run'):'');h+='<div class="step '+c+'"><span class="dot">'+(i<n?'✓':(i===n?(state==='fail'?'✕':'…'):'○'))+'</span>'+esc(s)+'</div>'});
-  h+='</div>';if(msg)h+='<div class="msg err" style="display:block">'+esc(msg)+'</div><button class="btn sec" onclick="renderHome()">رجوع</button>';
+  h+='</div>';if(msg)h+='<div class="msg err" style="display:block">'+esc(msg)+'</div>'+(retry?'<button class="btn" onclick="runCreate()">إعادة المحاولة</button>':'')+'<button class="btn sec" onclick="S.markets=[];S.listed=false;renderHome()">رجوع</button>';
   $('app').innerHTML=h;
 }
 function rid(){const a=new Uint8Array(6);crypto.getRandomValues(a);return 'm'+Array.from(a).map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -198,31 +198,37 @@ async function createMarket(){
   const name=($('mname').value||'').trim();
   if(name.length<2){showMsg('m1','اكتب اسماً من حرفين على الأقل');return}
   if(S.markets.length>=S.allowed){showMsg('m1','وصلت إلى الحد المسموح');return}
+  S.pend={name:name};runCreate();
+}
+function resumeMarket(i){const m=S.markets[i];if(!m)return;S.pend={name:m.name,sheetId:m.sheetId};runCreate()}
+async function runCreate(){
+  const P=S.pend;if(!P)return renderHome();
   let n=0;
   try{
     stepsUI(0);await gAuth();n=1;stepsUI(1);
-    const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+name},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
-    const sheetId=s.spreadsheetId;
-    await gf('https://sheets.googleapis.com/v4/spreadsheets/'+sheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
-      {range:'Businesses!A1',values:[['Name','SheetId','Added']]},{range:'Totals!A1',values:[['SheetId','Sum','Count','UpdatedAt','Readable']]},{range:'Snapshots!A1',values:[['Time','NAV']]}]})});
+    if(!P.sheetId){const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+P.name},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
+    P.sheetId=s.spreadsheetId;
+    await gf('https://sheets.googleapis.com/v4/spreadsheets/'+P.sheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
+      {range:'Businesses!A1',values:[['Name','SheetId','Added']]},{range:'Totals!A1',values:[['SheetId','Sum','Count','UpdatedAt','Readable']]},{range:'Snapshots!A1',values:[['Time','NAV']]}]})});}
+    const sheetId=P.sheetId,name=P.name;
     n=2;stepsUI(2);
     const [c,m]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب المؤشر');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
     const cfg={id:rid(),name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
-    const pr=await gf('https://script.googleapis.com/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:PREFIX+name})});
-    await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:m}]})});
-    const v=await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/versions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:'market '+new Date().toISOString()})});
+    if(!P.scriptId){const pr=await gf('https://script.googleapis.com/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:PREFIX+name})});P.scriptId=pr.scriptId}
+    await gf('https://script.googleapis.com/v1/projects/'+P.scriptId+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:m}]})});
+    const v=await gf('https://script.googleapis.com/v1/projects/'+P.scriptId+'/versions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:'market '+new Date().toISOString()})});
     n=3;stepsUI(3);
-    const d=await gf('https://script.googleapis.com/v1/projects/'+pr.scriptId+'/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({versionNumber:v.versionNumber,manifestFileName:'appsscript',description:'market'})});
+    const d=await gf('https://script.googleapis.com/v1/projects/'+P.scriptId+'/deployments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({versionNumber:v.versionNumber,manifestFileName:'appsscript',description:'market'})});
     const ep=(d.entryPoints||[]).find(e=>e.entryPointType==='WEB_APP');
     const url=(ep&&ep.webApp&&ep.webApp.url)||('https://script.google.com/macros/s/'+d.deploymentId+'/exec');
     n=4;stepsUI(4);
-    await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:pr.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
-    S.markets=await listMarkets();S.listed=true;saveCount();
+    await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:P.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
+    S.pend=null;S.markets=await listMarkets();S.listed=true;saveCount();
     const i=S.markets.findIndex(x=>x.sheetId===sheetId);openMarket(i<0?0:i);
   }catch(e){
-    const msg=e.apiOff?'فعّل Apps Script API من إعدادات حسابك: script.google.com/home/usersettings ثم أعد المحاولة':(e.message||'فشل غير متوقع');
-    stepsUI(n,'fail',msg);
+    const msg=e.apiOff?'فعّل Apps Script API من إعدادات حسابك: script.google.com/home/usersettings ثم اضغط «إعادة المحاولة» (لن يُنشأ شيت جديد).':(e.message||'فشل غير متوقع');
+    stepsUI(n,'fail',msg,true);
   }
 }
 
@@ -233,7 +239,7 @@ async function openMarket(i){
   $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
   try{
     const cfg=JSON.parse(((await getVals(m.sheetId,'Config!A1'))[0]||[])[0]||'null');
-    if(!cfg)throw new Error('إعدادات المؤشر غير موجودة');
+    if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
     m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
     renderMarket();checkHealth();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
