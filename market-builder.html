@@ -317,6 +317,20 @@ function mImgBox(m){
     (m.img?'<img src="'+esc(m.img)+'" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:18px;display:block;margin-bottom:8px">':'')+
     '<input type="file" accept="image/*" onchange="pickMImg(this)"></div>';
 }
+
+async function delMarket(){
+  const m=S.cur;if(!m||!m.cfg)return;
+  const t=($('dname').value||'').trim();
+  if(t!==m.name){showMsg('m6','اكتب اسم المؤشر بالضبط للتأكيد');return}
+  $('dbtn').disabled=true;showMsg('m6','جاري الحذف…','info');
+  const tr=id=>gf('https://www.googleapis.com/drive/v3/files/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});
+  try{
+    try{await gf('https://script.googleapis.com/v1/projects/'+m.cfg.scriptId+'/deployments/'+m.cfg.deploymentId,{method:'DELETE'})}catch(e){}
+    try{await tr(m.cfg.scriptId)}catch(e){}
+    await tr(m.sheetId);
+    S.markets=S.markets.filter(x=>x.sheetId!==m.sheetId);S.cur=null;saveCount();renderHome();
+  }catch(e){$('dbtn').disabled=false;showMsg('m6',e.message||'تعذّر الحذف')}
+}
 function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
@@ -330,6 +344,7 @@ function renderMarket(){
   (m.biz||[]).forEach((r,i)=>{if(r&&r[1])h+='<div class="ord"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>'+esc(r[0]||'—')+'</span><button class="btn sec sm" onclick="rmBiz('+i+')">حذف</button></div></div>'});
   h+='</div>';
   h+='<div class="card"><h2>تحديث الخلفية</h2><div class="small" style="line-height:1.9;margin-bottom:8px">إن ظهر خطأ عند فتح رابط البطاقة، اضغط هنا لتثبيت آخر نسخة من كود المؤشر في حسابك (يبقى الرابط نفسه).</div><button class="btn sec" onclick="updateBackend()">تحديث الخلفية</button><div id="m3" class="msg"></div></div>';
+  h+='<div class="card"><h2>حذف المؤشر</h2><div class="small" style="line-height:1.9;margin-bottom:8px">يُوقف رابط البطاقة ويُنقل شيت المؤشر وكوده إلى سلة Drive في حسابك (تستطيع استعادتهما منها). لا يمسّ شيتات البزنسات ولا متاجرها. بعد الحذف يتحرر مقعد من حدّك.</div><label>اكتب اسم المؤشر للتأكيد</label><input id="dname" maxlength="60"><button class="btn bad" id="dbtn" style="margin-top:10px" onclick="delMarket()">حذف المؤشر</button><div id="m6" class="msg"></div></div>';
   h+='<div class="card"><h2>الشيت الكامل</h2><a class="link" href="https://docs.google.com/spreadsheets/d/'+esc(m.sheetId)+'" target="_blank" rel="noopener">فتح الشيت في حسابك</a></div>';
   h+='<button class="btn sec" onclick="renderHome()">رجوع</button>';
   $('app').innerHTML=h;
