@@ -206,7 +206,7 @@ async function runCreate(){
   let n=0;
   try{
     stepsUI(0);await gAuth();n=1;stepsUI(1);
-    if(!P.sheetId){const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+P.name},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
+    if(!P.sheetId){const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+P.name,timeZone:'Africa/Khartoum'},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
     P.sheetId=s.spreadsheetId;
     await gf('https://sheets.googleapis.com/v4/spreadsheets/'+P.sheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
       {range:'Businesses!A1',values:[['Name','SheetId','Added']]},{range:'Totals!A1',values:[['SheetId','Sum','Count','UpdatedAt','Readable']]},{range:'Snapshots!A1',values:[['Time','NAV']]}]})});}
@@ -244,6 +244,22 @@ async function openMarket(i){
     renderMarket();checkHealth();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
 }
+
+async function updateBackend(){
+  const m=S.cur;if(!m||!m.cfg)return;
+  showMsg('m3','جاري التحديث…','info');
+  try{
+    await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+':batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[{updateSpreadsheetProperties:{properties:{timeZone:'Africa/Khartoum'},fields:'timeZone'}}]})});
+    const [c,mf]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل القالب');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل الإعدادات');return r.text()})]);
+    const cfg={id:rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120};
+    const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
+    const sid=m.cfg.scriptId;
+    await gf('https://script.googleapis.com/v1/projects/'+sid+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:mf}]})});
+    const v=await gf('https://script.googleapis.com/v1/projects/'+sid+'/versions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:'update '+new Date().toISOString()})});
+    await gf('https://script.googleapis.com/v1/projects/'+sid+'/deployments/'+m.cfg.deploymentId,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({deploymentConfig:{versionNumber:v.versionNumber,manifestFileName:'appsscript',description:'market'}})});
+    showMsg('m3','تم التحديث ✓ افتح رابط البطاقة الآن','good');checkHealth();
+  }catch(e){showMsg('m3',e.apiOff?'فعّل Apps Script API ثم أعد المحاولة':(e.message||'تعذّر التحديث'))}
+}
 function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
@@ -255,6 +271,7 @@ function renderMarket(){
   if(!n)h+='<div class="small">لم تُضف بزنسات بعد.</div>';
   (m.biz||[]).forEach((r,i)=>{if(r&&r[1])h+='<div class="ord"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>'+esc(r[0]||'—')+'</span><button class="btn sec sm" onclick="rmBiz('+i+')">حذف</button></div></div>'});
   h+='</div>';
+  h+='<div class="card"><h2>تحديث الخلفية</h2><div class="small" style="line-height:1.9;margin-bottom:8px">إن ظهر خطأ عند فتح رابط البطاقة، اضغط هنا لتثبيت آخر نسخة من كود المؤشر في حسابك (يبقى الرابط نفسه).</div><button class="btn sec" onclick="updateBackend()">تحديث الخلفية</button><div id="m3" class="msg"></div></div>';
   h+='<div class="card"><h2>الشيت الكامل</h2><a class="link" href="https://docs.google.com/spreadsheets/d/'+esc(m.sheetId)+'" target="_blank" rel="noopener">فتح الشيت في حسابك</a></div>';
   h+='<button class="btn sec" onclick="renderHome()">رجوع</button>';
   $('app').innerHTML=h;
