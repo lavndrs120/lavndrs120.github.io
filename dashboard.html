@@ -827,7 +827,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "-4.28", "changePercent": "-100.00", "dayHigh": "4.28", "dayLow": "4.28", "volatility": "0.00"}, "timestamp": "2026-11-20T07:34:29"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -839,6 +839,7 @@ const GSI_CLIENT_ID = '776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.google
 // ✅ ما فيش أي توكن محقون من السيرفر — التوكن بييجي فقط بعد تسجيل دخول Google حقيقي والتحقق منه.
 let AUTH_TOKEN = sessionStorage.getItem('lavndr_token') || '';
 let USER_EMAIL = sessionStorage.getItem('lavndr_email') || '';
+let _subsEmail = '', builderHubEmail = '';
 let _subsCache = null, _subsAt = 0, _subsTok = '', _subsP = null, _bhTarget = null, _hubBusy = false, _lastLoadAt = Date.now();
 // ✅ جديد: دور المستخدم الحالي كما يرجعه الباك اند (admin/participant/subscriber/visitor)
 // أو null لو زائر مجهول (مش مسجل دخول خالص). بيتحكم في إظهار تبويب "السوق".
@@ -1129,20 +1130,23 @@ function bhFranchiseHtml(f) {
     bhDetails('عن امتياز لاڤندرز', (GATE_OFFERS.franchise || {}).body) + '</div>';
 }
 // ── اشتراكاتي: ذاكرة مؤقتة (ثوانٍ بدل انتظار الخادم في كل مرة) ──
-function invalidateSubs() { _subsCache = null; _subsAt = 0; try { localStorage.removeItem('lavndr_subs'); } catch (e) {} }
+function invalidateSubs() { _subsCache = null; _subsAt = 0; _subsEmail = ''; try { localStorage.removeItem('lavndr_subs'); } catch (e) {} }
 function getMySubs(force) {
   if (!AUTH_TOKEN) return Promise.resolve({ items: [] });
   // محفوظ على الجهاز: لا نسأل الخادم عن اشتراكاتي كل مرة تُفتح فيها الصفحة
+  if (_subsCache && _subsEmail !== USER_EMAIL) { _subsCache = null; _subsAt = 0; }
   if (!_subsCache) {
-    try { const s = JSON.parse(localStorage.getItem('lavndr_subs') || 'null'); if (s && s.e === USER_EMAIL && s.j) { _subsCache = s.j; _subsAt = s.t || 0; } } catch (e) {}
+    try { const s = JSON.parse(localStorage.getItem('lavndr_subs') || 'null'); if (s && s.e === USER_EMAIL && s.j) { _subsCache = s.j; _subsAt = s.t || 0; _subsEmail = USER_EMAIL; } } catch (e) {}
   }
   const age = Date.now() - _subsAt;
   if (!force && _subsCache && age < 1800000) return Promise.resolve(_subsCache);      // حديثة (<30 دقيقة): بلا طلب
   if (_subsP) return (!force && _subsCache && age < 86400000) ? Promise.resolve(_subsCache) : _subsP;
+  const _tk = AUTH_TOKEN, _em = USER_EMAIL;
   _subsP = fetch(WORKER_URL + '?action=my_subscriptions&token=' + encodeURIComponent(AUTH_TOKEN))
     .then(r => r.json())
     .then(j => {
-      if (j && j.items) { _subsCache = j; _subsAt = Date.now(); try { localStorage.setItem('lavndr_subs', JSON.stringify({ e: USER_EMAIL, t: _subsAt, j: j })); } catch (e) {} }
+      if (_tk !== AUTH_TOKEN) return _subsCache || { items: [] };
+      if (j && j.items) { _subsCache = j; _subsEmail = _em; _subsAt = Date.now(); try { localStorage.setItem('lavndr_subs', JSON.stringify({ e: USER_EMAIL, t: _subsAt, j: j })); } catch (e) {} }
       return _subsCache || { items: [] };
     })
     .catch(() => _subsCache || { items: [] })
@@ -1172,17 +1176,10 @@ function bhAnchor() {
 function bhPlaceholder(tier, label) {
   return '<div id="bh_' + tier + '" class="glass" style="scroll-margin-top:70px;padding:30px 16px;border-radius:18px;margin-bottom:14px;text-align:center;color:var(--text-dim);font-size:13px;">' + label + '</div>';
 }
-function mktCountText(limit) {
-  try {
-    const j = JSON.parse(localStorage.getItem('lavndr_mkt_' + String(USER_EMAIL || '').toLowerCase()) || 'null');
-    if (j && typeof j.n === 'number') return 'مؤشراتك الآن: <b>' + j.n + '</b>' + (limit ? ' من ' + limit : '') + ' <span style="color:var(--text-faint);">(آخر تحديث ' + new Date(j.t).toLocaleDateString('ar') + ')</span>';
-  } catch (e) {}
-  return 'افتح «مؤشر سوقك» ليظهر هنا عدد مؤشراتك الحالية.';
-}
-function bhMarketCard(limit) {
+function bhMarketCard() {
   return '<a href="market-builder.html" class="glass" style="display:block;text-decoration:none;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);">' +
     '<div style="font-size:28px;">📈</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">مؤشر سوقك</div>' +
-    '<div style="font-size:12px;color:var(--text-dim);line-height:1.8;">أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.</div><div style="font-size:12.5px;color:#6EE7B7;margin-top:8px;">' + mktCountText(limit) + '</div></a>';
+    '<div style="font-size:12px;color:var(--text-dim);line-height:1.8;">أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.</div></a>';
 }
 async function renderBuilderHub(fresh) {
   const box = document.getElementById('builderHubBody');
@@ -1192,6 +1189,7 @@ async function renderBuilderHub(fresh) {
   const needHub = act.some(i => i.tier === 'reseller' || i.tier === 'franchise');
   const has = t => act.some(i => i.tier === t);
   const paint = () => {
+    if (builderHub && builderHubEmail !== USER_EMAIL) builderHub = null;
     const h = builderHub || {};
     const parts = [];
     if (has('reseller')) parts.push(h.reseller ? '<div id="bh_reseller" style="scroll-margin-top:70px;">' + bhResellerHtml(h.reseller) + '</div>' : bhPlaceholder('reseller', 'جاري تحميل استوديو الريسلر…'));
@@ -1202,7 +1200,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:32px;">' + (meta.badge || '✅') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
-        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».<br>' + mktCountText(i.tier === 'tycoon' ? 20 : 400) + '</div>' : '') +
+        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».</div>' : '') +
         gateFormsBox(i.tier) +
         '<a href="' + gateHelpWhatsAppUrl(i.tier) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a></div>');
     });
@@ -1212,7 +1210,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:28px;">📱</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">ابنِ تطبيق طلباتك</div>' +
         '<div style="font-size:12px;color:var(--text-dim);">متجر ويب وتطبيق أندرويد باسم بزنسك — تجربة يوم كاملة</div></a>');
     }
-    if (has('franchise') || has('tycoon') || has('tycoon_sector')) parts.unshift(bhMarketCard(has('tycoon_sector') ? 400 : has('tycoon') ? 20 : 1));
+    if (has('franchise') || has('tycoon') || has('tycoon_sector')) parts.unshift(bhMarketCard());
     box.innerHTML = parts.join('') || '<div class="glass" style="padding:24px;text-align:center;color:var(--text-dim);font-size:13px;">لا توجد عضوية فعّالة بعد.</div>';
     bhAnchor();
   };
@@ -1222,8 +1220,10 @@ async function renderBuilderHub(fresh) {
   // ثانياً: تحديث بيانات الريسلر/الفرانشايز في الخلفية (إن وُجدا)
   if (needHub && !_hubBusy) {
     _hubBusy = true;
+    const _tk2 = AUTH_TOKEN;
     fetch(WORKER_URL + '?action=builder_hub&token=' + encodeURIComponent(AUTH_TOKEN)).then(r => r.json()).then(j => {
-      builderHub = j;
+      if (_tk2 !== AUTH_TOKEN) return;
+      builderHub = j; builderHubEmail = USER_EMAIL;
       const a2 = document.activeElement;
       if (!(a2 && box.contains(a2) && /INPUT|TEXTAREA|SELECT/.test(a2.tagName))) paint();
     }).catch(() => { if (!builderHub) box.innerHTML = '<div class="glass" style="padding:24px;text-align:center;color:var(--red);font-size:13px;">تعذّر تحميل مساحتك</div>'; })
@@ -1809,6 +1809,9 @@ async function handleCredentialResponse(response) {
       document.getElementById('gsiButtonWrap').style.display = 'block';
       return;
     }
+    // حساب جديد = حالة جديدة: لا يرث اشتراكات/مقاعد/بزنسات الحساب السابق في هذه الصفحة
+    invalidateSubs(); builderHub = null; builderHubEmail = '';
+    ['lavndr_role','lavndr_tier','lavndr_space','lavndr_view','lavndr_chooser_done','lavndr_gate_pending','lavndr_sub_intent'].forEach(function (k) { try { sessionStorage.removeItem(k); } catch (e) {} });
     AUTH_TOKEN = data.token;
     USER_EMAIL = data.email;
     sessionStorage.setItem('lavndr_token', AUTH_TOKEN);
