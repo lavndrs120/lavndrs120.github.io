@@ -2,6 +2,7 @@
 <html dir="rtl" lang="ar">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="strict-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
 <title>مؤشر سوقك — لاڤندرز</title>
@@ -347,7 +348,7 @@ async function delMarket(){
 }
 
 // ───── نقل بطاقة المؤشر إلى حساب GitHub الخاص بالمستخدم ─────
-let GHT='';try{GHT=localStorage.getItem('ghT')||''}catch(e){}
+let GHT='';try{GHT=sessionStorage.getItem('ghT')||'';localStorage.removeItem('ghT')}catch(e){}
 let HOSTING=false;
 function slugG(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)}
 async function ghPost(path,body){const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body||{})});return r.json()}
@@ -360,7 +361,7 @@ async function ghAuth(){
   while(Date.now()<end){
     await new Promise(r=>setTimeout(r,wait));
     const t=await ghPost('/gh/token',{device_code:d.device_code});
-    if(t.access_token){GHT=t.access_token;try{localStorage.setItem('ghT',GHT)}catch(e){}return GHT}
+    if(t.access_token){GHT=t.access_token;try{sessionStorage.setItem('ghT',GHT)}catch(e){}return GHT}
     if(t.error==='slow_down')wait+=5000;
     else if(t.error&&t.error!=='authorization_pending')throw new Error(t.error_description||t.error);
   }
@@ -369,7 +370,7 @@ async function ghAuth(){
 async function ghApi(path,opt){
   opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+GHT,Accept:'application/vnd.github+json'},opt.headers||{});
   const r=await fetch('https://api.github.com'+path,opt);let j={};try{j=await r.json()}catch(e){}
-  if(r.status===401){GHT='';try{localStorage.removeItem('ghT')}catch(e){}}
+  if(r.status===401){GHT='';try{sessionStorage.removeItem('ghT')}catch(e){}}
   if(!r.ok&&r.status!==404)throw new Error(j.message||('GitHub '+r.status));
   return{status:r.status,json:j}
 }
