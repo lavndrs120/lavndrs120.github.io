@@ -37,6 +37,7 @@ async function get(){
 }
 const IMGRX=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/;
 function draw(d){
+  if(d.accent&&/^#[0-9A-Fa-f]{6}$/.test(d.accent)){const h=d.accent,r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16),l=v=>Math.round(v+(255-v)*.35);document.documentElement.style.setProperty('--gold',h);document.documentElement.style.setProperty('--gold2','rgb('+l(r)+','+l(g)+','+l(b)+')')}
   if(d.image&&IMGRX.test(d.image)){document.body.style.background="linear-gradient(rgba(4,4,10,.72),rgba(4,4,10,.86)),url('"+d.image+"') center/cover fixed no-repeat #04040A"}
   const x=d.index||{},ch=parseFloat(x.change)||0,c=ch>=0?'pos':'neg',a=ch>=0?'▲':'▼',ts=(d.timestamp||'').slice(0,16).replace('T',' ');
   $('c').innerHTML='<div class="eb">المؤشر الاستهلاكي</div><div class="nm">'+esc(d.market||'')+'</div><div class="lbl">قيمة الطلبات لحظة بلحظة</div>'+

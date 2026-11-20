@@ -201,9 +201,18 @@ function drawHome(h){
   $('app').innerHTML=h;
 }
 function renderNew(){
-  $('app').innerHTML='<h1>مؤشر جديد</h1><p class="sub">اسم المؤشر الذي سيظهر على بطاقته</p><div class="card"><label>اسم المؤشر</label><input id="mname" maxlength="60" placeholder="مثال: سوق المطاعم"><div class="small" style="margin-top:8px">يُنشأ المؤشر في حسابك: '+esc(EMAIL)+'</div><button class="btn" style="margin-top:12px" onclick="createMarket()">إنشاء</button><button class="btn sec" onclick="renderHome()">رجوع</button><div id="m1" class="msg"></div></div>';
+  $('app').innerHTML='<h1>مؤشر جديد</h1><p class="sub">اسم المؤشر الذي سيظهر على بطاقته</p><div class="card"><label>اسم المؤشر</label><input id="mname" maxlength="60" placeholder="مثال: سوق المطاعم"><div class="small" style="margin-top:12px">لون المؤشر:</div>'+mkSwatches(S.newAcc,'pickNewAcc')+'<div class="small" style="margin-top:8px">يُنشأ المؤشر في حسابك: '+esc(EMAIL)+'</div><button class="btn" style="margin-top:12px" onclick="createMarket()">إنشاء</button><button class="btn sec" onclick="renderHome()">رجوع</button><div id="m1" class="msg"></div></div>';
 }
-const STEPS=['الموافقة على الصلاحيات','إنشاء شيت المؤشر','إنشاء الخلفية في Apps Script','نشر الخلفية','حفظ الإعدادات'];
+const MK_COLORS=['#C9A84C','#10B981','#38BDF8','#F472B6','#FB923C','#A78BFA'];
+const MKRX=/^#[0-9A-Fa-f]{6}$/;
+function mkSwatches(cur,fn){return '<div style="display:flex;gap:10px;margin-top:8px" id="mkSw">'+MK_COLORS.map(c=>'<span data-c="'+c+'" onclick="'+fn+'(\''+c+'\')" style="width:30px;height:30px;border-radius:50%;background:'+c+';cursor:pointer;border:3px solid '+(c.toLowerCase()===String(cur||MK_COLORS[0]).toLowerCase()?'#fff':'transparent')+'"></span>').join('')+'</div>'}
+function mkMark(c){document.querySelectorAll('#mkSw span').forEach(x=>x.style.borderColor=x.dataset.c===c?'#fff':'transparent')}
+function pickNewAcc(c){S.newAcc=c;mkMark(c)}
+async function pickMAcc(c){
+  const m=S.cur;if(!m||!MKRX.test(c))return;mkMark(c);showMsg('m9','جاري الحفظ…','info');
+  try{await putVals(m.sheetId,'Config!E1',[[c]]);m.acc=c;showMsg('m9','تم حفظ اللون ✓ يظهر في البطاقة خلال دقائق','good');checkHealth()}catch(e){showMsg('m9',e.message||'تعذّر الحفظ')}
+}
+ const STEPS=['الموافقة على الصلاحيات','إنشاء شيت المؤشر','إنشاء الخلفية في Apps Script','نشر الخلفية','حفظ الإعدادات'];
 function stepsUI(n,state,msg,retry){
   let h='<h1>جاري إنشاء مؤشرك</h1><p class="sub">لا تُغلق الصفحة.</p><div class="card">';
   STEPS.forEach((s,i)=>{const c=i<n?'done':(i===n?(state||'run'):'');h+='<div class="step '+c+'"><span class="dot">'+(i<n?'✓':(i===n?(state==='fail'?'✕':'…'):'○'))+'</span>'+esc(s)+'</div>'});
@@ -215,7 +224,7 @@ async function createMarket(){
   const name=($('mname').value||'').trim();
   if(name.length<2){showMsg('m1','اكتب اسماً من حرفين على الأقل');return}
   if(S.markets.length>=S.allowed){showMsg('m1','وصلت إلى الحد المسموح');return}
-  S.pend={name:name};runCreate();
+  S.pend={name:name,acc:S.newAcc||''};runCreate();
 }
 function resumeMarket(i){const m=S.markets[i];if(!m)return;S.pend={name:m.name,sheetId:m.sheetId};runCreate()}
 async function runCreate(){
@@ -241,7 +250,8 @@ async function runCreate(){
     const url=(ep&&ep.webApp&&ep.webApp.url)||('https://script.google.com/macros/s/'+d.deploymentId+'/exec');
     n=4;stepsUI(4);
     await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:P.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
-    S.pend=null;S.markets=await listMarkets();S.listed=true;saveCount();
+    if(MKRX.test(P.acc||''))await putVals(sheetId,'Config!E1',[[P.acc]]);
+    S.newAcc='';S.pend=null;S.markets=await listMarkets();S.listed=true;saveCount();
     const i=S.markets.findIndex(x=>x.sheetId===sheetId);openMarket(i<0?0:i);
   }catch(e){
     const msg=e.apiOff?'فعّل Apps Script API من إعدادات حسابك: script.google.com/home/usersettings ثم اضغط «إعادة المحاولة» (لن يُنشأ شيت جديد).':(e.message||'فشل غير متوقع');
@@ -255,7 +265,7 @@ async function openMarket(i){
   const m=S.markets[i];if(!m){renderHome();return}S.cur=m;
   $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
   try{
-    const cv=await getVals(m.sheetId,'Config!A1:D1'),cr=cv[0]||[];m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
+    const cv=await getVals(m.sheetId,'Config!A1:E1'),cr=cv[0]||[];m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
     m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
     renderMarket();checkHealth();loadMApk();
@@ -446,6 +456,7 @@ function renderMarket(){
   h+='<div class="card" id="hcard"><h2>حالة المؤشر</h2><div class="small">جاري الفحص…</div></div>';
   h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
   h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
+  h+='<div class="card"><h2>لون المؤشر</h2><div class="small">لون العناوين والتمييز في بطاقة مؤشرك.</div>'+mkSwatches(m.acc,'pickMAcc')+'<div id="m9" class="msg"></div></div>';
   h+='<div class="card"><h2>خلفية المؤشر</h2>'+mImgBox(m)+'</div>';
   h+='<div class="card"><h2>استقلالك الكامل: بطاقتك في حسابك</h2>'+ghBox(m)+'</div>';
   h+='<div class="card"><h2>تطبيق الأندرويد للمؤشر</h2><div id="mapk" class="small">…</div></div>';
