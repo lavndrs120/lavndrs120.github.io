@@ -141,7 +141,7 @@ async function driveUpload(dataUrl,name){
   return 'https://drive.google.com/thumbnail?id='+f.id+'&sz=w900';
 }
 const REQ_HEADERS=['OrderID','Timestamp','Item','Qty','Unit','Total','Customer','Phone','Email','Location','ReqTime','Lat','Lon','TxnRef','Verified','Status','DecidedAt','SheetRow'];
-const ORD_HEADERS=['Timestamp','Product','Qty','Price','Total','Customer','Type','AP_Code','Location'];
+const ORD_HEADERS=['Timestamp','Product','Qty','Price','Total','Customer','Type','AP_Code','Location','RequestID'];
 async function createSheet(title){
   const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:title},sheets:[{properties:{title:'Requests'}},{properties:{title:'Orders'}},{properties:{title:'Config'}}]})});
   await gf('https://sheets.googleapis.com/v4/spreadsheets/'+s.spreadsheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[{range:'Requests!A1',values:[REQ_HEADERS]},{range:'Orders!A1',values:[ORD_HEADERS]}]})});
@@ -546,11 +546,27 @@ async function buildApk(){
 }
 
 // ───── الطلبات (من شيتك مباشرة) ─────
+// يحذف من Orders أي صف مربوط بطلب (RequestID) لم يعد موجوداً في Requests، فتبقى المؤشرات متسقة مع الشيت
+async function syncOrph(b,reqs){
+  try{
+    const ids=new Set(reqs.map(v=>String(v[0]||'')));
+    const base='https://sheets.googleapis.com/v4/spreadsheets/'+b.sheetId;
+    const oj=await gf(base+'/values/Orders!J2:J');
+    const col=oj.values||[];const del=[];
+    col.forEach((c,i)=>{const id=String((c&&c[0])||'');if(id&&!ids.has(id))del.push(i+1)});
+    if(!del.length)return;
+    const meta=await gf(base+'?fields=sheets.properties(sheetId,title)');
+    const sh=(meta.sheets||[]).find(x=>x.properties.title==='Orders');if(!sh)return;
+    const requests=del.sort((a,c)=>c-a).map(i=>({deleteDimension:{range:{sheetId:sh.properties.sheetId,dimension:'ROWS',startIndex:i,endIndex:i+1}}}));
+    await gf(base+':batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:requests})});
+  }catch(e){}
+}
 async function loadOrders(){
   const b=S.cur,el=$('ords');if(!el)return;
   try{
     await gAuth();
     const j=await gf('https://sheets.googleapis.com/v4/spreadsheets/'+b.sheetId+'/values/Requests!A2:R');
+    syncOrph(b,j.values||[]);
     const rows=(j.values||[]).map((v,i)=>({row:i+2,v:v})).filter(o=>o.v[15]==='pending').reverse();
     S.pend=rows;
     if(!rows.length){el.textContent='لا توجد طلبات بانتظار المراجعة.';return}
@@ -565,7 +581,7 @@ async function decide(row,d,btn){
     if(!(chk.values&&chk.values[0]&&chk.values[0][0]==='pending')){alert('الطلب مُعالَج مسبقاً');loadOrders();return}
     let sheetRow='';
     if(d==='accept'){
-      const ap=await gf(base+'/values/Orders!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[new Date().toISOString(),v[2],Number(v[3]),Number(v[4]),Number(v[5]),v[6],'BUY','',v[9]]]})});
+      const ap=await gf(base+'/values/Orders!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[new Date().toISOString(),v[2],Number(v[3]),Number(v[4]),Number(v[5]),v[6],'BUY','',v[9],v[0]]]})});
       const m=/(\d+)$/.exec((ap.updates&&ap.updates.updatedRange)||'');sheetRow=m?Number(m[1]):'';
     }
     await gf(base+'/values/Requests!P'+row+':R'+row+'?valueInputOption=RAW',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[d==='accept'?'accepted':'rejected',new Date().toISOString(),sheetRow]]})});
