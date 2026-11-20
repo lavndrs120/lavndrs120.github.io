@@ -129,6 +129,19 @@
     "description": "شرح لشروط شهادة لاڤندرز الذهبية",
     "date": "2026-11-19"
    }
+  },
+  {
+   "id": "app-builder-trial-unlock",
+   "title": "How does the 24-hour trial of the Lavenders app builder work?",
+   "description": "24-hour trial, unlock with membership",
+   "slug": "how-does-the-24-hour-trial-of-the-lavenders-app-builder-work",
+   "date": "2026-11-20",
+   "devto": "https://dev.to/lavenders/how-does-the-24-hour-trial-of-the-lavenders-app-builder-work-2kg5",
+   "ar": {
+    "title": "محرك تطبيقات لاڤندرز",
+    "description": "محرك تطبيقات لاڤندرز يسمح بتجربة لمدة 24 ساعة",
+    "date": "2026-11-20"
+   }
   }
  ],
  "failed": {}
