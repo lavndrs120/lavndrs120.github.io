@@ -98,6 +98,12 @@ async function onCred(resp){
     const j=await r.json();
     if(!j.token){showLogin('فشل تسجيل الدخول — حاول مرة أخرى');return}
     TOKEN=j.token;EMAIL=j.email;try{sessionStorage.setItem('appb_token',TOKEN);sessionStorage.setItem('appb_email',EMAIL)}catch(e){}
+    // مشترك فعّال يدخل عبر صفحة البناء ← واجهة «اشتراكاتك» في الداشبورد؛ غير المشترك يبقى في صفحة البناء
+    try{
+      const r2=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',idToken:resp.credential})});const j2=await r2.json();
+      if(j2.token){const sj=await (await fetch(WORKER_URL+'?action=my_subscriptions&token='+encodeURIComponent(j2.token))).json();
+        if(sj&&sj.items&&sj.items.some(x=>x.stage==='active')){sessionStorage.setItem('lavndr_token',j2.token);sessionStorage.setItem('lavndr_email',j2.email);sessionStorage.setItem('lavndr_login_chooser','1');sessionStorage.setItem('lavndr_fresh_login',String(Date.now()));try{sessionStorage.removeItem('appb_token');sessionStorage.removeItem('appb_email')}catch(e){}location.href='dashboard.html';return}}
+    }catch(e){}
     boot();
   }catch(e){showLogin('فشل الاتصال — حاول مرة أخرى')}
 }

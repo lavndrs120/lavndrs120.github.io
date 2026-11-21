@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "687.39"}, "timestamp": "2026-11-21T09:34:22"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1128,7 +1128,7 @@ function bhFranchiseHtml(f) {
     bhAddBizHtml(f) +
     '<div style="font-size:12px;color:var(--text-dim);margin:14px 0 8px;">بزنسات سوقك — تُفتح خانة بكل مقعد مدفوع (' + (f.perSeat || 22.58) + '$ للمقعد)</div>' +
     '<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:8px;max-height:420px;overflow:auto;">' + rows.join('') + '</div>' +
-    gateFormsBox('franchise') +
+    gateFormsBox('franchise', true) +
     bhDetails('عن امتياز لاڤندرز', (GATE_OFFERS.franchise || {}).body) + '</div>';
 }
 // ── اشتراكاتي: ذاكرة مؤقتة (ثوانٍ بدل انتظار الخادم في كل مرة) ──
@@ -1203,7 +1203,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
         ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».<br>وتبني أيضاً حتى <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> تطبيق طلبات لبزنساتك من «ابنِ تطبيق طلباتك».</div>' : '') +
-        gateFormsBox(i.tier) +
+        gateFormsBox(i.tier, true) +
         '<a href="' + gateHelpWhatsAppUrl(i.tier) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a></div>');
     });
     // بناء التطبيقات: لأعضاء OMS والريسلر والفرانشايز (والإدارة)
@@ -1365,7 +1365,15 @@ function orChatHtml() {
 }
 // ══ المعاينة التجريبية الكاملة (للزائر): نفس الشاشات الفعلية ببيانات نموذجية، وكل تنفيذ مقفول حتى الاشتراك ══
 let _demoKind = '', _demoMoved = null, _demoFetch = null;
-const DEMO_OFFER = { oracle: 'fendex', magma: 'magma', reseller: 'reseller', franchise: 'franchise' };
+const DEMO_OFFER = { oracle: 'fendex', magma: 'magma', reseller: 'reseller', franchise: 'franchise', tycoon: 'tycoon' };
+function bhTycoonDemoHtml() {
+  const card = (ic, t, d) => '<div onclick="demoCta()" class="glass" style="cursor:pointer;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);"><div style="font-size:28px;">' + ic + '</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">' + t + '</div><div style="font-size:12px;color:var(--text-dim);line-height:1.8;">' + d + '</div></div>';
+  return '<div style="margin-top:16px;">' + card('📱', 'ابنِ تطبيق طلباتك', 'متجر ويب وتطبيق أندرويد باسم بزنسك — تجربة يوم كاملة') +
+    card('📈', 'مؤشر سوقك', 'أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.') +
+    '<div class="glass" style="padding:20px 16px;border-radius:18px;margin-bottom:14px;text-align:center;"><div style="font-size:32px;">👑</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">تايكون المجال</div><div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة</div>' +
+    '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>20</b> مؤشر سوق، وفي كل مؤشر حتى 120 بزنساً وبراند.<br>وتبني حتى <b>20</b> تطبيق طلبات لبزنساتك.</div>' +
+    '<div style="margin:14px 0;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);text-align:right;font-size:12px;line-height:2;"><b style="color:var(--gold);">📑 صفحة اعتماد التمويل</b><br><button onclick="demoCta()" style="margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:700;font-size:12.5px;cursor:pointer;width:100%;">✍️ تعبئة وتوقيع الطلب هنا</button></div></div></div>';
+}
 function demoCta() { showNotif(DemoData.BLOCK); }
 function openDemoView(kind) {
   if (!window.DemoData) return;
@@ -1387,6 +1395,8 @@ function openDemoView(kind) {
     else { renderMagmaDirectory(DemoData.magma()); }
   } else if (kind === 'reseller') {
     body.innerHTML = '<div style="margin-top:16px;">' + bhResellerHtml(DemoData.reseller()).replace(/onclick="bhResSubmit\(\d+\)"/g, 'onclick="demoCta()"') + '</div>';
+  } else if (kind === 'tycoon') {
+    body.innerHTML = bhTycoonDemoHtml();
   } else if (kind === 'franchise') {
     body.innerHTML = '<div style="margin-top:16px;">' + bhFranchiseHtml(DemoData.franchise()).replace(/onclick="(payFranchise|bhSubmitBiz)\(\)"/g, 'onclick="demoCta()"') + '</div>';
   }
@@ -1401,7 +1411,7 @@ function openDemoView(kind) {
 }
 // فتح المعاينة مباشرة من رابط الصفحة الرئيسية: dashboard.html?demo=oracle|magma|reseller|franchise
 window.addEventListener('load', function () {
-  const m = location.search.match(/[?&]demo=(oracle|magma|reseller|franchise)/);
+  const m = location.search.match(/[?&]demo=(oracle|magma|reseller|franchise|tycoon)/);
   if (m) setTimeout(function () { try { openDemoView(m[1]); } catch (e) {} }, 700);
 });
 function closeDemoView(silent) {
@@ -1813,11 +1823,12 @@ async function handleCredentialResponse(response) {
     }
     // حساب جديد = حالة جديدة: لا يرث اشتراكات/مقاعد/بزنسات الحساب السابق في هذه الصفحة
     invalidateSubs(); builderHub = null; builderHubEmail = '';
-    ['lavndr_role','lavndr_tier','lavndr_space','lavndr_view','lavndr_chooser_done','lavndr_gate_pending','lavndr_sub_intent'].forEach(function (k) { try { sessionStorage.removeItem(k); } catch (e) {} });
+    ['lavndr_role','lavndr_tier','lavndr_space','lavndr_view','lavndr_gate_pending','lavndr_sub_intent'].forEach(function (k) { try { sessionStorage.removeItem(k); } catch (e) {} });
     AUTH_TOKEN = data.token;
     USER_EMAIL = data.email;
     sessionStorage.setItem('lavndr_token', AUTH_TOKEN);
     sessionStorage.setItem('lavndr_email', USER_EMAIL);
+    try { sessionStorage.setItem('lavndr_login_chooser', '1'); } catch (e) {}
     try { sessionStorage.setItem('lavndr_fresh_login', String(Date.now())); } catch (e) {}
     boot();
   } catch(e) {
@@ -1884,6 +1895,14 @@ async function loadData(isRetry) {
       renderDemoBanner();
       loadPublicIndex();
       checkBuilderMode(true);
+      // صاحب اشتراك فعّال (مسار الحركة: تايكون/ريسلر/فرانشايز/OMS) يدخل مقره مباشرة دون نافذة الاشتراكات في كل دخول؛ وتبقى متاحة من زر «اشتراكاتي»
+      if (data.role === 'movement') {
+        getMySubs().then(function (j) {
+          const hasActive = !!(j && j.items && j.items.some(function (x) { return x.stage === 'active'; }));
+          if (hasActive) maybeShowSubscriptionChooser(); else if (!subscribeGateDismissedByUser) showSubscribeGate();
+        }).catch(function () { if (!subscribeGateDismissedByUser) showSubscribeGate(); });
+        return;
+      }
       if (!subscribeGateDismissedByUser) showSubscribeGate();
       return;
     }
@@ -2066,15 +2085,17 @@ async function pickSubscription(it) {
 }
 // بعد دخول مشترك له أكثر من اشتراك فعّال: تُعرض نافذة الاختيار مرة واحدة في الجلسة
 async function maybeShowSubscriptionChooser() {
-  if (!AUTH_TOKEN || !USER_EMAIL || currentRole === 'participant') return; // صاحب البزنس يدخل بزنسه مباشرة، واشتراكاته من زر «اشتراكاتي»
-  try { if (sessionStorage.getItem('lavndr_chooser_done') === '1') return; } catch (e) {}
+  // كل تسجيل دخول يقود إلى واجهة «اشتراكاتك» (يُسجَّل العلم عند الدخول؛ إعادة تحميل الصفحة لا تعيد فتحها)
+  if (!AUTH_TOKEN || !USER_EMAIL) return;
+  let go = false; try { go = sessionStorage.getItem('lavndr_login_chooser') === '1'; sessionStorage.removeItem('lavndr_login_chooser'); } catch (e) {}
+  if (!go) return;
   try {
     const j = await getMySubs();
-    try { sessionStorage.setItem('lavndr_chooser_done', '1'); } catch (e) {}
-    if (j && j.items && j.items.length >= 2) {
+    const items = (j && j.items) ? j.items : [];
+    if (items.length >= 1 || currentRole === 'participant') {
       document.getElementById('subscribeGateModal').style.display = 'block';
       subscribeGateDismissedByUser = false;
-      renderSubscriptionChooser(j.items);
+      renderSubscriptionChooser(items);
     }
   } catch (e) {}
 }
@@ -2311,7 +2332,11 @@ function renderGatePath(pathKey) {
 }
 
 // ── مستندات الباقة + تعبئتها داخل الصفحة (تظهر في كل شاشات الاشتراك بعد الموافقة) ──
-function gateFormsBox(tier) {
+function gateBuildBtn() {
+  return '<a href="builder.html" style="display:block;margin:14px 0 0;padding:12px;border-radius:12px;border:1px solid var(--gold);background:rgba(255,255,255,.05);color:var(--gold);font-weight:800;font-size:13px;text-align:center;text-decoration:none;">📱 ابنِ تطبيقاتك</a>';
+}
+function gateFormsBox(tier, noBuild) {
+  if (!noBuild && (tier === 'franchise' || tier === 'tycoon' || tier === 'tycoon_sector')) return gateBuildBtn() + gateFormsBox(tier, true);
   if (tier === 'franchise') return `<div style="margin:14px 0;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);text-align:right;font-size:12px;line-height:2;">
       <b style="color:var(--gold);">📑 اتفاقية امتياز لاڤندرز</b><br>
       <a href="franchise-agreement.pdf" target="_blank" rel="noopener" style="color:var(--text-dim);">📝 نسخة PDF من الاتفاقية</a>
@@ -2349,7 +2374,7 @@ function openFundingForm(tier) {
 
 // ── الخطوة 2: تفاصيل العرض (القراءة والفهم — الدفع خطوة منفصلة لاحقة) ──
 function DEMO_OFFER_BTN(offerKey, t) {
-  const map = { fendex: ['openDemoView(\'oracle\')', 'معاينة الأوراكل كاملاً'], magma: ['openDemoView(\'magma\')', 'معاينة دليل ماقما كاملاً'], reseller: ['openDemoView(\'reseller\')', 'معاينة استوديو الريسلر كاملاً'], franchise: ['openDemoView(\'franchise\')', 'معاينة مقر الفرانشايز كاملاً'], oms: ['location.href=\'business.html?demo=1\'', 'معاينة صفحة بزنسك كاملة'] };
+  const map = { fendex: ['openDemoView(\'oracle\')', 'معاينة الأوراكل كاملاً'], magma: ['openDemoView(\'magma\')', 'معاينة دليل ماقما كاملاً'], reseller: ['openDemoView(\'reseller\')', 'معاينة استوديو الريسلر كاملاً'], franchise: ['openDemoView(\'franchise\')', 'معاينة مقر الفرانشايز كاملاً'], tycoon: ['openDemoView(\'tycoon\')', 'معاينة مقر التايكون كاملاً'], oms: ['location.href=\'business.html?demo=1\'', 'معاينة صفحة بزنسك كاملة'] };
   const m = map[offerKey];
   const bld = (offerKey === 'oms' || offerKey === 'reseller' || offerKey === 'franchise' || offerKey === 'tycoon') ? `<a href="builder.html" style="display:block;margin-top:14px;padding:12px;border-radius:12px;border:1px solid ${t.eyebrow};background:rgba(255,255,255,.06);color:${t.title};font-weight:800;font-size:13px;text-align:center;text-decoration:none">📱 ابنِ تطبيقك الآن — تجربة 24 ساعة<br><span style="font-weight:500;font-size:11px;opacity:.8">يُنشئ النظام متجرك (ويب + أندرويد) فعلياً في حسابك، ويعمل 24 ساعة، ولا يُفتح للنشر إلا بالاشتراك</span></a>` : '';
   if (!m) return bld;
