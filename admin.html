@@ -560,12 +560,13 @@ function vBadge(stage) {
   return '<svg width="16" height="16" viewBox="0 0 20 20" role="img" aria-label="موثّق" style="vertical-align:-3px;margin-inline-start:5px;flex:none"><title>موثّق — حتى مرحلة ' + stage + ' طلب</title><circle cx="10" cy="10" r="10" fill="#E11D48"/><path d="M5.2 10.4l3.1 3.1 6.5-6.9" fill="none" stroke="#FACC15" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 
-let vfRows = [];
+let vfRows = [], vrRows = [];
 async function loadVerification() {
   const el = document.getElementById('vfList');
   try {
     const data = await authGet('admin_verification');
     vfRows = data.rows || [];
+    try { vrRows = (await authGet('admin_verify_requests')).rows || []; } catch (e) {}
     document.getElementById('vfDemo').innerHTML = vBadge(100);
     document.getElementById('vfPending').textContent = vfRows.filter(r => r.pending).length;
     renderVerification();
@@ -580,9 +581,12 @@ function renderVerification() {
     const st = r.verifiedStage;
     const state = st ? ('موثّق حتى ' + st + ' طلب') : 'غير موثّق';
     const need = r.pending ? ' · <b style="color:#FACC15">⏳ يحتاج توثيق مرحلة ' + r.requiredStage + '</b>' : '';
-    const btns = (r.pending ? '<button class="approve" data-vf="' + esc(r.sheetId) + '">✓ توثيق مرحلة ' + r.requiredStage + '</button>' : '') +
+    const rq = vrRows.filter(x => x.sheetId === r.sheetId && (x.status === 'submitted' || x.status === 'uploaded'))[0];
+    const rqHtml = rq ? '<div class="meta" style="margin-top:6px"><b style="color:#FACC15">' + (rq.kind === 'exc' ? '⭐ طلب استثنائي' : '📑 طلب توثيق') + ' · ' + esc(rq.files) + ' صورة · ' + (rq.status === 'submitted' ? 'بانتظار قرارك' : 'لم يُرفع للإدارة بعد') + '</b><br><a href="' + esc(rq.folderUrl) + '" target="_blank" rel="noopener" style="color:var(--gold);font-weight:700">📂 فتح ملف التوثيق (Drive)</a></div>' : '';
+    const btns = rq ? (rq.status === 'submitted' ? '<button class="approve" data-vra="' + rq.row + '">✓ اعتماد التوثيق</button><button class="reject" data-vrr="' + rq.row + '">✕ رفض</button>' : '') + (st ? '<button class="reject" data-vfx="' + esc(r.sheetId) + '">↩ إلغاء التوثيق</button>' : '') :
+      (r.pending ? '<button class="approve" data-vf="' + esc(r.sheetId) + '">✓ توثيق مرحلة ' + r.requiredStage + ' (يدوي)</button>' : '') +
       (st ? '<button class="reject" data-vfx="' + esc(r.sheetId) + '">↩ إلغاء التوثيق</button>' : '');
-    return '<div class="row"><div class="info"><div class="email">' + esc(r.name || '(بدون اسم)') + vBadge(st) + '</div><div class="meta">' + r.orders + ' طلب · ' + state + need + '</div></div><div class="btns">' + btns + '</div></div>';
+    return '<div class="row"><div class="info"><div class="email">' + esc(r.name || '(بدون اسم)') + vBadge(st) + '</div><div class="meta">' + r.orders + ' طلب · ' + state + need + '</div>' + rqHtml + '</div><div class="btns">' + btns + '</div></div>';
   }).join('');
   el.querySelectorAll('button[data-vf]').forEach(b => b.onclick = async () => {
     const r = vfRows.find(x => x.sheetId === b.dataset.vf);
@@ -609,7 +613,6 @@ document.getElementById('vfList').addEventListener('click', async ev => {
   } catch (e) { showToast('❌ تعذّر الاتصال'); b.disabled = false; }
 });
 
-let vrRows = [];
 async function loadVerifyReqs() {
   const el = document.getElementById('vrList');
   try {
@@ -624,7 +627,7 @@ async function loadVerifyReqs() {
       '<div class="btns">' + (r.status === 'submitted' ? '<button class="approve" data-vra="' + r.row + '">اعتماد</button><button class="reject" data-vrr="' + r.row + '">رفض</button>' : '') + '</div></div>').join('');
   } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
 }
-document.getElementById('vrList').addEventListener('click', async ev => {
+async function vrClick(ev) {
   const b = ev.target.closest && ev.target.closest('button[data-vra],button[data-vrr]'); if (!b) return;
   const ok = !!b.dataset.vra, row = b.dataset.vra || b.dataset.vrr;
   let note = ''; if (!ok) { note = prompt('سبب الرفض (يصل للبزنس):') || ''; if (!note) return; } else if (!confirm('اعتماد التوثيق؟')) return;
@@ -634,7 +637,9 @@ document.getElementById('vrList').addEventListener('click', async ev => {
     const j = await res.json(); if (j.error) { showToast('❌ ' + j.error); b.disabled = false; return; }
     showToast('✓ تم'); loadVerifyReqs(); loadVerification();
   } catch (e) { showToast('❌ تعذّر الاتصال'); b.disabled = false; }
-});
+}
+document.getElementById('vrList').addEventListener('click', vrClick);
+document.getElementById('vfList').addEventListener('click', vrClick);
 async function loadUserNotes() {
   const el = document.getElementById('unList');
   try {
