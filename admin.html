@@ -182,7 +182,7 @@ button {
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">يصل الإشعار إلى جرس المشترك داخل صفحته.</div>
     <input id="nsEmail" placeholder="بريد المشترك" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit">
     <input id="nsTitle" placeholder="العنوان (اختياري)" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit">
-    <textarea id="nsBody" maxlength="800" placeholder="نص الإشعار" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit;min-height:60px"></textarea>
+    <textarea id="nsBody" maxlength="800" placeholder="نص الإشعار — نص فقط، بدون روابط أو رموز" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit;min-height:60px"></textarea>
     <button class="approve" onclick="sendUserNote()">إرسال</button>
     <div class="section-title" style="margin-top:14px">رسائل المشتركين إليك</div>
     <div id="unList"><div class="empty">جاري التحميل...</div></div>
@@ -1456,5 +1456,6 @@ window.addEventListener('load', function() {
 })();
 </script>
 <script src="lavndr-app.js"></script>
+<script src="lavndr-press.js" defer></script>
 </body>
 </html>

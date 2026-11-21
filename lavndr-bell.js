@@ -27,10 +27,11 @@
       var who = x.from === 'user' ? 'أنت' : (x.from === 'admin' ? 'الإدارة' : 'لاڤندرز');
       h += '<div class="i' + (x.unread ? ' u' : '') + '"><b>' + esc(who) + '</b> · ' + esc(x.title || '') + '<div>' + esc(x.body) + '</div><div class="t">' + esc(String(x.at || '').slice(0, 16).replace('T', ' ')) + '</div></div>';
     });
-    h += '<textarea id="lvnMsg" maxlength="500" placeholder="اكتب رسالة للإدارة…"></textarea><button type="button" id="lvnSend">إرسال للإدارة</button><div id="lvnSt" class="t" style="padding:0 14px 10px"></div>';
+    h += '<textarea id="lvnMsg" maxlength="500" placeholder="اكتب رسالة نصية فقط (بدون روابط أو صور)…"></textarea><button type="button" id="lvnSend">إرسال للإدارة</button><div id="lvnSt" class="t" style="padding:0 14px 10px"></div>';
     panel.innerHTML = h;
     document.getElementById('lvnSend').onclick = function () {
       var v = document.getElementById('lvnMsg').value.trim(); if (v.length < 2) return;
+      if (/(https?:|www\.|\.[a-z]{2,}\/|\b[a-z0-9-]{2,}\.(com|net|org|io|me|app|co|sa|sd|ly|link|gl|dev|info|xyz|ae|eg)\b|[<>{}\[\]\\`|])/i.test(v)) { document.getElementById('lvnSt').textContent = 'الرسالة نص فقط — بدون روابط أو رموز'; return; }
       call('note_to_admin', true, { body: v }).then(function (r) { var s = document.getElementById('lvnSt'); if (s) s.textContent = r && r.status === 'sent' ? 'وصلت رسالتك للإدارة ✓' : ((r && r.error) || 'تعذّر الإرسال'); if (r && r.status === 'sent') refresh(true); });
     };
   }
