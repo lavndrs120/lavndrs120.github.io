@@ -142,6 +142,19 @@
     "description": "محرك تطبيقات لاڤندرز يسمح بتجربة لمدة 24 ساعة",
     "date": "2026-11-20"
    }
+  },
+  {
+   "id": "golden-certificate-valuation",
+   "title": "How is a golden certificate valued in Lavenders?",
+   "description": "Valuation of golden certificate in Lavenders",
+   "slug": "how-is-a-golden-certificate-valued-in-lavenders",
+   "date": "2026-11-21",
+   "devto": "https://dev.to/lavenders/how-is-a-golden-certificate-valued-in-lavenders-3ahn",
+   "ar": {
+    "title": "شهادة الذهب في لاڤندرز",
+    "description": "قيمة شهادة الذهب في لاڤندرز",
+    "date": "2026-11-21"
+   }
   }
  ],
  "failed": {}
