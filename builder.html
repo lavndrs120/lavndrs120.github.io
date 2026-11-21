@@ -143,7 +143,7 @@ async function driveUpload(dataUrl,name){
   return 'https://drive.google.com/thumbnail?id='+f.id+'&sz=w900';
 }
 const REQ_HEADERS=['OrderID','Timestamp','Item','Qty','Unit','Total','Customer','Phone','Email','Location','ReqTime','Lat','Lon','TxnRef','Verified','Status','DecidedAt','SheetRow'];
-const ORD_HEADERS=['Timestamp','Product','Qty','Price','Total','Customer','Type','AP_Code','Location','RequestID'];
+const ORD_HEADERS=['Timestamp','Product','Qty','Price','Total','Customer','Type','AP_Code','Location','RequestID','Status'];
 async function createSheet(title){
   const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:title},sheets:[{properties:{title:'Requests'}},{properties:{title:'Orders'}},{properties:{title:'Config'}}]})});
   await gf('https://sheets.googleapis.com/v4/spreadsheets/'+s.spreadsheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[{range:'Requests!A1',values:[REQ_HEADERS]},{range:'Orders!A1',values:[ORD_HEADERS]}]})});
@@ -225,7 +225,7 @@ function renderEditor(){
   if(!slotKind&&!b.appId)h+='<label>نوع البزنس</label><select id="f_kind"><option value="services"'+(b.kind==='services'?' selected':'')+'>خدمات</option><option value="products"'+(b.kind==='products'?' selected':'')+'>منتجات</option></select>';
   h+='<label>اسم البزنس أو البراند</label><input id="f_name" maxlength="60" value="'+esc(b.name)+'">';
   const pay=b.pay||{};
-  h+='<h2 style="margin-top:18px">الدفع (تحويل بنكي مباشر)</h2><p class="small">تصل هذه البيانات إلى زبونك في بريد رمز التحقق عند طلبه، ولا تظهر في صفحة المتجر. أسعار الأصناف بالدولار (العملة الأصل)؛ إن كان زبائنك يدفعون بعملة محلية فاكتب رمزها وسعر الدولار الواحد بها ليظهر لهم السعر المحلي أيضاً.</p>';
+  h+='<h2 style="margin-top:18px">الدفع (تحويل بنكي مباشر)</h2><div style="margin:8px 0;padding:11px 13px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);font-size:13px;line-height:1.9">🔒 <b>معلوماتك البنكية لا تُحفظ في لاڤندرز مطلقاً</b> ولا تمرّ عبرها. تُحفظ فقط داخل متجرك وتطبيقك الذي تنشئه في حسابك أنت على جوجل.</div><p class="small">تصل هذه البيانات إلى زبونك في بريد رمز التحقق عند طلبه، ولا تظهر في صفحة المتجر. أسعار الأصناف بالدولار (العملة الأصل)؛ إن كان زبائنك يدفعون بعملة محلية فاكتب رمزها وسعر الدولار الواحد بها ليظهر لهم السعر المحلي أيضاً.</p>';
   h+='<label>اسم البنك</label><input id="f_pbank" maxlength="60" value="'+esc(pay.bank)+'">';
   h+='<label>اسم صاحب الحساب</label><input id="f_phold" maxlength="80" value="'+esc(pay.holder)+'">';
   h+='<label>رقم الحساب</label><input id="f_pacc" maxlength="60" dir="ltr" value="'+esc(pay.account)+'">';
@@ -627,7 +627,8 @@ async function decide(row,d,btn){
     if(!(chk.values&&chk.values[0]&&chk.values[0][0]==='pending')){alert('الطلب مُعالَج مسبقاً');loadOrders();return}
     let sheetRow='';
     if(d==='accept'){
-      const ap=await gf(base+'/values/Orders!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[new Date().toISOString(),v[2],Number(v[3]),Number(v[4]),Number(v[5]),v[6],'BUY','',v[9],v[0]]]})});
+      try{await gf(base+'/values/Orders!J1:K1?valueInputOption=RAW',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[['RequestID','Status']]})})}catch(e){}
+      const ap=await gf(base+'/values/Orders!A1:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[new Date().toISOString(),v[2],Number(v[3]),Number(v[4]),Number(v[5]),v[6],'BUY','',v[9],v[0],'approved']]})});
       const m=/(\d+)$/.exec((ap.updates&&ap.updates.updatedRange)||'');sheetRow=m?Number(m[1]):'';
     }
     await gf(base+'/values/Requests!P'+row+':R'+row+'?valueInputOption=RAW',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[[d==='accept'?'accepted':'rejected',new Date().toISOString(),sheetRow]]})});

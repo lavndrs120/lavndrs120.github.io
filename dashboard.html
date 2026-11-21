@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "456.36"}, "timestamp": "2026-11-21T02:19:38"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1202,12 +1202,12 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:32px;">' + (meta.badge || '✅') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
-        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».</div>' : '') +
+        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».<br>وتبني أيضاً حتى <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> تطبيق طلبات لبزنساتك من «ابنِ تطبيق طلباتك».</div>' : '') +
         gateFormsBox(i.tier) +
         '<a href="' + gateHelpWhatsAppUrl(i.tier) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a></div>');
     });
     // بناء التطبيقات: لأعضاء OMS والريسلر والفرانشايز (والإدارة)
-    if (has('oms_services') || has('oms_products') || has('reseller') || has('franchise') || currentRole === 'admin') {
+    if (has('oms_services') || has('oms_products') || has('reseller') || has('franchise') || has('tycoon') || has('tycoon_sector') || currentRole === 'admin') {
       parts.unshift('<a href="builder.html" class="glass" style="display:block;text-decoration:none;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);">' +
         '<div style="font-size:28px;">📱</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">ابنِ تطبيق طلباتك</div>' +
         '<div style="font-size:12px;color:var(--text-dim);">متجر ويب وتطبيق أندرويد باسم بزنسك — تجربة يوم كاملة</div></a>');
@@ -2350,8 +2350,9 @@ function openFundingForm(tier) {
 // ── الخطوة 2: تفاصيل العرض (القراءة والفهم — الدفع خطوة منفصلة لاحقة) ──
 function DEMO_OFFER_BTN(offerKey, t) {
   const map = { fendex: ['openDemoView(\'oracle\')', 'معاينة الأوراكل كاملاً'], magma: ['openDemoView(\'magma\')', 'معاينة دليل ماقما كاملاً'], reseller: ['openDemoView(\'reseller\')', 'معاينة استوديو الريسلر كاملاً'], franchise: ['openDemoView(\'franchise\')', 'معاينة مقر الفرانشايز كاملاً'], oms: ['location.href=\'business.html?demo=1\'', 'معاينة صفحة بزنسك كاملة'] };
-  const m = map[offerKey]; if (!m) return '';
-  const bld = (offerKey === 'oms' || offerKey === 'reseller' || offerKey === 'franchise') ? `<a href="builder.html" style="display:block;margin-top:14px;padding:12px;border-radius:12px;border:1px solid ${t.eyebrow};background:rgba(255,255,255,.06);color:${t.title};font-weight:800;font-size:13px;text-align:center;text-decoration:none">📱 ابنِ تطبيقك الآن — تجربة 24 ساعة<br><span style="font-weight:500;font-size:11px;opacity:.8">يُنشئ النظام متجرك (ويب + أندرويد) فعلياً في حسابك، ويعمل 24 ساعة، ولا يُفتح للنشر إلا بالاشتراك</span></a>` : '';
+  const m = map[offerKey];
+  const bld = (offerKey === 'oms' || offerKey === 'reseller' || offerKey === 'franchise' || offerKey === 'tycoon') ? `<a href="builder.html" style="display:block;margin-top:14px;padding:12px;border-radius:12px;border:1px solid ${t.eyebrow};background:rgba(255,255,255,.06);color:${t.title};font-weight:800;font-size:13px;text-align:center;text-decoration:none">📱 ابنِ تطبيقك الآن — تجربة 24 ساعة<br><span style="font-weight:500;font-size:11px;opacity:.8">يُنشئ النظام متجرك (ويب + أندرويد) فعلياً في حسابك، ويعمل 24 ساعة، ولا يُفتح للنشر إلا بالاشتراك</span></a>` : '';
+  if (!m) return bld;
   return bld + `<button onclick="closeSubscribeGateModal();${m[0]}" style="width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1px dashed ${t.eyebrow};background:transparent;color:${t.title};font-weight:700;font-size:13px;cursor:pointer;">👁 ${m[1]} — ببيانات تجريبية</button>`;
 }
 function renderGateOffer(offerKey, variantTier) {
