@@ -180,16 +180,15 @@ async function boot(){
   const j=await api('my_subscriptions');
   if(j.error){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(j.error)+'</div><button class="btn sec" onclick="boot()">إعادة المحاولة</button></div>';return}
   const act=((j.items)||[]).filter(i=>i.stage==='active'&&LIMITS[i.tier]);
-  S.tiers=act.map(i=>i.tier);S.allowed=act.reduce((a,i)=>a+LIMITS[i.tier],0);
+  S.tiers=act.map(i=>i.tier);S.ent=act.length>0;S.trial=!S.ent;S.allowed=S.ent?act.reduce((a,i)=>a+LIMITS[i.tier],0):1;
   renderHome();
 }
 function saveCount(){try{const k=String(EMAIL).toLowerCase();localStorage.setItem('lavndr_mkt_'+k,JSON.stringify({n:S.markets.length,t:Date.now()}));localStorage.setItem('lavndr_mktl_'+k,JSON.stringify(S.markets.map(m=>({sheetId:m.sheetId,name:m.name}))))}catch(e){}}
 function loadCached(){try{const a=JSON.parse(localStorage.getItem('lavndr_mktl_'+String(EMAIL).toLowerCase())||'null');if(Array.isArray(a)){S.markets=a.filter(m=>m&&SHEETRX.test(m.sheetId||''));S.listed=true;return true}}catch(e){}return false}
-function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+privNote()}
+function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+(S.trial?'<div class="card" style="border-color:rgba(201,168,76,.5)"><div class="small" style="line-height:2">🕐 <b>تجربة فعلية لمدة 24 ساعة:</b> تُنشئ مؤشراً حقيقياً يعمل كاملاً ويمكنك مشاركته. بعد 24 ساعة يتوقف تلقائياً، ويُفتح بالاشتراك في الفرانشايز أو التايكون. مؤشر تجريبي واحد لكل حساب.</div></div>':'')+privNote()}
 async function renderHome(){
   const h=homeHead();
   if(!S.listed)loadCached();
-  if(!S.allowed){$('app').innerHTML=h+'<div class="card"><div class="msg info">إنشاء مؤشر سوق متاح لأعضاء الفرانشايز والتايكون الفعّالين.</div><a class="btn sec" href="index.html?home=1#p/movement">انضم إلى الحركة الاقتصادية</a></div>';return}
   if(!S.listed){$('app').innerHTML=h+'<div class="card"><b>الحد المسموح لعضويتك: '+S.allowed+' مؤشر</b><div class="small" style="margin:8px 0 12px;line-height:1.9">لعرض مؤشراتك الحالية وإنشاء جديدة نحتاج موافقتك على الاتصال بحسابك في جوجل (تُطلب مرة واحدة).</div><button class="btn" onclick="loadMarkets()">الاتصال بحسابي في جوجل</button>'+(window.LavndrApp?'<div class="small" style="margin-top:10px;line-height:1.9">إن لم تفتح نافذة جوجل داخل التطبيق، أكمل الموافقة من Chrome:</div><input id="clink" dir="ltr" readonly value="https://lavndrs120.github.io/market-builder.html" style="display:none;margin-top:6px" onclick="this.select()"><button class="btn sec" style="margin-top:8px" onclick="chromeLink()">نسخ رابط الصفحة</button><button class="btn sec" style="margin-top:8px" onclick="shareLink()">مشاركة الرابط (لفتحه في Chrome)</button>':'')+'<div id="m0" class="msg"></div></div>';return}
   drawHome(h)
 }
@@ -230,9 +229,9 @@ async function createMarket(){
   const name=($('mname').value||'').trim();
   if(name.length<2){showMsg('m1','اكتب اسماً من حرفين على الأقل');return}
   if(S.markets.length>=S.allowed){showMsg('m1','وصلت إلى الحد المسموح');return}
-  S.pend={name:name,acc:S.newAcc||''};runCreate();
+  S.pend={name:name,acc:S.newAcc||'',mid:rid()};runCreate();
 }
-function resumeMarket(i){const m=S.markets[i];if(!m)return;S.pend={name:m.name,sheetId:m.sheetId};runCreate()}
+function resumeMarket(i){const m=S.markets[i];if(!m)return;S.pend={name:m.name,sheetId:m.sheetId,mid:rid()};runCreate()}
 async function runCreate(){
   const P=S.pend;if(!P)return renderHome();
   let n=0;
@@ -245,7 +244,10 @@ async function runCreate(){
     const sheetId=P.sheetId,name=P.name;
     n=2;stepsUI(2);
     const [c,m]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب المؤشر');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
-    const cfg={id:rid(),name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
+    const mid=P.mid||(P.mid=rid());let tr=null;
+    if(S.trial){const rv=await api('mkt_trial_reserve',{mid:mid},true);if(rv.error)throw new Error(rv.error);if(!rv.entitled)tr=rv}
+    const cfg={id:mid,name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
+    if(tr){cfg.trialEnds=tr.trialEnds;cfg.unlockHash=tr.unlockHash}
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
     if(!P.scriptId){const pr=await gf('https://script.googleapis.com/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:PREFIX+name})});P.scriptId=pr.scriptId}
     await gf('https://script.googleapis.com/v1/projects/'+P.scriptId+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:m}]})});
@@ -255,7 +257,7 @@ async function runCreate(){
     const ep=(d.entryPoints||[]).find(e=>e.entryPointType==='WEB_APP');
     const url=(ep&&ep.webApp&&ep.webApp.url)||('https://script.google.com/macros/s/'+d.deploymentId+'/exec');
     n=4;stepsUI(4);
-    await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:P.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString()})]]);
+    await putVals(sheetId,'Config!A1',[[JSON.stringify({name:name,scriptId:P.scriptId,deploymentId:d.deploymentId,url:url,created:new Date().toISOString(),mid:mid,trialEnds:tr?tr.trialEnds:0,unlockHash:tr?tr.unlockHash:''})]]);
     if(MKRX.test(P.acc||''))await putVals(sheetId,'Config!E1',[[P.acc]]);
     S.newAcc='';S.pend=null;S.markets=await listMarkets();S.listed=true;saveCount();
     const i=S.markets.findIndex(x=>x.sheetId===sheetId);openMarket(i<0?0:i);
@@ -274,7 +276,7 @@ async function openMarket(i){
     const cv=await getVals(m.sheetId,'Config!A1:E1'),cr=cv[0]||[];m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
     m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
-    renderMarket();checkHealth();loadMApk();
+    renderMarket();checkHealth();loadMApk();mktTrialUI();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
 }
 
@@ -284,7 +286,8 @@ async function updateBackend(){
   try{
     await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+':batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[{updateSpreadsheetProperties:{properties:{timeZone:'Africa/Khartoum'},fields:'timeZone'}}]})});
     const [c,mf]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل القالب');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل الإعدادات');return r.text()})]);
-    const cfg={id:rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120};
+    const cfg={id:m.cfg.mid||rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120};
+    if(m.cfg.trialEnds&&m.cfg.unlockHash){cfg.trialEnds=m.cfg.trialEnds;cfg.unlockHash=m.cfg.unlockHash}
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
     const sid=m.cfg.scriptId;
     await gf('https://script.googleapis.com/v1/projects/'+sid+'/content',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({files:[{name:'Code',type:'SERVER_JS',source:c.split('__MARKET_JSON__').join(json)},{name:'appsscript',type:'JSON',source:mf}]})});
@@ -427,7 +430,7 @@ async function hostMarket(){
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
     try{await ghApi('/repos/'+user+'/'+repo+'/pages',{method:'POST',body:JSON.stringify({source:{branch:'main',path:'/'}})})}catch(e){}
     await putVals(m.sheetId,'Config!C1',[[short]]);m.home=short;HOSTING=false;
-    renderMarket();checkHealth();loadMApk();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
+    renderMarket();checkHealth();loadMApk();mktTrialUI();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
   }catch(err){HOSTING=false;showMsg('m7',err.message||'تعذّر النقل')}
 }
 async function hostMApk(){
@@ -460,6 +463,7 @@ function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
   let h='<h1>'+esc(m.name)+'</h1><p class="sub">مؤشر مستقل · '+n+' / 120 بزنس</p>';
+  h+='<div id="mtrial"></div>';
   h+='<div class="card" id="hcard"><h2>حالة المؤشر</h2><div class="small">جاري الفحص…</div></div>';
   h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
   h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
@@ -477,11 +481,25 @@ function renderMarket(){
   h+='<button class="btn sec" onclick="renderHome()">رجوع</button>';
   $('app').innerHTML=h;
 }
+async function mktTrialUI(){
+  const m=S.cur,el=$('mtrial');if(!el||!m||!m.cfg||!m.cfg.trialEnds)return;
+  try{
+    const c=await callBack(m.cfg.url,{action:'config'});if(S.cur!==m||!$('mtrial'))return;
+    if(!c||c.status==='paid'||!c.status){el.innerHTML='';return}
+    if(S.ent){const j=await api('mkt_unlock',{},true);if(j&&j.code){const u=await callBack(m.cfg.url,{action:'unlock',code:j.code});if(u&&u.status==='paid'){el.innerHTML='<div class="msg good" style="display:block">✓ مؤشرك مفتوح بشكل دائم بعضويتك</div>';checkHealth();return}}}
+    const left=Math.max(0,Number(c.trialEnds||m.cfg.trialEnds)-Date.now()),hh=Math.floor(left/3600000),mm=Math.floor(left%3600000/60000);
+    const sub='<a class="btn sec sm" style="margin-top:8px;display:inline-block" href="index.html?home=1#p/movement">اشترك لفتحه بشكل دائم</a>';
+    el.innerHTML=c.status==='locked'
+      ?'<div class="card" style="border-color:#ff8aa0"><b>⛔ انتهت تجربة الـ24 ساعة</b><div class="small" style="line-height:1.9;margin-top:6px">المؤشر متوقف الآن. يُفتح بالاشتراك في الفرانشايز أو التايكون، وبعدها تعود إلى هذه الصفحة وتفتحه.</div>'+sub+'</div>'
+      :'<div class="card" style="border-color:rgba(201,168,76,.5)"><b>🕐 مؤشر تجريبي — متبقٍ '+hh+' س '+mm+' د</b><div class="small" style="line-height:1.9;margin-top:6px">يعمل فعلياً الآن، ويتوقف تلقائياً بعد انتهاء المهلة ما لم تشترك.</div>'+sub+'</div>';
+  }catch(e){}
+}
 async function checkHealth(){
   const m=S.cur,el=$('hcard');if(!el)return;
   try{
     const r=await callBack(m.cfg.url,{action:'health'});
     if(r&&r.status==='ok'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل · بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات مقبولة '+r.orders+'</div><div class="small" style="margin-top:8px;line-height:1.9">إن ظهر بزنس غير مقروء فالسبب غالباً أن شيته لم يُشارك معك بعد.</div><button class="btn" id="rcBtn" style="margin-top:8px" onclick="recalcOrders()">إعادة حساب الطلبات</button><div id="m8" class="msg"></div><button class="btn sec sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل التحديث التلقائي (مرة واحدة)</button>';return}
+    if(r&&r.status==='locked'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#ffb3c0">⛔ متوقف — انتهت التجربة المؤقتة</div>';return}
     throw 0;
   }catch(e){
     el.innerHTML='<h2>تفعيل المؤشر</h2><div class="small" style="line-height:1.9">مرة واحدة فقط: اضغط الزر، ثم في صفحة جوجل اختر حسابك ← «متقدم» ← «الانتقال» ← «السماح». بعدها اضغط «تحديث».</div><button class="btn ok sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل</button> <button class="btn sec sm" onclick="checkHealth()">تحديث</button>';
@@ -520,5 +538,7 @@ function syncLo(){const e=document.getElementById('lo');if(e)e.style.display=TOK
 setInterval(syncLo,500);
 boot();
 </script>
+<script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
+<script src="lavndr-bell.js" defer></script>
 </body>
 </html>

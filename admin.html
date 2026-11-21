@@ -169,6 +169,25 @@ button {
     <div id="vfList"><div class="empty">جاري التحميل...</div></div>
   </div>
 
+  <!-- طلبات التوثيق من البزنسات + المراسلة المباشرة مع المشتركين (جرس المشترك) -->
+  <div class="glass section">
+    <h2>📑 طلبات التوثيق الواردة <span class="badge" id="vrPending">0</span></h2>
+    <div style="font-size:12px;line-height:1.9;color:var(--text-dim);margin-bottom:10px">
+      كل طلب فيه مجلد Google Drive يملكه حسابك (مشارَك معك تلقائياً) وعدد الصور المرفوعة. راجع الصور ثم اعتمد أو ارفض. «استثنائي» = بزنس تجاوز 100 طلب (حدّه 10 طلبات).
+    </div>
+    <div id="vrList"><div class="empty">جاري التحميل...</div></div>
+  </div>
+  <div class="glass section">
+    <h2>🔔 مراسلة المشتركين <span class="badge" id="unCount">0</span></h2>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">يصل الإشعار إلى جرس المشترك داخل صفحته.</div>
+    <input id="nsEmail" placeholder="بريد المشترك" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit">
+    <input id="nsTitle" placeholder="العنوان (اختياري)" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit">
+    <textarea id="nsBody" maxlength="800" placeholder="نص الإشعار" style="width:100%;margin-bottom:6px;padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:transparent;color:inherit;min-height:60px"></textarea>
+    <button class="approve" onclick="sendUserNote()">إرسال</button>
+    <div class="section-title" style="margin-top:14px">رسائل المشتركين إليك</div>
+    <div id="unList"><div class="empty">جاري التحميل...</div></div>
+  </div>
+
   <!-- ✅ جديد: الطاقة الاستيعابية لباقتي الاشتراك — سقف مقصود (قرار عمل، مش قيد
        تقني) لعدد المشتركين النشطين في كل باقة. راجع CONFIG.MAX_LAVA_SUBSCRIBERS /
        MAX_ANNUAL_SUBSCRIBERS في الـ.gs لتغيير الأرقام. -->
@@ -370,7 +389,7 @@ async function boot() {
       const j = await res.json(); m.textContent = j.error ? ('❌ ' + j.error) : ('✅ ' + (j.message || 'تم'));
     } catch (e) { m.textContent = '❌ تعذّر الاتصال'; }
   };
-  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadBusinessRequests(); loadAppSheetReqs(); loadAppBuilds(); loadDonations(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
+  setTimeout(() => { loadAuditLog(); loadApEarnings(); loadCapacity(); loadWaitlist(); loadFranchises(); loadOmsMembers(); loadMovementRequests(); loadFranchiseBiz(); loadResellerReqs(); loadVerification(); loadVerifyReqs(); loadUserNotes(); loadBusinessRequests(); loadAppSheetReqs(); loadAppBuilds(); loadDonations(); loadFundingForms(); loadActiveSubs(); loadStageVal(); }, 1500);
 }
 function redirectToDashboard(msg) {
   try { sessionStorage.setItem('lavndr_flash', msg || ''); sessionStorage.removeItem('lavndr_stay_dash'); } catch (e) {}
@@ -590,6 +609,51 @@ document.getElementById('vfList').addEventListener('click', async ev => {
   } catch (e) { showToast('❌ تعذّر الاتصال'); b.disabled = false; }
 });
 
+let vrRows = [];
+async function loadVerifyReqs() {
+  const el = document.getElementById('vrList');
+  try {
+    const data = await authGet('admin_verify_requests'); vrRows = data.rows || [];
+    const open = vrRows.filter(r => r.status === 'submitted');
+    document.getElementById('vrPending').textContent = open.length;
+    const list = vrRows.filter(r => r.status !== 'draft').slice(0, 40);
+    if (!list.length) { el.innerHTML = '<div class="empty">لا طلبات</div>'; return; }
+    const L = { uploaded: 'رُفعت الصور', submitted: '⏳ بانتظارك', approved: '✅ معتمد', rejected: '❌ مرفوض' };
+    el.innerHTML = list.map(r => '<div class="row"><div class="info"><div class="email">' + esc(r.name || '') + (r.kind === 'exc' ? ' <b style="color:#FACC15">⭐ استثنائي</b>' : '') + '</div><div class="meta">' + esc(r.email) + ' · مرحلة ' + esc(r.stage) + ' · ' + esc(r.orders) + ' طلب · ' + esc(r.files) + ' صورة · ' + (L[r.status] || esc(r.status)) + '</div>' +
+      '<div class="meta"><a href="' + esc(r.folderUrl) + '" target="_blank" rel="noopener" style="color:var(--gold)">فتح مجلد Drive</a></div></div>' +
+      '<div class="btns">' + (r.status === 'submitted' ? '<button class="approve" data-vra="' + r.row + '">اعتماد</button><button class="reject" data-vrr="' + r.row + '">رفض</button>' : '') + '</div></div>').join('');
+  } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
+}
+document.getElementById('vrList').addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('button[data-vra],button[data-vrr]'); if (!b) return;
+  const ok = !!b.dataset.vra, row = b.dataset.vra || b.dataset.vrr;
+  let note = ''; if (!ok) { note = prompt('سبب الرفض (يصل للبزنس):') || ''; if (!note) return; } else if (!confirm('اعتماد التوثيق؟')) return;
+  b.disabled = true;
+  try {
+    const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_verify_decide', row: row, decision: ok ? 'approved' : 'rejected', note: note, token: AUTH_TOKEN }) });
+    const j = await res.json(); if (j.error) { showToast('❌ ' + j.error); b.disabled = false; return; }
+    showToast('✓ تم'); loadVerifyReqs(); loadVerification();
+  } catch (e) { showToast('❌ تعذّر الاتصال'); b.disabled = false; }
+});
+async function loadUserNotes() {
+  const el = document.getElementById('unList');
+  try {
+    const d = await authGet('admin_user_notes'), rows = d.rows || [];
+    document.getElementById('unCount').textContent = rows.length;
+    el.innerHTML = rows.length ? rows.map(r => '<div class="row"><div class="info"><div class="email">' + esc(r.email) + '</div><div class="meta">' + esc(r.body) + '</div></div><div class="btns"><button class="approve" data-rp="' + esc(r.email) + '">رد</button></div></div>').join('') : '<div class="empty">لا رسائل</div>';
+  } catch (e) { el.innerHTML = '<div class="empty">تعذّر التحميل</div>'; }
+}
+document.getElementById('unList').addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('button[data-rp]'); if (!b) return; document.getElementById('nsEmail').value = b.dataset.rp; document.getElementById('nsBody').focus(); });
+async function sendUserNote() {
+  const email = document.getElementById('nsEmail').value.trim(), body = document.getElementById('nsBody').value.trim(), title = document.getElementById('nsTitle').value.trim();
+  if (!email || body.length < 2) { showToast('اكتب البريد والنص'); return; }
+  try {
+    const res = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'admin_note_send', email: email, title: title, body: body, token: AUTH_TOKEN }) });
+    const j = await res.json(); if (j.error) { showToast('❌ ' + j.error); return; }
+    showToast('✓ وصل الإشعار'); document.getElementById('nsBody').value = ''; document.getElementById('nsTitle').value = '';
+  } catch (e) { showToast('❌ تعذّر الاتصال'); }
+}
+
 // ── 🔔 الإشعارات: كل ما يحتاج مراجعة الأدمن، والضغط على إشعار يوجّهك إلى مكانه
 const NOTIF_DEFS = [
   { a: 'admin_reseller_requests',     t: 'طلبات ريسلر (بيع / تفاوض) بانتظار قرارك', el: 'rsList',   n: d => (d.rows || []).length },
@@ -601,6 +665,7 @@ const NOTIF_DEFS = [
   { a: 'admin_appb_sheet_requests', t: 'طلبات إدراج شيت متجر في المؤشر', el: 'asrList', n: d => (d.rows || []).filter(r => r.status === 'pending').length },
   { a: 'admin_funding_forms',         t: 'نماذج اعتماد تمويل/امتياز مقدَّمة',          el: 'fundList', n: d => (d.rows || []).filter(r => r.status === 'submitted').length },
   { a: 'admin_pending_subscriptions', t: 'اشتراكات بانتظار المراجعة',                 el: 'subsList', n: d => (d.rows || []).filter(r => r.state === 'review').length },
+  { a: 'admin_verify_requests',       t: 'طلبات توثيق مرفوعة من البزنسات',            el: 'vrList',   n: d => (d.rows || []).filter(r => r.status === 'submitted').length },
   { a: 'admin_verification',          t: 'بزنسات بانتظار التوثيق',                    el: 'vfList',   n: d => (d.rows || []).filter(r => r.pending).length },
   { a: 'admin_entitlements',          t: 'استحقاقات بانتظار تأكيد الضمان',            el: 'entitlementsList', n: d => (d.rows || []).filter(r => r.status === 'accepted_awaiting_guarantee').length }
 ];

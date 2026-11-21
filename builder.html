@@ -662,5 +662,7 @@ setInterval(syncLo,500);
 boot();
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
+<script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","builder.html")}catch(e){}});</script>
+<script src="lavndr-bell.js" defer></script>
 </body>
 </html>

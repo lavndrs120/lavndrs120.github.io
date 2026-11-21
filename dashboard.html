@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "427.50", "change": "0.00", "changePercent": "0.00", "dayHigh": "427.50", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-21T15:44:22"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1367,9 +1367,9 @@ function orChatHtml() {
 let _demoKind = '', _demoMoved = null, _demoFetch = null;
 const DEMO_OFFER = { oracle: 'fendex', magma: 'magma', reseller: 'reseller', franchise: 'franchise', tycoon: 'tycoon' };
 function bhTycoonDemoHtml() {
-  const card = (ic, t, d) => '<div onclick="demoCta()" class="glass" style="cursor:pointer;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);"><div style="font-size:28px;">' + ic + '</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">' + t + '</div><div style="font-size:12px;color:var(--text-dim);line-height:1.8;">' + d + '</div></div>';
-  return '<div style="margin-top:16px;">' + card('📱', 'ابنِ تطبيق طلباتك', 'متجر ويب وتطبيق أندرويد باسم بزنسك — تجربة يوم كاملة') +
-    card('📈', 'مؤشر سوقك', 'أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند.') +
+  const card = (ic, t, d, href) => '<div onclick="location.href=\''+href+'\'" class="glass" style="cursor:pointer;margin-bottom:14px;padding:18px 16px;border-radius:18px;text-align:center;border:1px solid var(--gold);"><div style="font-size:28px;">' + ic + '</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:4px 0;">' + t + '</div><div style="font-size:12px;color:var(--text-dim);line-height:1.8;">' + d + '</div></div>';
+  return '<div style="margin-top:16px;">' + card('📱', 'ابنِ تطبيق طلباتك', 'متجر ويب وتطبيق أندرويد باسم بزنسك — يُبنى فعلياً الآن، والنسخة التجريبية تعمل 24 ساعة', 'builder.html') +
+    card('📈', 'مؤشر سوقك', 'أنشئ نسختك المستقلة من LAVNDR120 داخل حسابك في جوجل، وأضف إليها حتى 120 بزنساً وبراند — يُنشأ فعلياً الآن، والنسخة التجريبية تعمل 24 ساعة.', 'market-builder.html') +
     '<div class="glass" style="padding:20px 16px;border-radius:18px;margin-bottom:14px;text-align:center;"><div style="font-size:32px;">👑</div><div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">تايكون المجال</div><div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة</div>' +
     '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>20</b> مؤشر سوق، وفي كل مؤشر حتى 120 بزنساً وبراند.<br>وتبني حتى <b>20</b> تطبيق طلبات لبزنساتك.</div>' +
     '<div style="margin:14px 0;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);text-align:right;font-size:12px;line-height:2;"><b style="color:var(--gold);">📑 صفحة اعتماد التمويل</b><br><button onclick="demoCta()" style="margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:700;font-size:12.5px;cursor:pointer;width:100%;">✍️ تعبئة وتوقيع الطلب هنا</button></div></div></div>';
@@ -1398,7 +1398,7 @@ function openDemoView(kind) {
   } else if (kind === 'tycoon') {
     body.innerHTML = bhTycoonDemoHtml();
   } else if (kind === 'franchise') {
-    body.innerHTML = '<div style="margin-top:16px;">' + bhFranchiseHtml(DemoData.franchise()).replace(/onclick="(payFranchise|bhSubmitBiz)\(\)"/g, 'onclick="demoCta()"') + '</div>';
+    body.innerHTML = '<div style="margin-top:16px;">' + [['📱','ابنِ تطبيق طلباتك','builder.html'],['📈','ابنِ مؤشر سوقك','market-builder.html']].map(function (c) { return '<div onclick="location.href=\''+c[2]+'\'" class="glass" style="cursor:pointer;margin-bottom:14px;padding:16px;border-radius:18px;text-align:center;border:1px solid var(--gold);"><div style="font-size:26px;">'+c[0]+'</div><div style="font-size:15px;font-weight:800;color:var(--gold);">'+c[1]+'</div><div style="font-size:12px;color:var(--text-dim);line-height:1.8;">يُبنى فعلياً الآن — النسخة التجريبية تعمل 24 ساعة</div></div>'; }).join('') + bhFranchiseHtml(DemoData.franchise()).replace(/onclick="(payFranchise|bhSubmitBiz)\(\)"/g, 'onclick="demoCta()"') + '</div>';
   }
   const offer = DEMO_OFFER[kind];
   document.getElementById('demoSubBtn').onclick = function () {
@@ -2015,6 +2015,8 @@ function renderSubscriptionChooser(items) {
     <div style="font-size:15px;color:#ccc;margin-bottom:6px;">اشتراكاتك</div>
     <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;">اختر الاشتراك الذي تريد الدخول إليه</div>
     ${cards}
+    <a href="builder.html" style="display:block;box-sizing:border-box;text-align:center;text-decoration:none;margin-bottom:10px;padding:12px;border:1px solid var(--glass-border);border-radius:12px;background:rgba(255,255,255,0.04);color:var(--text);font-weight:700;font-size:13px;">📱 ابنِ تطبيق طلباتك</a>
+    <a href="market-builder.html" style="display:block;box-sizing:border-box;text-align:center;text-decoration:none;margin-bottom:10px;padding:12px;border:1px solid var(--glass-border);border-radius:12px;background:rgba(255,255,255,0.04);color:var(--text);font-weight:700;font-size:13px;">📈 ابنِ مؤشر سوقك</a>
     <button id="subAddAnotherBtn" style="width:100%;padding:12px;border:1px dashed var(--gold);border-radius:12px;background:transparent;color:var(--gold);font-size:13px;cursor:pointer;">+ اشترك في باقة أخرى</button>
     ${items.some(x => x.stage === 'active' && OT_TIERS.indexOf(x.tier) !== -1) ? '<button onclick="goToIndicator()" style="width:100%;margin-top:10px;padding:12px;border:1px solid var(--gold);border-radius:12px;background:rgba(201,168,76,0.12);color:var(--gold);font-weight:800;font-size:13px;cursor:pointer;">عرض المؤشر</button>' : ''}
   `);
@@ -3620,5 +3622,7 @@ window.addEventListener('load', function() {
 ['copy','cut','contextmenu','selectstart','dragstart'].forEach(function(e){document.addEventListener(e,function(ev){if(!ok(ev.target))ev.preventDefault();},true);});})();
 </script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
+<script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","dashboard.html")}catch(e){}});</script>
+<script src="lavndr-bell.js" defer></script>
 </body>
 </html>
