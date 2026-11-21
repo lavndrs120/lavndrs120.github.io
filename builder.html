@@ -474,7 +474,7 @@ async function loadApk(){
     const short=shortFromUrl(j.url);
     el.innerHTML='<a class="btn ok" href="'+esc(j.url)+'">تنزيل APK</a>'+(j.note?'<div class="small" style="margin-top:8px">'+esc(j.note)+'</div>':'')+
       (central?'<div style="margin-top:14px"><div class="small">اسم الرابط القصير (حروف إنجليزية صغيرة وأرقام وشرطة):</div><input id="ghName" dir="ltr" value="'+esc(lsGet('ghRepo:'+S.cur.appId)||slugG(S.cur.name))+'" style="margin-top:6px"><button class="btn sec" id="ghBtn" style="margin-top:8px" onclick="hostApk()">نقل التطبيق وأكوادي إلى حسابي في GitHub</button><div id="m6" class="msg"></div><div class="small" style="margin-top:6px">يُنشأ لك ريبو بهذا الاسم فيه الأكواد والتطبيق، ويصير رابط متجرك القصير: github.io/اسمك/الاسم. ويُحذف من ريبو لاڤندرز.</div></div>':
-        '<div class="small" style="margin-top:12px">رابطك القصير:</div><a class="link" dir="ltr" href="'+esc(short)+'" target="_blank" rel="noopener">'+esc(short)+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(short)+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button><div class="msg good" style="display:block;margin-top:10px">📣 شارك هذا الرابط مع عملائك المحتملين والمفضلين.</div><div class="msg info" style="display:block;margin-top:8px">⏳ إن لم يفتح الرابط فورًا فانتظر دقيقة أو دقيقتين حتى تُبنى صفحاتك على GitHub، ثم أعد المحاولة.</div><div class="small" style="margin-top:10px">التطبيق والأكواد محفوظة في حسابك على GitHub: <a class="link" dir="ltr" href="'+esc(short.replace(/^https:\/\/([^.]+)\.github\.io\/(.+)$/,'https://github.com/$1/$2'))+'" target="_blank" rel="noopener">فتح الريبو</a> · <a href="#" onclick="ghLogout();return false" style="color:inherit">فصل الحساب</a></div>');
+        (central?'':playBox(j.url))+'<div class="small" style="margin-top:12px">رابطك القصير:</div><a class="link" dir="ltr" href="'+esc(short)+'" target="_blank" rel="noopener">'+esc(short)+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(short)+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button><div class="msg good" style="display:block;margin-top:10px">📣 شارك هذا الرابط مع عملائك المحتملين والمفضلين.</div><div class="msg info" style="display:block;margin-top:8px">⏳ إن لم يفتح الرابط فورًا فانتظر دقيقة أو دقيقتين حتى تُبنى صفحاتك على GitHub، ثم أعد المحاولة.</div><div class="small" style="margin-top:10px">التطبيق والأكواد محفوظة في حسابك على GitHub: <a class="link" dir="ltr" href="'+esc(short.replace(/^https:\/\/([^.]+)\.github\.io\/(.+)$/,'https://github.com/$1/$2'))+'" target="_blank" rel="noopener">فتح الريبو</a> · <a href="#" onclick="ghLogout();return false" style="color:inherit">فصل الحساب</a></div>');
     return}
   if(j.status==='building'){el.textContent='جاري بناء التطبيق… يستغرق عدة دقائق وتتحدث الصفحة تلقائياً.';apkPoll=setTimeout(loadApk,15000);return}
   el.innerHTML=(j.status==='failed'?'<div class="small" style="color:#ffb3c0;margin-bottom:6px">فشلت المحاولة السابقة.</div>':'')+'<button class="btn" id="apkBtn" onclick="buildApk()">بناء تطبيق الأندرويد</button><div id="m5" class="msg"></div>';
@@ -518,6 +518,9 @@ async function ghPut(user,repo,path,b64,msg){
   const p=await ghApi('/repos/'+user+'/'+repo+'/contents/'+path,{method:'PUT',body:JSON.stringify(body)});
   if(p.status===404)throw new Error('تعذّر الكتابة في الريبو');
 }
+function playBox(apkUrl){
+  const u=String(apkUrl||'').replace(/\.apk$/,'.aab');
+  return '<div style="margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);font-size:13px;line-height:1.9"><b>📦 للنشر على Google Play</b><br>ملف الحزمة <span dir="ltr">AAB</span> الذي تطلبه Google Play يُنشأ مع كل بناء ويُنقل إلى حسابك. تحتاج حساب مطوّر Play خاصاً بك، وصفحة سياسة خصوصية، وتعبئة نموذج أمان البيانات.<br><a class="link" dir="ltr" href="'+esc(u)+'" target="_blank" rel="noopener">تنزيل ملف AAB</a><div class="small" style="margin-top:4px">إن لم يُفتح الرابط فأعد بناء التطبيق ليظهر الملف.</div></div>'}
 async function hostApk(auto){
   if(HOSTING)return;const b=S.cur;let name=auto===true?lsGet('ghRepo:'+b.appId):(($('ghName')||{}).value||'').trim().toLowerCase();
   if(!name)name=slugG(b.name)||'store';
@@ -542,6 +545,7 @@ async function hostApk(auto){
     showMsg('m6','جاري نقل التطبيق إلى ريبوك…','info');
     const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(b.appId));if(!ar.ok)throw new Error('تعذّر جلب ملف التطبيق');
     await ghPut(user,repo,'apk/store.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
+    try{const br=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(b.appId)+'&fmt=aab');if(br.ok)await ghPut(user,repo,'apk/store.aab',b64buf(await br.arrayBuffer()),'Lavenders: Google Play bundle (AAB)')}catch(e){}
     const url='https://github.com/'+user+'/'+repo+'/raw/main/apk/store.apk';
     const j=await api('appb_apk_hosted',{appId:b.appId,url:url},true);if(j.error)throw new Error(j.message||j.error);
     lsSet('ghRepo:'+b.appId,repo);lsSet('ghUser:'+b.appId,user.toLowerCase());HOSTING=false;loadApk();
