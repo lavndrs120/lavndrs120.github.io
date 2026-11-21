@@ -213,6 +213,56 @@ const MKRX=/^#[0-9A-Fa-f]{6}$/;
 function mkSwatches(cur,fn){return '<div style="display:flex;gap:10px;margin-top:8px" id="mkSw">'+MK_COLORS.map(c=>'<span data-c="'+c+'" onclick="'+fn+'(\''+c+'\')" style="width:30px;height:30px;border-radius:50%;background:'+c+';cursor:pointer;border:3px solid '+(c.toLowerCase()===String(cur||MK_COLORS[0]).toLowerCase()?'#fff':'transparent')+'"></span>').join('')+'</div>'}
 function mkMark(c){document.querySelectorAll('#mkSw span').forEach(x=>x.style.borderColor=x.dataset.c===c?'#fff':'transparent')}
 function pickNewAcc(c){S.newAcc=c;mkMark(c)}
+
+/* ───── باقات مسار البيانات لمؤشرك: لافا / السنوية / ڤندكس / ماقما — تسعيرك واستلامك واعتمادك ───── */
+const PT=[['lava','لافا (يومي)',1],['annual','الباقة السنوية',365],['fendex','ڤندكس',365],['magma','ماقما',365]];
+function planCard(m){
+  const p=m.plans||{},t=p.t||{},lk=p.links||{};
+  const rows=PT.map(x=>{const c=t[x[0]]||{};return '<div style="display:flex;gap:8px;align-items:center;margin:8px 0"><label style="flex:1;margin:0"><input type="checkbox" id="pl_'+x[0]+'" '+(c.on?'checked':'')+'> '+x[1]+'</label><input id="pp_'+x[0]+'" type="number" min="1" max="100000" step="0.01" inputmode="decimal" placeholder="السعر $" value="'+(c.p?esc(c.p):'')+'" style="width:110px"></div>'}).join('');
+  const links=Object.keys(lk).map(k=>k+' | '+lk[k]).join('\n');
+  return '<div class="card"><h2>باقات مسار البيانات</h2><div class="small" style="line-height:1.9;margin-bottom:8px">لمؤشرك باقاتك الخاصة بنفس فكرة لاڤندرز: <b>لافا / السنوية</b> (بيانات المؤشر الكاملة) و<b>ڤندكس</b> (تقرير تحليلي) و<b>ماقما</b> (دليل الأنشطة بروابطها). أنت تحدّد الأسعار وتستلم الدفع بنفسك وتعتمد المشتركين؛ لاڤندرز لا تستلم ولا تحتفظ بأي مبلغ. اشتراك للاطلاع فقط، وليس استثماراً ولا وعداً بعوائد.</div>'+
+  '<label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="pl_on" '+(p.on?'checked':'')+'> تفعيل الباقات على بطاقة مؤشري</label>'+rows+
+  '<label>تعليمات الدفع (تظهر لزوار بطاقتك — اكتب فقط ما تريد إظهاره علناً)</label><textarea id="pl_pay" maxlength="600" rows="4" placeholder="مثال: حوّل المبلغ إلى … ثم أدخل رقم المعاملة">'+esc(p.pay||'')+'</textarea><div class="small" style="margin:4px 0 8px">يُحفظ في شيتك أنت لا في لاڤندرز. لا تضع كلمات مرور أو بيانات لا تريد نشرها.</div>'+
+  '<label>روابط دليل ماقما — سطر لكل بزنس: <span dir="ltr">الاسم | https://الرابط</span></label><textarea id="pl_links" rows="4" style="direction:ltr;text-align:left">'+esc(links)+'</textarea>'+
+  '<button class="btn" style="margin-top:10px" onclick="savePlans()">حفظ الباقات</button><div id="m10" class="msg"></div>'+
+  '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول تفعيل (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيتي «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز دخول التطبيق).</div>'+
+  '<h2 style="margin-top:16px">طلبات الاشتراك</h2><div id="subs" class="small">جاري التحميل…</div></div>';
+}
+async function savePlans(){
+  const m=S.cur;if(!m)return;showMsg('m10','جاري الحفظ…','info');
+  try{
+    const t={};let any=0;
+    PT.forEach(x=>{const on=$('pl_'+x[0]).checked,pr=parseFloat($('pp_'+x[0]).value);if(on){if(!(pr>0&&pr<=100000))throw new Error('أدخل سعراً صحيحاً لباقة '+x[1]);any++}t[x[0]]={on:on?1:0,p:pr>0?Math.round(pr*100)/100:0}});
+    const on=$('pl_on').checked;if(on&&!any)throw new Error('فعّل باقة واحدة على الأقل');
+    const links={};
+    String($('pl_links').value||'').split('\n').slice(0,120).forEach(l=>{const i=l.indexOf('|');if(i<1)return;const n=l.slice(0,i).trim().slice(0,80),u=l.slice(i+1).trim();if(n&&/^https:\/\/[^\s"'<>]{4,300}$/.test(u))links[n]=u});
+    const p={on:on?1:0,pay:String($('pl_pay').value||'').replace(/[<>]/g,'').trim().slice(0,600),t:t,links:links};
+    await putVals(m.sheetId,'Config!F1',[[JSON.stringify(p)]]);m.plans=p;
+    showMsg('m10','تم الحفظ ✓ تظهر الباقات في بطاقتك خلال دقائق','good');
+  }catch(e){showMsg('m10',e.message||'تعذّر الحفظ')}
+}
+async function loadSubs(){
+  const m=S.cur;if(!m)return;let rows=[];
+  try{const j=await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+'/values/'+encodeURIComponent('Subs!A2:H500')+'?valueRenderOption=UNFORMATTED_VALUE');rows=j.values||[]}catch(e){rows=[]}
+  m.subs=rows;const el=$('subs');if(!el||S.cur!==m)return;
+  const nm=k=>(PT.filter(x=>x[0]===k)[0]||[k,k])[1],now=Date.now(),pend=[],act=[];
+  rows.forEach((r,i)=>{if(!r||!r[0])return;if(r[2]==='pending')pend.push([i,r]);else if(r[2]==='active'&&Number(r[6])>now)act.push([i,r])});
+  let h='';
+  if(!pend.length)h+='<div class="small">لا طلبات بانتظارك.</div>';
+  pend.forEach(([i,r])=>{h+='<div class="ord"><div><b dir="ltr">'+esc(r[0])+'</b> · '+esc(nm(r[1]))+'</div><div class="small">رقم المعاملة: <b dir="ltr">'+esc(r[3]||'')+'</b></div><div style="display:flex;gap:8px;margin-top:6px"><button class="btn sm" onclick="subDecide('+i+',1)">اعتماد</button><button class="btn sec sm" onclick="subDecide('+i+',0)">رفض</button></div></div>'});
+  if(act.length){h+='<div class="small" style="margin-top:10px"><b>المشتركون الفعّالون ('+act.length+')</b></div>';act.forEach(([i,r])=>{h+='<div class="ord small"><span dir="ltr">'+esc(r[0])+'</span> · '+esc(nm(r[1]))+' · حتى '+esc(new Date(Number(r[6])).toISOString().slice(0,10))+' <button class="btn sec sm" style="margin-inline-start:6px" onclick="subDecide('+i+',2)">إلغاء</button></div>'})}
+  el.innerHTML=h;
+}
+async function subDecide(i,mode){
+  const m=S.cur,r=m&&m.subs&&m.subs[i];if(!r)return;const row=i+2;
+  if(mode===1&&!confirm('اعتماد اشتراك '+r[0]+'؟ تأكد أولاً من وصول المبلغ إلى حسابك.'))return;
+  if(mode===2&&!confirm('إلغاء اشتراك '+r[0]+'؟'))return;
+  try{
+    if(mode===1){const d=(PT.filter(x=>x[0]===r[1])[0]||[0,0,30])[2],now=Date.now();await putVals(m.sheetId,'Subs!C'+row+':G'+row,[['active',r[3]||'',r[4]||'',now,now+d*86400000]])}
+    else await putVals(m.sheetId,'Subs!C'+row,[[mode===2?'revoked':'rejected']]);
+    await loadSubs();
+  }catch(e){const el=$('subs');if(el)el.insertAdjacentHTML('afterbegin','<div class="msg err" style="display:block">'+esc(e.message||'تعذّر الحفظ')+'</div>')}
+}
 async function pickMAcc(c){
   const m=S.cur;if(!m||!MKRX.test(c))return;mkMark(c);showMsg('m9','جاري الحفظ…','info');
   try{await putVals(m.sheetId,'Config!E1',[[c]]);m.acc=c;showMsg('m9','تم حفظ اللون ✓ يظهر في البطاقة خلال دقائق','good');checkHealth()}catch(e){showMsg('m9',e.message||'تعذّر الحفظ')}
@@ -273,10 +323,10 @@ async function openMarket(i){
   const m=S.markets[i];if(!m){renderHome();return}S.cur=m;
   $('app').innerHTML='<div class="card sub">جاري التحميل…</div>';
   try{
-    const cv=await getVals(m.sheetId,'Config!A1:E1'),cr=cv[0]||[];m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
+    const cv=await getVals(m.sheetId,'Config!A1:F1'),cr=cv[0]||[];try{m.plans=JSON.parse(cr[5]||'{}')||{}}catch(e){m.plans={}}m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
     m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
-    renderMarket();checkHealth();loadMApk();mktTrialUI();
+    renderMarket();checkHealth();loadMApk();mktTrialUI();loadSubs();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
 }
 
@@ -468,6 +518,7 @@ function renderMarket(){
   h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
   h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
   h+='<div class="card"><h2>لون المؤشر</h2><div class="small">لون العناوين والتمييز في بطاقة مؤشرك.</div>'+mkSwatches(m.acc,'pickMAcc')+'<div id="m9" class="msg"></div></div>';
+  h+=planCard(m);
   h+='<div class="card"><h2>خلفية المؤشر</h2>'+mImgBox(m)+'</div>';
   h+='<div class="card"><h2>استقلالك الكامل: بطاقتك في حسابك</h2>'+ghBox(m)+'</div>';
   h+='<div class="card"><h2>تطبيق الأندرويد للمؤشر</h2><div id="mapk" class="small">…</div></div>';

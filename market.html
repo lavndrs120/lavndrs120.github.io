@@ -20,10 +20,19 @@ body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Sego
 .meta div{font-size:11px;color:var(--dim)}.meta b{display:block;font-size:15px;color:#fff;margin-top:2px;direction:ltr}
 .ft{font-size:11px;color:var(--dim);margin-top:16px;line-height:1.8}
 .err{color:#ffb3c0;font-size:14px;line-height:1.9}
+.wrap{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px;margin:auto}
+.plans{text-align:right}.plans h2{font-size:16px;color:var(--gold2);margin-bottom:4px}
+.tier{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.08)}
+.tier b{font-size:14px}.plans button{padding:9px 14px;border-radius:10px;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;transition:transform .12s,opacity .2s}
+.plans button:active{transform:scale(.95)}.plans button:disabled{opacity:.5}
+.plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit;direction:ltr}
+.pay{white-space:pre-wrap;font-size:13px;line-height:1.9;background:rgba(255,255,255,.05);border-radius:10px;padding:10px;margin-top:8px}
+.ok{color:var(--em);font-size:12px}.rw{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13px}
+.rw span:last-child{direction:ltr;color:var(--gold2)}
 </style>
 </head>
 <body>
-<div class="card" id="c"><div class="lbl">جاري التحميل…</div></div>
+<div class="wrap"><div class="card" id="c"><div class="lbl">جاري التحميل…</div></div><div class="card plans" id="pl" style="display:none"></div></div>
 <script>
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 const OK=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
@@ -31,9 +40,10 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let n=0;
 function jsonp(params){return new Promise((res,rej)=>{const cb='__m'+(++n)+'_'+Date.now(),s=document.createElement('script');const t=setTimeout(()=>{x();rej(1)},30000);function x(){clearTimeout(t);delete window[cb];s.remove()}window[cb]=r=>{x();res(r)};s.onerror=()=>{x();rej(1)};s.src=BACK+'?'+new URLSearchParams(Object.assign({callback:cb},params));document.head.appendChild(s)})}
-async function get(){
-  try{const r=await fetch(BACK+'?'+new URLSearchParams({callback:'cb'}),{credentials:'omit'});const t=await r.text(),i=t.indexOf('('),k=t.lastIndexOf(')');if(i<0||k<i)throw 0;return JSON.parse(t.slice(i+1,k))}
-  catch(e){return await jsonp({})}
+async function get(pr){
+  pr=pr||{};
+  try{const r=await fetch(BACK+'?'+new URLSearchParams(Object.assign({callback:'cb'},pr)),{credentials:'omit'});const t=await r.text(),i=t.indexOf('('),k=t.lastIndexOf(')');if(i<0||k<i)throw 0;return JSON.parse(t.slice(i+1,k))}
+  catch(e){return await jsonp(pr)}
 }
 const IMGRX=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/;
 function draw(d){
@@ -45,9 +55,121 @@ function draw(d){
   '<div class="meta"><div>High<b>$'+esc(x.dayHigh||'0.00')+'</b></div><div>Low<b>$'+esc(x.dayLow||'0.00')+'</b></div><div>Volatility<b>'+esc(x.volatility||'0.00')+'%</b></div></div>'+
   '<div class="ft">'+(d.businesses?esc(d.businesses)+' بزنس وبراند · ':'')+(ts?'آخر تحديث '+esc(ts)+' UTC<br>':'')+'مؤشر مستقل يكشف سلوك المستهلك من الطلبات الحقيقية، ويتحرك مع طلبات هذه الأنشطة الفعلية. لا يوجد بيع أو شراء أو تداول لحصص، ولا وعود بعوائد.<br>مبني بأداة لاڤندرز · LAVNDR120</div>';
 }
+
+/* ───── باقات مسار البيانات (إن فعّلها صاحب المؤشر) ───── */
+let PL=null,SES='',MYS=[],VIEW='';
+const ST=(k,v)=>{try{if(v===undefined)return sessionStorage.getItem(k)||'';sessionStorage.setItem(k,v)}catch(e){return ''}};
+function fmtD(ms){try{return new Date(ms).toISOString().slice(0,10)}catch(e){return ''}}
+async function loadPlans(){
+  try{const p=await get({action:'plans'});if(!p||!p.on)return;PL=p;SES=ST('mkt_s_'+p.mid);await refreshSub();renderPlans()}catch(e){}
+}
+async function refreshSub(){
+  MYS=[];if(!SES)return;
+  const r=await get({action:'my_sub',s:SES});
+  if(r&&r.error){SES='';ST('mkt_s_'+PL.mid,'');return}
+  MYS=(r&&r.subs)||[];
+}
+function mine(tier){const now=Date.now();let a=MYS.filter(x=>x.tier===tier&&x.status==='active'&&x.end>now)[0];if(a)return{k:'active',end:a.end};if(MYS.some(x=>x.tier===tier&&x.status==='pending'))return{k:'pending'};return{k:'none'}}
+function has(tiers){return tiers.some(t=>mine(t).k==='active')}
+function renderPlans(){
+  const el=$('pl');el.style.display='block';
+  let h='<h2>مسارات البيانات</h2><div class="lbl">اشتراكات للاطلاع على بيانات هذا المؤشر. يحدّد صاحب المؤشر أسعارها ويستلم الدفع ويعتمد الاشتراك بنفسه.</div>';
+  PL.tiers.forEach(t=>{
+    const m=mine(t.tier);
+    const act=m.k==='active'?'<span class="ok">فعّال حتى '+esc(fmtD(m.end))+'</span>':m.k==='pending'?'<span class="lbl">قيد المراجعة ⏳</span>':'<button data-t="'+esc(t.tier)+'">اشترك</button>';
+    h+='<div class="tier"><div><b>'+esc(t.name)+'</b> · $'+esc(t.price)+'<div class="lbl">'+esc(t.desc)+'</div></div><div>'+act+'</div></div>';
+  });
+  h+='<div id="pf"></div>';
+  if(!SES)h+='<div class="lbl" style="margin-top:10px">للاشتراك أو لعرض اشتراكك سجّل الدخول بحساب Google:</div><div id="gb" style="margin-top:8px;display:flex;justify-content:center"></div>';
+  else{
+    const b=[];
+    if(has(['lava','annual','fendex']))b.push('<button data-v="data">📊 البيانات</button>');
+    if(has(['fendex']))b.push('<button data-v="report">📑 التقرير</button>');
+    if(has(['magma']))b.push('<button data-v="directory">📇 الدليل</button>');
+    if(b.length)h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+b.join('')+'</div>';
+    h+='<div style="margin-top:10px"><button data-out="1">تسجيل الخروج</button></div>';
+  }
+  h+='<div id="pv"></div><div class="ft">اشتراك للاطلاع على بيانات فقط — ليس استثماراً ولا حصة في شيء، ولا وعداً بعوائد. الدفع والاسترداد بين المشترك وصاحب المؤشر مباشرة، ولاڤندرز لا تستلم ولا تحتفظ بأي مبلغ.</div>';
+  el.innerHTML=h;
+  if(!SES)loginUI();
+  if(VIEW&&SES)showView(VIEW);
+}
+$('pl').addEventListener('click',async ev=>{
+  const b=ev.target.closest&&ev.target.closest('button');if(!b)return;
+  if(b.dataset.t){
+    if(!SES){$('pf').innerHTML='<div class="lbl" style="margin-top:10px">سجّل الدخول أولاً بحساب Google بالزر أدناه ثم اضغط اشترك.</div>';return}
+    const t=PL.tiers.filter(x=>x.tier===b.dataset.t)[0];
+    $('pf').innerHTML='<div class="lbl" style="margin-top:12px">حوّل $'+esc(t.price)+' ثم اكتب رقم المعاملة:</div>'+(PL.pay?'<div class="pay">'+esc(PL.pay)+'</div>':'<div class="lbl">لم يضف صاحب المؤشر بيانات الدفع بعد.</div>')+'<input id="rf" maxlength="40" placeholder="رقم المعاملة" autocomplete="off"><button data-send="'+esc(t.tier)+'">إرسال الطلب</button><div id="pm" class="lbl" style="margin-top:6px"></div>';
+  }else if(b.dataset.send){
+    const v=($('rf').value||'').trim();b.disabled=true;$('pm').textContent='جارٍ الإرسال…';
+    try{const r=await get({action:'sub_request',s:SES,tier:b.dataset.send,ref:v});
+      if(r&&r.status==='pending'){await refreshSub();renderPlans();$('pf').innerHTML='<div class="ok" style="margin-top:10px">وصل طلبك — سيراجعه صاحب المؤشر ويفعّل اشتراكك.</div>'}
+      else{$('pm').textContent=(r&&r.error)||'تعذّر الإرسال';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');renderPlans()}}
+    }catch(e){$('pm').textContent='تعذّر الاتصال';b.disabled=false}
+  }else if(b.dataset.v){VIEW=b.dataset.v;showView(VIEW)}
+  else if(b.dataset.out){SES='';VIEW='';MYS=[];ST('mkt_s_'+PL.mid,'');renderPlans()}
+});
+async function showView(a){
+  const pv=$('pv');if(!pv)return;pv.innerHTML='<div class="lbl" style="margin-top:12px">جاري التحميل…</div>';
+  try{const r=await get({action:a,s:SES});
+    if(!r||r.error){pv.innerHTML='<div class="err" style="margin-top:10px">'+esc((r&&r.error)||'تعذّر التحميل')+'</div>';return}
+    let h='<div style="margin-top:14px">';
+    if(a==='data'){
+      const hs=r.history||[];
+      if(hs.length>1){const mn=Math.min(...hs.map(x=>x.nav)),mx=Math.max(...hs.map(x=>x.nav)),sp=(mx-mn)||1,pts=hs.map((x,i)=>(i/(hs.length-1)*300).toFixed(1)+','+(60-(x.nav-mn)/sp*56-2).toFixed(1)).join(' ');
+        h+='<svg viewBox="0 0 300 60" style="width:100%;height:70px"><polyline fill="none" stroke="var(--gold2)" stroke-width="2" points="'+pts+'"/></svg><div class="lbl">سجل قيمة المؤشر ($'+mn.toFixed(2)+' – $'+mx.toFixed(2)+')</div>'}
+      h+='<div class="lbl" style="margin:10px 0 4px">ترتيب البزنسات بعدد الطلبات ('+esc(r.orders)+' طلب)</div>'+(r.ranking||[]).map((x,i)=>'<div class="rw"><span>'+(i+1)+'. '+esc(x.name)+'</span><span>'+esc(x.orders)+' · '+esc(x.weight)+'%</span></div>').join('');
+    }else if(a==='report'){
+      const c=v=>'<span class="'+(v>=0?'pos':'neg')+'">'+(v>=0?'+':'')+esc(v)+'%</span>';
+      h+='<div class="rw"><span>قيمة المؤشر</span><span>$'+esc(r.nav)+'</span></div><div class="rw"><span>تغيّر 24 ساعة</span><span>'+c(r.change24h)+'</span></div><div class="rw"><span>تغيّر 7 أيام</span><span>'+c(r.change7d)+'</span></div><div class="rw"><span>تغيّر 30 يوماً</span><span>'+c(r.change30d)+'</span></div><div class="rw"><span>أعلى / أدنى 30 يوماً</span><span>$'+esc(Number(r.high30d).toFixed(2))+' / $'+esc(Number(r.low30d).toFixed(2))+'</span></div><div class="rw"><span>البزنسات · الطلبات</span><span>'+esc(r.businesses)+' · '+esc(r.orders)+'</span></div><div class="lbl" style="margin:10px 0 4px">أعلى 5 بزنسات وزناً</div>'+(r.top||[]).map((x,i)=>'<div class="rw"><span>'+(i+1)+'. '+esc(x.name)+'</span><span>'+esc(x.weight)+'%</span></div>').join('')+'<div class="lbl" style="margin-top:8px">تقرير وصفي لما حدث فعلاً، لا يتنبأ بشيء ولا يعد بنتيجة.</div>';
+    }else{
+      h+=(r.list||[]).map(x=>'<div class="rw"><span>'+esc(x.name)+'</span><span>'+(/^https:\/\//.test(x.link||'')?'<a href="'+esc(x.link)+'" target="_blank" rel="noopener noreferrer" style="color:var(--gold2)">فتح</a>':'—')+'</span></div>').join('')||'<div class="lbl">لا أنشطة بعد.</div>';
+    }
+    pv.innerHTML=h+'</div>';
+  }catch(e){pv.innerHTML='<div class="err" style="margin-top:10px">تعذّر الاتصال</div>'}
+}
+const APP=new URLSearchParams(location.search).get('app')==='1';
+function loginUI(){
+  const box=$('gb');if(!box)return;
+  if(APP||CODE){
+    box.style.display='block';
+    box.innerHTML='<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(APP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
+    return;
+  }
+  showGsi();
+  box.insertAdjacentHTML('afterend','<div class="lbl" style="margin-top:8px;text-align:center"><a href="#" data-c="1" style="color:var(--gold2)">لا يعمل زر Google؟ ادخل برمز على بريدك</a></div>');
+}
+let CODE=false;
+document.addEventListener('click',async ev=>{
+  const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv]');if(!a||!PL)return;
+  if(a.dataset.c){ev.preventDefault();CODE=true;renderPlans()}
+  else if(a.dataset.g){ev.preventDefault();CODE=false;renderPlans()}
+  else if(a.dataset.cs){
+    const em=($('le').value||'').trim();a.disabled=true;$('lm').textContent='جارٍ الإرسال…';
+    try{const r=await get({action:'code_send',email:em});
+      if(r&&r.status==='sent'){$('lm').textContent='أرسلنا رمزاً إلى بريدك (تحقق من البريد المزعج أيضاً).';$('lc').innerHTML='<input id="lk" inputmode="numeric" maxlength="6" placeholder="الرمز المكوّن من 6 أرقام"><button data-cv="1" style="width:100%">دخول</button>'}
+      else $('lm').textContent=(r&&r.error)||'تعذّر الإرسال';a.disabled=false}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
+  }else if(a.dataset.cv){
+    a.disabled=true;
+    try{const r=await get({action:'code_verify',email:($('le').value||'').trim(),code:($('lk').value||'').trim()});
+      if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();renderPlans()}else{$('lm').textContent=(r&&r.error)||'تعذّر الدخول';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
+  }
+});
+function showGsi(){
+  const go=()=>{
+    if(!window.google||!google.accounts||!$('gb'))return false;
+    google.accounts.id.initialize({client_id:PL.clientId,nonce:'lvnmkt-'+PL.mid,callback:async cr=>{
+      try{const r=await get({action:'mkt_login',idToken:cr.credential});
+        if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
+    google.accounts.id.renderButton($('gb'),{theme:'filled_black',size:'large',text:'signin_with'});return true;
+  };
+  if(go())return;
+  if(!document.getElementById('gsi')){const s=document.createElement('script');s.id='gsi';s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>go();document.head.appendChild(s)}
+  else setTimeout(go,800);
+}
 async function load(){
   if(!OK){$('c').innerHTML='<div class="err">الرابط غير صحيح.</div>';return}
-  try{const d=await get();if(d&&d.index)draw(d);else $('c').innerHTML='<div class="err">'+esc((d&&d.error)||'المؤشر غير متاح الآن')+'</div>'}
+  try{const d=await get();if(d&&d.index){draw(d);if(d.plans&&!PL)loadPlans()}else $('c').innerHTML='<div class="err">'+esc((d&&d.error)||'المؤشر غير متاح الآن')+'</div>'}
   catch(e){$('c').innerHTML='<div class="err">تعذّر الاتصال. أعد المحاولة بعد قليل.</div>'}
 }
 load();setInterval(load,120000);
