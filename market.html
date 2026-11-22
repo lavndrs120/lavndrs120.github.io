@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
+<script id="gsi" src="https://accounts.google.com/gsi/client" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <title>مؤشر سوق — لاڤندرز</title>
 <style>
@@ -37,7 +38,7 @@ body{background:var(--void);color:#fff;font-family:'Inter',system-ui,-apple-syst
 <body>
 <div class="wrap"><div class="card" id="c"><div class="lbl">جاري التحميل…</div></div><div class="card plans" id="pl" style="display:none"></div></div>
 <div id="gate" style="position:fixed;inset:0;background:rgba(4,4,10,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:9000;display:none"></div>
-<div id="lo" style="position:fixed;inset:0;background:rgba(6,6,12,.88);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;padding:20px"><button onclick="closeLogin()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:28px;cursor:pointer;line-height:1;padding:6px">✕</button><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:40px">المؤشر الاستهلاكي</div><div id="lm0" style="color:#888;font-size:13px;max-width:280px;text-align:center">سجّل دخولك بحساب Google للمتابعة</div><div id="gb" style="margin-top:20px;display:flex;flex-direction:column;align-items:center;width:100%;max-width:300px"></div></div>
+<div id="lo" style="position:fixed;inset:0;background:rgba(6,6,12,.88);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;padding:20px"><button onclick="closeLogin()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:28px;cursor:pointer;line-height:1;padding:6px">✕</button><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:40px">المؤشر الاستهلاكي</div><div id="lm0" style="color:#888;font-size:13px;max-width:280px;text-align:center">سجّل دخولك بحساب Google للمتابعة</div><div id="gb" style="margin-top:20px"></div></div>
 <script>
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 const OK=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
@@ -66,7 +67,9 @@ let PL=null,SES='',MYS=[],VIEW='';
 const ST=(k,v)=>{try{if(v===undefined)return sessionStorage.getItem(k)||'';sessionStorage.setItem(k,v)}catch(e){return ''}};
 function fmtD(ms){try{return new Date(ms).toISOString().slice(0,10)}catch(e){return ''}}
 async function loadPlans(){
-  try{const p=await get({action:'plans'});if(!p||!p.on)return;PL=p;SES=ST('mkt_s_'+p.mid);await refreshSub();renderPlans()}catch(e){}
+  try{const p=await get({action:'plans'});if(!p||!p.on)return;PL=p;SES=ST('mkt_s_'+p.mid);
+    if(HC&&!SES){try{const r=await get({action:'mkt_handoff_use',c:HC});if(r&&r.session){SES=r.session;ST('mkt_s_'+p.mid,SES)}}catch(e){}try{history.replaceState(null,'',location.pathname+'?b='+encodeURIComponent(BACK)+'&app=1&sch='+encodeURIComponent(SCH))}catch(e){}}
+    await refreshSub();renderPlans();if(LOGINMODE&&!SES)openLogin()}catch(e){}
 }
 async function refreshSub(){
   MYS=[];if(!SES)return;
@@ -216,23 +219,24 @@ async function showView(a){
     pv.innerHTML=h+'</div>';
   }catch(e){pv.innerHTML='<div class="err" style="margin-top:10px">تعذّر الاتصال</div>'}
 }
-const APP=new URLSearchParams(location.search).get('app')==='1';
+const QS=new URLSearchParams(location.search),APP=QS.get('app')==='1',SCH=(QS.get('sch')||'').replace(/[^a-z0-9.]/g,'').slice(0,80),LOGINMODE=QS.get('login')==='1',HC=(QS.get('hc')||'').replace(/[^a-f0-9]/g,'').slice(0,12);
 function loginUI(){
   const box=$('gb');if(!box)return;
   const old0=$('gl');if(old0)old0.remove();
   if(APP||CODE){
     box.style.display='block';
-    box.innerHTML='<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(APP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
+    box.innerHTML=(APP&&SCH&&window.LavndrMkt?'<button data-bro="1" style="width:100%;padding:13px;border:none;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px;cursor:pointer">الدخول بحساب Google (يفتح المتصفح)</button><div class="lbl" style="margin:14px 0 8px;text-align:center">أو بالبريد:</div>':'')+'<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(APP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
     return;
   }
-  box.style.display='flex';box.innerHTML='';const old=$('gl');if(old)old.remove();
+  box.style.display='block';box.innerHTML='';const old=$('gl');if(old)old.remove();
   showGsi();
   box.insertAdjacentHTML('afterend','<div id="gl" class="lbl" style="margin-top:14px;text-align:center"><a href="#" data-c="1" style="color:var(--gold2)">لا يعمل زر Google؟ ادخل برمز على بريدك</a></div>');
 }
 let CODE=false;
 document.addEventListener('click',async ev=>{
-  const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv]');if(!a||!PL)return;
-  if(a.dataset.c){ev.preventDefault();CODE=true;loginUI()}
+  const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv],[data-bro]');if(!a||!PL)return;
+  if(a.dataset.bro){try{LavndrMkt.open(location.origin+location.pathname+'?b='+encodeURIComponent(BACK)+'&login=1&sch='+encodeURIComponent(SCH))}catch(e){alert('حدّث التطبيق لاستخدام هذه الطريقة')}}
+  else if(a.dataset.c){ev.preventDefault();CODE=true;loginUI()}
   else if(a.dataset.g){ev.preventDefault();CODE=false;loginUI()}
   else if(a.dataset.cs){
     const em=($('le').value||'').trim();a.disabled=true;$('lm').textContent='جارٍ الإرسال…';
@@ -250,7 +254,7 @@ function showGsi(){
     if(!window.google||!google.accounts||!$('gb'))return false;
     google.accounts.id.initialize({client_id:PL.clientId,nonce:'lvnmkt-'+PL.mid,callback:async cr=>{
       try{const r=await get({action:'mkt_login',idToken:cr.credential});
-        if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
+        if(r&&r.session){if(LOGINMODE&&SCH){const h=await get({action:'mkt_handoff_new',s:r.session});if(h&&h.c){const u=SCH+'://h?c='+h.c;$('lo').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:20px">LAVNDR120</div><div style="font-size:15px;margin-bottom:18px">تم تسجيل الدخول ✓</div><a href="'+u+'" style="display:inline-block;padding:14px 28px;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;text-decoration:none">العودة إلى التطبيق</a></div>';setTimeout(()=>{location.href=u},400);return}alert((h&&h.error)||'تعذّر');return}SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
     google.accounts.id.renderButton($('gb'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'ar'});return true;
   };
   if(go())return;
