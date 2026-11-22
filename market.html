@@ -26,6 +26,7 @@ body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Sego
 .tier b{font-size:14px}.plans button{padding:9px 14px;border-radius:10px;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;transition:transform .12s,opacity .2s}
 .plans button:active{transform:scale(.95)}.plans button:disabled{opacity:.5}
 .plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit;direction:ltr}
+.bkb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 14px;margin:10px 0}.brw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}.cpb{flex-shrink:0;padding:6px 10px;font-size:11px;width:auto}.pfc{margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px}
 .pay{white-space:pre-wrap;font-size:13px;line-height:1.9;background:rgba(255,255,255,.05);border-radius:10px;padding:10px;margin-top:8px}
 .ok{color:var(--em);font-size:12px}.rw{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13px}
 .rw span:last-child{direction:ltr;color:var(--gold2)}
@@ -71,13 +72,32 @@ async function refreshSub(){
 }
 function mine(tier){const now=Date.now();let a=MYS.filter(x=>x.tier===tier&&x.status==='active'&&x.end>now)[0];if(a)return{k:'active',end:a.end};if(MYS.some(x=>x.tier===tier&&x.status==='pending'))return{k:'pending'};return{k:'none'}}
 function has(tiers){return tiers.some(t=>mine(t).k==='active')}
+function stepsBar(active){
+  const L=['اختر','التفاصيل','الدفع','التأكيد'];
+  return '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 18px;flex-wrap:wrap">'+L.map((l,i)=>{const n=i+1,on=n===active,dn=n<active;
+    return '<div style="display:flex;align-items:center;gap:5px"><div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'+(on?'background:var(--gold);color:#04040A':dn?'background:rgba(201,168,76,.25);color:var(--gold)':'background:rgba(255,255,255,.07);opacity:.6')+'">'+(dn?'✓':n)+'</div><span style="font-size:10.5px;'+(on?'font-weight:700':'opacity:.6')+'">'+l+'</span></div>'+(n<4?'<div style="width:14px;height:1px;background:rgba(255,255,255,.12)"></div>':'')}).join('')+'</div>';
+}
+function bankBox(){
+  const b=PL.bank||{};
+  const row=(l,v)=>v?'<div class="brw"><div style="min-width:0;text-align:right"><div class="lbl" style="font-size:10px">'+l+'</div><div dir="auto" style="word-break:break-all;font-size:13px">'+esc(v)+'</div></div><button data-copy="'+esc(v)+'" class="cpb">نسخ</button></div>':'';
+  if(!(b.bank||b.holder||b.account||b.iban||b.bban||b.swift||b.branch))return '<div class="lbl">لم يضف صاحب المؤشر بيانات الدفع بعد.</div>';
+  return '<div class="bkb">'+row('البنك',b.bank)+row('اسم صاحب الحساب',b.holder)+row('رقم الحساب',b.account)+row('IBAN',b.iban)+row('BBAN',b.bban)+row('رمز السويفت — للتحويل الدولي (SWIFT)',b.swift)+row('الفرع',b.branch)+(b.cur?'<div class="lbl" style="padding:8px 0 6px;line-height:1.7">القيمة بالدولار، والتحويل الفعلي بـ('+esc(b.cur)+') بما يعادلها يوم التحويل.</div>':'')+'</div>';
+}
+function payScreen(t){
+  return '<div class="pfc" style="text-align:center">'+stepsBar(3)+'<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px">'+esc(t.name)+'</div><div style="font-size:26px;font-weight:900;margin-bottom:14px">$'+esc(t.price)+'</div>'+
+  '<div class="lbl" style="margin-bottom:14px;line-height:1.8;text-align:right"><b>١.</b> حوّل المبلغ إلى الحساب أدناه.<br><b>٢.</b> أرسلنا رمز التحقق إلى إيميلك — أدخله مع رقم/مرجع المعاملة من إشعار البنك.</div>'+bankBox()+
+  '<input id="so" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="رمز التحقق (من الإيميل)" style="text-align:center;letter-spacing:3px"><input id="rf" maxlength="40" placeholder="رقم/مرجع المعاملة البنكية" autocomplete="off" style="text-align:center"><button data-send="'+esc(t.tier)+'" style="width:100%">تأكيد الدفع</button><div id="pm" class="err" style="margin-top:10px"></div></div>';
+}
+function pendScreen(){
+  return '<div class="pfc" style="text-align:center">'+stepsBar(4)+'<div style="font-size:36px;margin-bottom:12px">⏳</div><div style="font-size:15px;margin-bottom:8px">وصلنا تأكيدك — نراجع التحويل الآن</div><div class="lbl" style="line-height:1.8;margin-bottom:14px">يتفعّل اشتراكك بعد اعتماد التحويل. لا تحتاج لفعل أي شيء الآن — ويمكنك إغلاق هذه الصفحة والعودة لاحقًا.</div><button data-chk="1">تحقق من الحالة</button></div>';
+}
 function renderPlans(){
   const el=$('pl');el.style.display='block';
   let h='<h2>مسارات البيانات</h2><div class="lbl">اشتراكات للاطلاع على بيانات هذا المؤشر. يحدّد صاحب المؤشر أسعارها ويستلم الدفع ويعتمد الاشتراك بنفسه.</div>';
   PL.tiers.forEach(t=>{
     const m=mine(t.tier);
-    const act=m.k==='active'?'<span class="ok">فعّال حتى '+esc(fmtD(m.end))+'</span>':m.k==='pending'?'<span class="lbl">قيد المراجعة ⏳</span>':'<button data-t="'+esc(t.tier)+'">اشترك</button>';
-    h+='<div class="tier"><div><b>'+esc(t.name)+'</b> · $'+esc(t.price)+'<div class="lbl">'+esc(t.desc)+'</div></div><div>'+act+'</div></div>';
+    const act=m.k==='active'?'<span class="ok">فعّال حتى '+esc(fmtD(m.end))+'</span>':m.k==='pending'?'<span class="lbl">قيد المراجعة ⏳</span>':(t.max>0&&t.left<=0)?'<span class="lbl">🔒 اكتملت العضوية — مفيش أماكن حاليًا</span>':'<button data-t="'+esc(t.tier)+'">اشترك</button>';
+    h+='<div class="tier"><div><b>'+esc(t.name)+'</b> · $'+esc(t.price)+'<div class="lbl">'+esc(t.desc)+'</div>'+(t.max>0&&t.left>0?'<div style="display:inline-block;margin-top:6px;padding:4px 10px;border-radius:100px;background:rgba(244,63,94,.18);border:1px solid rgba(244,63,94,.4);color:#FCA5A5;font-size:10.5px;font-weight:700">🔥 باقي '+esc(t.left)+' مكان من '+esc(t.max)+'</div>':'')+'</div><div>'+act+'</div></div>';
   });
   h+='<div id="pf"></div>';
   if(!SES)h+='<div class="lbl" style="margin-top:10px">للاشتراك أو لعرض اشتراكك سجّل الدخول بحساب Google:</div><div id="gb" style="margin-top:8px;display:flex;justify-content:center"></div>';
@@ -99,14 +119,21 @@ $('pl').addEventListener('click',async ev=>{
   if(b.dataset.t){
     if(!SES){$('pf').innerHTML='<div class="lbl" style="margin-top:10px">سجّل الدخول أولاً بحساب Google بالزر أدناه ثم اضغط اشترك.</div>';return}
     const t=PL.tiers.filter(x=>x.tier===b.dataset.t)[0];
-    $('pf').innerHTML='<div class="lbl" style="margin-top:12px">حوّل $'+esc(t.price)+' ثم اكتب رقم المعاملة:</div>'+(PL.pay?'<div class="pay">'+esc(PL.pay)+'</div>':'<div class="lbl">لم يضف صاحب المؤشر بيانات الدفع بعد.</div>')+'<input id="rf" maxlength="40" placeholder="رقم المعاملة" autocomplete="off"><button data-send="'+esc(t.tier)+'">إرسال الطلب</button><div id="pm" class="lbl" style="margin-top:6px"></div>';
+    b.disabled=true;$('pf').innerHTML='<div class="lbl" style="margin-top:12px">جارٍ إرسال رمز التحقق إلى بريدك…</div>';
+    try{const r=await get({action:'sub_start',s:SES,tier:t.tier});
+      if(r&&r.status==='otp_sent'){$('pf').innerHTML=payScreen(t)}
+      else{$('pf').innerHTML='<div class="err" style="margin-top:10px">'+esc((r&&r.error)||'تعذّر البدء')+'</div>';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');renderPlans()}}
+    }catch(e){$('pf').innerHTML='<div class="err" style="margin-top:10px">تعذّر الاتصال</div>';b.disabled=false}
   }else if(b.dataset.send){
-    const v=($('rf').value||'').trim();b.disabled=true;$('pm').textContent='جارٍ الإرسال…';
-    try{const r=await get({action:'sub_request',s:SES,tier:b.dataset.send,ref:v});
-      if(r&&r.status==='pending'){await refreshSub();renderPlans();$('pf').innerHTML='<div class="ok" style="margin-top:10px">وصل طلبك — سيراجعه صاحب المؤشر ويفعّل اشتراكك.</div>'}
+    const v=($('rf').value||'').trim(),o=($('so').value||'').trim();if(!o||!v){$('pm').textContent='لازم تدخل الرمز ورقم المعاملة';return}
+    b.disabled=true;$('pm').textContent='جاري التأكيد...';
+    try{const r=await get({action:'sub_confirm',s:SES,tier:b.dataset.send,otp:o,ref:v});
+      if(r&&r.status==='pending'){await refreshSub();renderPlans();$('pf').innerHTML=pendScreen()}
       else{$('pm').textContent=(r&&r.error)||'تعذّر الإرسال';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');renderPlans()}}
     }catch(e){$('pm').textContent='تعذّر الاتصال';b.disabled=false}
   }else if(b.dataset.v){VIEW=b.dataset.v;showView(VIEW)}
+  else if(b.dataset.chk){await refreshSub();renderPlans()}
+  else if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='تم ✓'}catch(e){const ta=document.createElement('textarea');ta.value=b.dataset.copy;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');b.textContent='تم ✓'}catch(_){}ta.remove()}setTimeout(()=>{b.textContent='نسخ'},1500)}
   else if(b.dataset.out){SES='';VIEW='';MYS=[];ST('mkt_s_'+PL.mid,'');renderPlans()}
 });
 async function showView(a){
