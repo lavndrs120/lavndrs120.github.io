@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <title>مؤشر سوق — لاڤندرز</title>
 <style>
 :root{--void:#04040A;--gold:#C9A84C;--gold2:#F0D080;--em:#10B981;--red:#F43F5E;--dim:rgba(255,255,255,.55)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+body{background:var(--void);color:#fff;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
 .card{width:100%;max-width:420px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:26px 22px;text-align:center}
 .eb{font-size:11px;letter-spacing:2px;color:var(--gold2)}
 .nm{font-size:22px;font-weight:900;margin:6px 0 2px}
@@ -26,7 +27,8 @@ body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Sego
 .tier b{font-size:14px}.plans button{padding:9px 14px;border-radius:10px;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;white-space:nowrap;transition:transform .12s,opacity .2s}
 .plans button:active{transform:scale(.95)}.plans button:disabled{opacity:.5}
 .plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit;direction:ltr}
-.bkb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 14px;margin:10px 0}.brw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}.cpb{flex-shrink:0;padding:6px 10px;font-size:11px;width:auto}.pfc{margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px}
+.bkb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 14px;margin:10px 0}.brw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}.plans .cpb{flex-shrink:0;padding:6px 10px;font-size:11px;width:auto;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.55)}.pfc{margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px}
+#lo input,.plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit}#lo button[data-cs],#lo button[data-cv]{padding:10px 14px;border-radius:10px;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:700;font-family:inherit;cursor:pointer}
 .pay{white-space:pre-wrap;font-size:13px;line-height:1.9;background:rgba(255,255,255,.05);border-radius:10px;padding:10px;margin-top:8px}
 .ok{color:var(--em);font-size:12px}.rw{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13px}
 .rw span:last-child{direction:ltr;color:var(--gold2)}
@@ -34,6 +36,7 @@ body{background:var(--void);color:#fff;font-family:system-ui,-apple-system,'Sego
 </head>
 <body>
 <div class="wrap"><div class="card" id="c"><div class="lbl">جاري التحميل…</div></div><div class="card plans" id="pl" style="display:none"></div></div>
+<div id="lo" style="position:fixed;inset:0;background:rgba(6,6,12,.88);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;padding:20px"><button onclick="closeLogin()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:28px;cursor:pointer;line-height:1;padding:6px">✕</button><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:40px">المؤشر الاستهلاكي</div><div id="lm0" style="color:#888;font-size:13px;max-width:280px;text-align:center">سجّل دخولك بحساب Google للمتابعة</div><div id="gb" style="margin-top:20px;display:flex;flex-direction:column;align-items:center;width:100%;max-width:300px"></div></div>
 <script>
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 const OK=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
@@ -74,7 +77,7 @@ function mine(tier){const now=Date.now();let a=MYS.filter(x=>x.tier===tier&&x.st
 function has(tiers){return tiers.some(t=>mine(t).k==='active')}
 function stepsBar(active){
   const L=['اختر','التفاصيل','الدفع','التأكيد'];
-  return '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin:0 0 18px;flex-wrap:wrap">'+L.map((l,i)=>{const n=i+1,on=n===active,dn=n<active;
+  return '<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin:0 0 18px;flex-wrap:nowrap;transform-origin:center">'+L.map((l,i)=>{const n=i+1,on=n===active,dn=n<active;
     return '<div style="display:flex;align-items:center;gap:5px"><div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;'+(on?'background:var(--gold);color:#04040A':dn?'background:rgba(201,168,76,.25);color:var(--gold)':'background:rgba(255,255,255,.07);opacity:.6')+'">'+(dn?'✓':n)+'</div><span style="font-size:10.5px;'+(on?'font-weight:700':'opacity:.6')+'">'+l+'</span></div>'+(n<4?'<div style="width:14px;height:1px;background:rgba(255,255,255,.12)"></div>':'')}).join('')+'</div>';
 }
 function bankBox(){
@@ -84,57 +87,88 @@ function bankBox(){
   return '<div class="bkb">'+row('البنك',b.bank)+row('اسم صاحب الحساب',b.holder)+row('رقم الحساب',b.account)+row('IBAN',b.iban)+row('BBAN',b.bban)+row('رمز السويفت — للتحويل الدولي (SWIFT)',b.swift)+row('الفرع',b.branch)+(b.cur?'<div class="lbl" style="padding:8px 0 6px;line-height:1.7">القيمة بالدولار، والتحويل الفعلي بـ('+esc(b.cur)+') بما يعادلها يوم التحويل.</div>':'')+'</div>';
 }
 function payScreen(t){
-  return '<div class="pfc" style="text-align:center">'+stepsBar(3)+'<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px">'+esc(t.name)+'</div><div style="font-size:26px;font-weight:900;margin-bottom:14px">$'+esc(t.price)+'</div>'+
+  return '<div style="text-align:center">'+stepsBar(3)+'<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px">'+esc(t.name)+'</div><div style="font-size:26px;font-weight:900;margin-bottom:14px">$'+esc(t.price)+'</div>'+
   '<div class="lbl" style="margin-bottom:14px;line-height:1.8;text-align:right"><b>١.</b> حوّل المبلغ إلى الحساب أدناه.<br><b>٢.</b> أرسلنا رمز التحقق إلى إيميلك — أدخله مع رقم/مرجع المعاملة من إشعار البنك.</div>'+bankBox()+
-  '<input id="so" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="رمز التحقق (من الإيميل)" style="text-align:center;letter-spacing:3px"><input id="rf" maxlength="40" placeholder="رقم/مرجع المعاملة البنكية" autocomplete="off" style="text-align:center"><button data-send="'+esc(t.tier)+'" style="width:100%">تأكيد الدفع</button><div id="pm" class="err" style="margin-top:10px"></div></div>';
+  '<input id="so" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="رمز التحقق (من الإيميل)" style="text-align:center;letter-spacing:3px"><input id="rf" maxlength="40" placeholder="رقم/مرجع المعاملة البنكية" autocomplete="off" style="text-align:center"><button data-send="'+esc(t.tier)+'" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px">تأكيد الدفع</button><div id="pm" class="err" style="margin-top:10px"></div></div>';
 }
 function pendScreen(){
-  return '<div class="pfc" style="text-align:center">'+stepsBar(4)+'<div style="font-size:36px;margin-bottom:12px">⏳</div><div style="font-size:15px;margin-bottom:8px">وصلنا تأكيدك — نراجع التحويل الآن</div><div class="lbl" style="line-height:1.8;margin-bottom:14px">يتفعّل اشتراكك بعد اعتماد التحويل. لا تحتاج لفعل أي شيء الآن — ويمكنك إغلاق هذه الصفحة والعودة لاحقًا.</div><button data-chk="1">تحقق من الحالة</button></div>';
+  return '<div style="text-align:center">'+stepsBar(4)+'<div style="font-size:36px;margin-bottom:12px">⏳</div><div style="font-size:15px;margin-bottom:8px">وصلنا تأكيدك — نراجع التحويل الآن</div><div class="lbl" style="line-height:1.8;margin-bottom:14px">يتفعّل اشتراكك بعد اعتماد التحويل. لا تحتاج لفعل أي شيء الآن — ويمكنك إغلاق هذه الصفحة والعودة لاحقًا.</div><button data-chk="1">تحقق من الحالة</button></div>';
+}
+/* ───── عروض الباقات: نفس الثيمات والنصوص والبنية في لاڤندرز ───── */
+const GT={
+  gold:{border:'linear-gradient(135deg,#C9A84C,#6B21A8,#C9A84C)',bg:'linear-gradient(160deg,#1a1230 0%,#0d0a1a 100%)',eyebrow:'#F0D080',title:'#FFF7E0',body:'rgba(255,247,224,0.85)',btnBg:'linear-gradient(135deg,#F0D080,#C9A84C)',btnColor:'#1a1230',glow:'rgba(201,168,76,0.35)'},
+  orange:{border:'linear-gradient(135deg,#F97316,#7C2D12,#F97316)',bg:'linear-gradient(160deg,#2a1408 0%,#170a05 100%)',eyebrow:'#FDBA74',title:'#FFF1E0',body:'rgba(255,241,224,0.85)',btnBg:'linear-gradient(135deg,#FDBA74,#F97316)',btnColor:'#2a1408',glow:'rgba(249,115,22,0.35)'},
+  plain:{border:'linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.06))',bg:'linear-gradient(160deg,#12121c 0%,#0a0a12 100%)',eyebrow:'#C9A84C',title:'#F5F5F5',body:'rgba(255,255,255,0.8)',btnBg:'var(--gold)',btnColor:'#04040A',glow:'rgba(201,168,76,0.25)'}
+};
+const GO={
+  lava:{theme:'plain',icon:'🌋',title:'لاڤا',eyebrow:'داتا السوق',body:'ماذا لو ما بقيت تشوف السوق من الخارج بس؟\nلاڤندرز بدأت بـ120 بزنس وبراند، ولما اجتمعت الطلبات ظهر سوق له حركة ومؤشر استهلاكي وداتا بتتكوّن مع كل حركة. سمّينا الداتا دي لاڤا.\n\nلاڤا مش تقرير بتقرأه، ولا أرقام بتتفرج عليها — لاڤا هي داتا السوق. الـ120 بيكوّنوا السوق، وإنت تقدر تدخل وتستخدم اللاڤا.\n(للمطالعة فقط.)',variants:[['lava','يوم واحد','/ يوم'],['annual','سنة كاملة','/ سنة']],cta:'اشترك في لاڤا'},
+  fendex:{theme:'gold',icon:'🔮',title:'ڤندكس',eyebrow:'LAVENDERS ORACLE — 120 ڤندر فقط',body:'احمِ اللاڤا بالامتلاك، واحصل على تقرير الأوراكل التنبؤي.\nامتلك داتا تحليل السوق، واكشف سلوك المستهلك بعيدًا عن أيدي 1,000 مشترك.\nاحصل على تنبؤ السوق وسلوك المستهلك قبل أن يصبح ما تعرفه متاحًا للجميع.\n\nامتلك الأمس. افهم اليوم. واحتكر المستقبل.',variants:[['fendex','سنة كاملة','/ سنة']],cta:'إنضم للڤندكس'},
+  magma:{theme:'orange',icon:'🌋',title:'ماقما',eyebrow:'عضوية محدودة لـ500 فقط',body:'لاڤندرز ما بدأت لتضيف لك متجرًا آخر — بدأت لتجمع لك السوق: 120 بزنس وبراند.\nبدل ما تكون مرتبط بما تعرفه بس، الآن عندك مجال أن تعرف أكثر، وترى أكثر، وتختار أكثر.\n\nبـ100$ في السنة تفتح لنفسك بابًا إلى سوق كامل. المكان محدود، والفرصة ليست للجميع.',variants:[['magma','سنة كاملة','/ سنة']],cta:'ادخل ماقما'}
+};
+const OSEL={};let PAYV=null;
+const money=n=>Number(n).toLocaleString('en-US');
+function offerCard(key){
+  const o=GO[key],t=GT[o.theme],vs=o.variants.map(v=>({v:v,t:PL.tiers.filter(x=>x.tier===v[0])[0]})).filter(x=>x.t);
+  if(!vs.length)return '';
+  const sel=vs.filter(x=>x.v[0]===OSEL[key])[0]||vs[0],T=sel.t,m=mine(T.tier);
+  const vb=vs.length>1?'<div style="display:flex;gap:8px;margin:14px 0;flex-wrap:wrap">'+vs.map(x=>'<button data-sel="'+key+'|'+x.v[0]+'" style="flex:1;min-width:90px;padding:10px 6px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;border:1px solid '+(x.v[0]===sel.v[0]?t.eyebrow:'rgba(255,255,255,.1)')+';background:'+(x.v[0]===sel.v[0]?'rgba(255,255,255,0.08)':'transparent')+';color:'+(x.v[0]===sel.v[0]?t.title:'rgba(255,255,255,.55)')+'">'+x.v[1]+'<br><span style="font-size:15px">$'+money(x.t.price)+'</span></button>').join('')+'</div>':'';
+  const scar=(T.max>0&&T.left>0)?'<div style="display:inline-block;margin-top:6px;padding:4px 10px;border-radius:100px;background:rgba(244,63,94,0.18);border:1px solid rgba(244,63,94,0.4);color:#FCA5A5;font-size:10.5px;font-weight:700">🔥 باقي '+money(T.left)+' مكان من '+money(T.max)+'</div>':'';
+  let cta;
+  if(m.k==='active')cta='<div class="ok" style="text-align:center;font-size:14px">فعّال حتى '+esc(fmtD(m.end))+' ✓</div>';
+  else if(m.k==='pending')cta='<div style="text-align:center;font-size:13px;color:'+t.eyebrow+'">قيد المراجعة ⏳</div>';
+  else if(T.max>0&&T.left<=0)cta='<button disabled style="width:100%;padding:14px;border:none;border-radius:12px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,.4);font-weight:700;font-size:14px;cursor:not-allowed">🔒 اكتملت العضوية — مفيش أماكن حاليًا</button>';
+  else if(!SES)cta='<button data-login="1" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+t.btnBg+';color:'+t.btnColor+';font-weight:900;font-size:15px;cursor:pointer">سجّل الدخول للمتابعة</button>';
+  else cta='<button data-t="'+esc(T.tier)+'" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+t.btnBg+';color:'+t.btnColor+';font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 20px '+t.glow+'">'+o.cta+'</button>';
+  return '<div style="border-radius:20px;padding:2px;background:'+t.border+';margin-top:14px"><div style="border-radius:18px;padding:20px;background:'+t.bg+';text-align:right"><div style="font-size:10px;letter-spacing:1.5px;color:'+t.eyebrow+';margin-bottom:4px">'+o.eyebrow+'</div><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:21px;font-weight:900;color:'+t.title+'">'+o.icon+' '+o.title+'</div><div style="text-align:left"><div style="font-size:26px;font-weight:900;color:'+t.title+'">$'+money(T.price)+'</div><div style="font-size:10px;color:'+t.eyebrow+'">'+sel.v[2]+'</div></div></div>'+vb+'<div style="font-size:13px;color:'+t.body+';line-height:2;margin:12px 0 6px;white-space:pre-line">'+o.body+'</div>'+scar+'<div style="margin-top:14px">'+cta+'</div></div></div>';
+}
+function shell(inner){
+  return '<div style="text-align:center"><div style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:6px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:24px">المؤشر الاستهلاكي</div>'+inner+'</div>';
 }
 function renderPlans(){
   const el=$('pl');el.style.display='block';
-  let h='<h2>مسارات البيانات</h2><div class="lbl">اشتراكات للاطلاع على بيانات هذا المؤشر. يحدّد صاحب المؤشر أسعارها ويستلم الدفع ويعتمد الاشتراك بنفسه.</div>';
-  PL.tiers.forEach(t=>{
-    const m=mine(t.tier);
-    const act=m.k==='active'?'<span class="ok">فعّال حتى '+esc(fmtD(m.end))+'</span>':m.k==='pending'?'<span class="lbl">قيد المراجعة ⏳</span>':(t.max>0&&t.left<=0)?'<span class="lbl">🔒 اكتملت العضوية — مفيش أماكن حاليًا</span>':'<button data-t="'+esc(t.tier)+'">اشترك</button>';
-    h+='<div class="tier"><div><b>'+esc(t.name)+'</b> · $'+esc(t.price)+'<div class="lbl">'+esc(t.desc)+'</div>'+(t.max>0&&t.left>0?'<div style="display:inline-block;margin-top:6px;padding:4px 10px;border-radius:100px;background:rgba(244,63,94,.18);border:1px solid rgba(244,63,94,.4);color:#FCA5A5;font-size:10.5px;font-weight:700">🔥 باقي '+esc(t.left)+' مكان من '+esc(t.max)+'</div>':'')+'</div><div>'+act+'</div></div>';
-  });
-  h+='<div id="pf"></div>';
-  if(!SES)h+='<div class="lbl" style="margin-top:10px">للاشتراك أو لعرض اشتراكك سجّل الدخول بحساب Google:</div><div id="gb" style="margin-top:8px;display:flex;justify-content:center"></div>';
-  else{
+  if(PAYV){
+    el.innerHTML=shell((PAYV.k==='pay'?payScreen(PAYV.t):pendScreen())+'<button data-back="1" style="width:100%;margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:transparent;color:rgba(255,255,255,.55);font-size:12px">رجوع</button>');
+    return;
+  }
+  let h='<div style="text-align:center;margin-bottom:6px"><div style="font-size:20px;font-weight:900;color:#F5F5F5">🔗 Join Up LAVENDERS</div><div class="lbl" style="margin-top:6px;line-height:1.8">ادخل السوق: بيانات السوق وتقارير الذكاء ودليل الأنشطة.</div></div>';
+  h+=offerCard('lava')+offerCard('fendex')+offerCard('magma');
+  if(SES){
     const b=[];
     if(has(['lava','annual','fendex']))b.push('<button data-v="data">📊 البيانات</button>');
     if(has(['fendex']))b.push('<button data-v="report">📑 التقرير</button>');
     if(has(['magma']))b.push('<button data-v="directory">📇 الدليل</button>');
-    if(b.length)h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+b.join('')+'</div>';
+    if(b.length)h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'+b.join('')+'</div>';
     h+='<div style="margin-top:10px"><button data-out="1">تسجيل الخروج</button></div>';
   }
   h+='<div id="pv"></div><div class="ft">اشتراك للاطلاع على بيانات فقط — ليس استثماراً ولا حصة في شيء، ولا وعداً بعوائد. الدفع والاسترداد بين المشترك وصاحب المؤشر مباشرة، ولاڤندرز لا تستلم ولا تحتفظ بأي مبلغ.</div>';
   el.innerHTML=h;
-  if(!SES)loginUI();
   if(VIEW&&SES)showView(VIEW);
 }
+function openLogin(){const o=$('lo');o.style.display='flex';loginUI()}
+function closeLogin(){$('lo').style.display='none'}
 $('pl').addEventListener('click',async ev=>{
   const b=ev.target.closest&&ev.target.closest('button');if(!b)return;
-  if(b.dataset.t){
-    if(!SES){$('pf').innerHTML='<div class="lbl" style="margin-top:10px">سجّل الدخول أولاً بحساب Google بالزر أدناه ثم اضغط اشترك.</div>';return}
+  if(b.dataset.sel){const p=b.dataset.sel.split('|');OSEL[p[0]]=p[1];renderPlans()}
+  else if(b.dataset.login){openLogin()}
+  else if(b.dataset.back){PAYV=null;renderPlans()}
+  else if(b.dataset.t){
     const t=PL.tiers.filter(x=>x.tier===b.dataset.t)[0];
-    b.disabled=true;$('pf').innerHTML='<div class="lbl" style="margin-top:12px">جارٍ إرسال رمز التحقق إلى بريدك…</div>';
+    b.disabled=true;b.textContent='جارٍ إرسال رمز التحقق إلى بريدك…';
     try{const r=await get({action:'sub_start',s:SES,tier:t.tier});
-      if(r&&r.status==='otp_sent'){$('pf').innerHTML=payScreen(t)}
-      else{$('pf').innerHTML='<div class="err" style="margin-top:10px">'+esc((r&&r.error)||'تعذّر البدء')+'</div>';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');renderPlans()}}
-    }catch(e){$('pf').innerHTML='<div class="err" style="margin-top:10px">تعذّر الاتصال</div>';b.disabled=false}
+      if(r&&r.status==='otp_sent'){PAYV={k:'pay',t:t};renderPlans()}
+      else{alert((r&&r.error)||'تعذّر البدء');if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'')}renderPlans()}
+    }catch(e){alert('تعذّر الاتصال');renderPlans()}
   }else if(b.dataset.send){
     const v=($('rf').value||'').trim(),o=($('so').value||'').trim();if(!o||!v){$('pm').textContent='لازم تدخل الرمز ورقم المعاملة';return}
     b.disabled=true;$('pm').textContent='جاري التأكيد...';
     try{const r=await get({action:'sub_confirm',s:SES,tier:b.dataset.send,otp:o,ref:v});
-      if(r&&r.status==='pending'){await refreshSub();renderPlans();$('pf').innerHTML=pendScreen()}
-      else{$('pm').textContent=(r&&r.error)||'تعذّر الإرسال';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');renderPlans()}}
+      if(r&&r.status==='pending'){await refreshSub();PAYV={k:'pend'};renderPlans()}
+      else{$('pm').textContent=(r&&r.error)||'تعذّر الإرسال';b.disabled=false;if(r&&r.code===401){SES='';ST('mkt_s_'+PL.mid,'');PAYV=null;renderPlans()}}
     }catch(e){$('pm').textContent='تعذّر الاتصال';b.disabled=false}
   }else if(b.dataset.v){VIEW=b.dataset.v;showView(VIEW)}
-  else if(b.dataset.chk){await refreshSub();renderPlans()}
-  else if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='تم ✓'}catch(e){const ta=document.createElement('textarea');ta.value=b.dataset.copy;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');b.textContent='تم ✓'}catch(_){}ta.remove()}setTimeout(()=>{b.textContent='نسخ'},1500)}
-  else if(b.dataset.out){SES='';VIEW='';MYS=[];ST('mkt_s_'+PL.mid,'');renderPlans()}
+  else if(b.dataset.chk){await refreshSub();PAYV=null;renderPlans()}
+  else if(b.dataset.copy){try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='تم النسخ ✓'}catch(e){const ta=document.createElement('textarea');ta.value=b.dataset.copy;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');b.textContent='تم النسخ ✓'}catch(_){}ta.remove()}setTimeout(()=>{b.textContent='نسخ'},1400)}
+  else if(b.dataset.out){SES='';VIEW='';MYS=[];PAYV=null;ST('mkt_s_'+PL.mid,'');renderPlans()}
 });
 async function showView(a){
   const pv=$('pv');if(!pv)return;pv.innerHTML='<div class="lbl" style="margin-top:12px">جاري التحميل…</div>';
@@ -158,19 +192,21 @@ async function showView(a){
 const APP=new URLSearchParams(location.search).get('app')==='1';
 function loginUI(){
   const box=$('gb');if(!box)return;
+  const old0=$('gl');if(old0)old0.remove();
   if(APP||CODE){
     box.style.display='block';
     box.innerHTML='<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(APP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
     return;
   }
+  box.style.display='flex';box.innerHTML='';const old=$('gl');if(old)old.remove();
   showGsi();
-  box.insertAdjacentHTML('afterend','<div class="lbl" style="margin-top:8px;text-align:center"><a href="#" data-c="1" style="color:var(--gold2)">لا يعمل زر Google؟ ادخل برمز على بريدك</a></div>');
+  box.insertAdjacentHTML('afterend','<div id="gl" class="lbl" style="margin-top:14px;text-align:center"><a href="#" data-c="1" style="color:var(--gold2)">لا يعمل زر Google؟ ادخل برمز على بريدك</a></div>');
 }
 let CODE=false;
 document.addEventListener('click',async ev=>{
   const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv]');if(!a||!PL)return;
-  if(a.dataset.c){ev.preventDefault();CODE=true;renderPlans()}
-  else if(a.dataset.g){ev.preventDefault();CODE=false;renderPlans()}
+  if(a.dataset.c){ev.preventDefault();CODE=true;loginUI()}
+  else if(a.dataset.g){ev.preventDefault();CODE=false;loginUI()}
   else if(a.dataset.cs){
     const em=($('le').value||'').trim();a.disabled=true;$('lm').textContent='جارٍ الإرسال…';
     try{const r=await get({action:'code_send',email:em});
@@ -179,7 +215,7 @@ document.addEventListener('click',async ev=>{
   }else if(a.dataset.cv){
     a.disabled=true;
     try{const r=await get({action:'code_verify',email:($('le').value||'').trim(),code:($('lk').value||'').trim()});
-      if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();renderPlans()}else{$('lm').textContent=(r&&r.error)||'تعذّر الدخول';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
+      if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else{$('lm').textContent=(r&&r.error)||'تعذّر الدخول';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
   }
 });
 function showGsi(){
@@ -187,8 +223,8 @@ function showGsi(){
     if(!window.google||!google.accounts||!$('gb'))return false;
     google.accounts.id.initialize({client_id:PL.clientId,nonce:'lvnmkt-'+PL.mid,callback:async cr=>{
       try{const r=await get({action:'mkt_login',idToken:cr.credential});
-        if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
-    google.accounts.id.renderButton($('gb'),{theme:'filled_black',size:'large',text:'signin_with'});return true;
+        if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
+    google.accounts.id.renderButton($('gb'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'ar'});return true;
   };
   if(go())return;
   if(!document.getElementById('gsi')){const s=document.createElement('script');s.id='gsi';s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>go();document.head.appendChild(s)}
