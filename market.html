@@ -29,7 +29,7 @@ body{background:var(--void);color:#fff;font-family:'Inter',system-ui,-apple-syst
 .plans button:active{transform:scale(.95)}.plans button:disabled{opacity:.5}
 .plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit;direction:ltr}
 .bkb{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:4px 14px;margin:10px 0}.brw{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.07)}.cpb{flex-shrink:0;padding:6px 10px;font-size:11px;width:auto;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.55)}.pfc{margin-top:12px;padding:14px;border:1px solid rgba(255,255,255,.12);border-radius:14px}
-#lo input,#gate input,#inx input,.plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit}#lo button[data-cs],#lo button[data-cv]{padding:10px 14px;border-radius:10px;border:1px solid var(--gold);background:none;color:var(--gold);font-weight:700;font-family:inherit;cursor:pointer}
+#lo input,#gate input,#inx input,.plans input{width:100%;padding:10px;margin:8px 0;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05);color:#fff;font-family:inherit}
 .glass{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;position:relative}
 .comp-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.03)}
 .comp-rank{font-size:11px;color:rgba(255,255,255,.3);width:24px;text-align:center;flex-shrink:0}
@@ -42,6 +42,7 @@ body{background:var(--void);color:#fff;font-family:'Inter',system-ui,-apple-syst
 .lb-w{font-size:12px;color:rgba(255,255,255,.55);flex:none;min-width:48px;text-align:left}
 .itab{padding:7px 13px;border-radius:100px;font-size:12px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);background:transparent;cursor:pointer;font-family:inherit;white-space:nowrap;width:auto}
 .itab.on{color:var(--gold);border-color:var(--gold);background:rgba(201,168,76,.12)}
+.lgi{width:100%;padding:14px;margin:0 0 10px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:#101018!important;color:#fff!important;font-family:inherit;font-size:15px;-webkit-text-fill-color:#fff}.lgi:-webkit-autofill{-webkit-box-shadow:0 0 0 40px #101018 inset;-webkit-text-fill-color:#fff}.lgb{width:100%;padding:14px;border:none;border-radius:100px;background:linear-gradient(135deg,#F0D080,#C9A84C);color:#1a1230;font-weight:900;font-size:15px;font-family:inherit;cursor:pointer}.lgb:disabled{opacity:.6}.lgm{min-height:18px;margin-top:10px;font-size:12px;color:#FCA5A5}
 .pay{white-space:pre-wrap;font-size:13px;line-height:1.9;background:rgba(255,255,255,.05);border-radius:10px;padding:10px;margin-top:8px}
 .ok{color:var(--em);font-size:12px}.rw{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06);font-size:13px}
 .rw span:last-child{direction:ltr;color:var(--gold2)}
@@ -51,7 +52,7 @@ body{background:var(--void);color:#fff;font-family:'Inter',system-ui,-apple-syst
 <div class="wrap"><div class="card" id="c"><div class="lbl">جاري التحميل…</div></div><div class="card plans" id="pl" style="display:none"></div></div>
 <div id="inx" style="position:fixed;inset:0;background:#04040A;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:9500;display:none"></div>
 <div id="gate" style="position:fixed;inset:0;background:#04040A;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:9000;display:none"></div>
-<div id="lo" style="position:fixed;inset:0;background:rgba(6,6,12,.88);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;padding:20px"><button onclick="closeLogin()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:28px;cursor:pointer;line-height:1;padding:6px">✕</button><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:40px">المؤشر الاستهلاكي</div><div id="lm0" style="color:#888;font-size:13px;max-width:280px;text-align:center">سجّل دخولك بحساب Google للمتابعة</div><div id="gb" style="margin-top:20px"></div></div>
+<div id="lo" style="position:fixed;inset:0;background:rgba(6,6,12,.88);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;padding:20px"><button onclick="closeLogin()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:28px;cursor:pointer;line-height:1;padding:6px">✕</button><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;letter-spacing:2px">LAVNDR120</div><div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:40px">المؤشر الاستهلاكي</div><div id="lm0" style="color:#888;font-size:13px;max-width:280px;text-align:center">سجّل دخولك بحساب Google للمتابعة</div><div id="gb" style="margin-top:20px;text-align:center;width:100%;max-width:320px"></div></div>
 <script>
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 const OK=/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]{10,200}\/exec$/.test(BACK);
@@ -79,12 +80,16 @@ function draw(d){
 let PL=null,SES='',MYS=[],VIEW='';
 const ST=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||sessionStorage.getItem(k)||'';if(v===''){localStorage.removeItem(k);sessionStorage.removeItem(k)}else{localStorage.setItem(k,v);sessionStorage.setItem(k,v)}}catch(e){try{if(v===undefined)return sessionStorage.getItem(k)||'';sessionStorage.setItem(k,v)}catch(_){}return ''}};
 function fmtD(ms){try{return new Date(ms).toISOString().slice(0,10)}catch(e){return ''}}
+function resumeFlow(){
+  if(!SES||!PL||has(['lava','annual','fendex','magma']))return;
+  const aw=MYS.filter(x=>x.status==='awaiting'&&Date.now()-x.at<48*36e5)[0],pe=MYS.filter(x=>x.status==='pending')[0];
+  if(aw){const t=PL.tiers.filter(x=>x.tier===aw.tier)[0];if(t)G={open:true,s:'pay',k:G.k,t:t}}else if(pe)G={open:true,s:'pend',k:G.k}
+}
 async function loadPlans(){
   try{const p=await get({action:'plans'});if(!p||!p.on)return;PL=p;SES=ST('mkt_s_'+p.mid);
     if(HC&&!SES){try{const r=await get({action:'mkt_handoff_use',c:HC});if(r&&r.session){SES=r.session;ST('mkt_s_'+p.mid,SES)}}catch(e){}try{history.replaceState(null,'',location.pathname+'?b='+encodeURIComponent(BACK)+'&app=1&sch='+encodeURIComponent(SCH))}catch(e){}}
     await refreshSub();
-    if(SES&&!has(['lava','annual','fendex','magma'])){const aw=MYS.filter(x=>x.status==='awaiting'&&Date.now()-x.at<48*36e5)[0],pe=MYS.filter(x=>x.status==='pending')[0];
-      if(aw){const t=p.tiers.filter(x=>x.tier===aw.tier)[0];if(t)G={open:true,s:'pay',k:G.k,t:t}}else if(pe)G={open:true,s:'pend',k:G.k}}
+    resumeFlow();
     renderPlans();if(LOGINMODE&&!SES)openLogin()}catch(e){}
 }
 async function refreshSub(){
@@ -272,28 +277,36 @@ function loginUI(){
   const old0=$('gl');if(old0)old0.remove();
   if(INAPP||CODE){
     box.style.display='block';
-    box.innerHTML=(APP&&SCH&&window.LavndrMkt?'<button data-bro="1" style="width:100%;padding:13px;border:none;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px;cursor:pointer">الدخول بحساب Google (يفتح المتصفح)</button><div class="lbl" style="margin:14px 0 8px;text-align:center">أو بالبريد:</div>':'')+'<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(INAPP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
+    const bro=(APP&&SCH&&window.LavndrMkt)?'<button data-bro="1" class="lgb">الدخول بحساب Google (يفتح المتصفح)</button><div style="margin:14px 0;color:#666;font-size:12px">— أو —</div>':'';
+    if(LEM){
+      box.innerHTML='<div style="font-size:13px;color:#aaa;line-height:1.8;margin-bottom:12px">أرسلنا رمزاً من 6 أرقام إلى<br><b dir="ltr" style="color:#fff">'+esc(LEM)+'</b><br><span style="font-size:11px;color:#777">تحقق من البريد المزعج أيضاً</span></div><input id="lk" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="الرمز" class="lgi" style="text-align:center;letter-spacing:8px;font-size:22px"><button data-cv="1" class="lgb">دخول</button><div id="lm" class="lgm"></div><div style="margin-top:14px;font-size:12px"><a href="#" data-resend="1" style="color:var(--gold)">إعادة إرسال الرمز</a> · <a href="#" data-chg="1" style="color:#888">تغيير البريد</a></div>';
+    }else{
+      box.innerHTML=bro+'<div style="font-size:13px;color:#aaa;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" dir="ltr" class="lgi" style="text-align:center"><button data-cs="1" class="lgb">إرسال الرمز</button><div id="lm" class="lgm"></div>'+(INAPP?'':'<div style="margin-top:14px;font-size:12px"><a href="#" data-g="1" style="color:var(--gold)">الدخول بحساب Google</a></div>');
+    }
     return;
   }
   box.style.display='block';box.innerHTML='';const old=$('gl');if(old)old.remove();
   showGsi();
   box.insertAdjacentHTML('afterend','<div id="gl" class="lbl" style="margin-top:14px;text-align:center"><a href="#" data-c="1" style="color:var(--gold2)">لا يعمل زر Google؟ ادخل برمز على بريدك</a></div>');
 }
-let CODE=false;
+let CODE=false,LEM='';
 document.addEventListener('click',async ev=>{
-  const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv],[data-bro]');if(!a||!PL)return;
+  const a=ev.target.closest&&ev.target.closest('[data-c],[data-g],[data-cs],[data-cv],[data-bro],[data-resend],[data-chg]');if(!a||!PL)return;
   if(a.dataset.bro){try{LavndrMkt.open(location.origin+location.pathname+'?b='+encodeURIComponent(BACK)+'&login=1&sch='+encodeURIComponent(SCH))}catch(e){alert('حدّث التطبيق لاستخدام هذه الطريقة')}}
   else if(a.dataset.c){ev.preventDefault();CODE=true;loginUI()}
   else if(a.dataset.g){ev.preventDefault();CODE=false;loginUI()}
-  else if(a.dataset.cs){
-    const em=($('le').value||'').trim();a.disabled=true;$('lm').textContent='جارٍ الإرسال…';
+  else if(a.dataset.cs||a.dataset.resend){
+    const em=a.dataset.resend?LEM:($('le').value||'').trim().toLowerCase();if(!em){$('lm').textContent='اكتب بريدك';return}
+    a.disabled=true;$('lm').textContent='جارٍ الإرسال…';
     try{const r=await get({action:'code_send',email:em});
-      if(r&&r.status==='sent'){$('lm').textContent='أرسلنا رمزاً إلى بريدك (تحقق من البريد المزعج أيضاً).';$('lc').innerHTML='<input id="lk" inputmode="numeric" maxlength="6" placeholder="الرمز المكوّن من 6 أرقام"><button data-cv="1" style="width:100%">دخول</button>'}
-      else $('lm').textContent=(r&&r.error)||'تعذّر الإرسال';a.disabled=false}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
-  }else if(a.dataset.cv){
-    a.disabled=true;
-    try{const r=await get({action:'code_verify',email:($('le').value||'').trim(),code:($('lk').value||'').trim()});
-      if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else{$('lm').textContent=(r&&r.error)||'تعذّر الدخول';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
+      if(r&&r.status==='sent'){LEM=em;loginUI();$('lm').textContent=a.dataset.resend?'أُعيد إرسال الرمز ✓':''}
+      else{$('lm').textContent=(r&&r.error)||'تعذّر الإرسال';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
+  }else if(a.dataset.chg){ev.preventDefault();LEM='';loginUI()}
+  else if(a.dataset.cv){
+    const code=($('lk').value||'').trim();if(!/^\d{6}$/.test(code)){$('lm').textContent='اكتب الرمز المكوّن من 6 أرقام';return}
+    a.disabled=true;$('lm').textContent='جارٍ التحقق…';
+    try{const r=await get({action:'code_verify',email:LEM,code:code});
+      if(r&&r.session){SES=r.session;ST('mkt_s_'+PL.mid,SES);LEM='';await refreshSub();closeLogin();resumeFlow();renderPlans()}else{$('lm').textContent=(r&&r.error)||'تعذّر الدخول';a.disabled=false}}catch(e){$('lm').textContent='تعذّر الاتصال';a.disabled=false}
   }
 });
 function showGsi(){
@@ -301,7 +314,7 @@ function showGsi(){
     if(!window.google||!google.accounts||!$('gb'))return false;
     google.accounts.id.initialize({client_id:PL.clientId,nonce:'lvnmkt-'+PL.mid,callback:async cr=>{
       try{const r=await get({action:'mkt_login',idToken:cr.credential});
-        if(r&&r.session){if(LOGINMODE&&SCH){const h=await get({action:'mkt_handoff_new',s:r.session});if(h&&h.c){const u=SCH+'://h?c='+h.c;$('lo').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:20px">LAVNDR120</div><div style="font-size:15px;margin-bottom:18px">تم تسجيل الدخول ✓</div><a href="'+u+'" style="display:inline-block;padding:14px 28px;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;text-decoration:none">العودة إلى التطبيق</a></div>';setTimeout(()=>{location.href=u},400);return}alert((h&&h.error)||'تعذّر');return}SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
+        if(r&&r.session){if(LOGINMODE&&SCH){const h=await get({action:'mkt_handoff_new',s:r.session});if(h&&h.c){const u=SCH+'://h?c='+h.c;$('lo').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:20px">LAVNDR120</div><div style="font-size:15px;margin-bottom:18px">تم تسجيل الدخول ✓</div><a href="'+u+'" style="display:inline-block;padding:14px 28px;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;text-decoration:none">العودة إلى التطبيق</a></div>';setTimeout(()=>{location.href=u},400);return}alert((h&&h.error)||'تعذّر');return}SES=r.session;ST('mkt_s_'+PL.mid,SES);await refreshSub();closeLogin();resumeFlow();renderPlans()}else alert((r&&r.error)||'تعذّر الدخول')}catch(e){alert('تعذّر الاتصال')}}});
     google.accounts.id.renderButton($('gb'),{theme:'filled_black',size:'large',shape:'pill',text:'signin_with',locale:'ar'});return true;
   };
   if(go())return;
