@@ -77,12 +77,15 @@ function draw(d){
 
 /* ───── باقات مسار البيانات (إن فعّلها صاحب المؤشر) ───── */
 let PL=null,SES='',MYS=[],VIEW='';
-const ST=(k,v)=>{try{if(v===undefined)return sessionStorage.getItem(k)||'';sessionStorage.setItem(k,v)}catch(e){return ''}};
+const ST=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||sessionStorage.getItem(k)||'';if(v===''){localStorage.removeItem(k);sessionStorage.removeItem(k)}else{localStorage.setItem(k,v);sessionStorage.setItem(k,v)}}catch(e){try{if(v===undefined)return sessionStorage.getItem(k)||'';sessionStorage.setItem(k,v)}catch(_){}return ''}};
 function fmtD(ms){try{return new Date(ms).toISOString().slice(0,10)}catch(e){return ''}}
 async function loadPlans(){
   try{const p=await get({action:'plans'});if(!p||!p.on)return;PL=p;SES=ST('mkt_s_'+p.mid);
     if(HC&&!SES){try{const r=await get({action:'mkt_handoff_use',c:HC});if(r&&r.session){SES=r.session;ST('mkt_s_'+p.mid,SES)}}catch(e){}try{history.replaceState(null,'',location.pathname+'?b='+encodeURIComponent(BACK)+'&app=1&sch='+encodeURIComponent(SCH))}catch(e){}}
-    await refreshSub();renderPlans();if(LOGINMODE&&!SES)openLogin()}catch(e){}
+    await refreshSub();
+    if(SES&&!has(['lava','annual','fendex','magma'])){const aw=MYS.filter(x=>x.status==='awaiting'&&Date.now()-x.at<48*36e5)[0],pe=MYS.filter(x=>x.status==='pending')[0];
+      if(aw){const t=p.tiers.filter(x=>x.tier===aw.tier)[0];if(t)G={open:true,s:'pay',k:G.k,t:t}}else if(pe)G={open:true,s:'pend',k:G.k}}
+    renderPlans();if(LOGINMODE&&!SES)openLogin()}catch(e){}
 }
 async function refreshSub(){
   MYS=[];if(!SES)return;
@@ -90,7 +93,7 @@ async function refreshSub(){
   if(r&&r.error){SES='';ST('mkt_s_'+PL.mid,'');return}
   MYS=(r&&r.subs)||[];
 }
-function mine(tier){const now=Date.now();let a=MYS.filter(x=>x.tier===tier&&x.status==='active'&&x.end>now)[0];if(a)return{k:'active',end:a.end};if(MYS.some(x=>x.tier===tier&&x.status==='pending'))return{k:'pending'};return{k:'none'}}
+function mine(tier){const now=Date.now();let a=MYS.filter(x=>x.tier===tier&&x.status==='active'&&x.end>now)[0];if(a)return{k:'active',end:a.end};if(MYS.some(x=>x.tier===tier&&x.status==='pending'))return{k:'pending'};if(MYS.some(x=>x.tier===tier&&x.status==='awaiting'&&Date.now()-x.at<48*36e5))return{k:'awaiting'};return{k:'none'}}
 function has(tiers){return tiers.some(t=>mine(t).k==='active')}
 function stepsBar(active){
   const L=['اختر','التفاصيل','الدفع','التأكيد'];
@@ -106,7 +109,7 @@ function bankBox(){
 function payScreen(t){
   return '<div style="text-align:center">'+stepsBar(3)+'<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px">'+esc(t.name)+'</div><div style="font-size:26px;font-weight:900;margin-bottom:14px">$'+esc(t.price)+'</div>'+
   '<div class="lbl" style="margin-bottom:14px;line-height:1.8;text-align:right"><b>١.</b> حوّل المبلغ إلى الحساب أدناه.<br><b>٢.</b> أرسلنا رمز التحقق إلى إيميلك — أدخله مع رقم/مرجع المعاملة من إشعار البنك.</div>'+bankBox()+
-  '<input id="so" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="رمز التحقق (من الإيميل)" style="text-align:center;letter-spacing:3px"><input id="rf" maxlength="40" placeholder="رقم/مرجع المعاملة البنكية" autocomplete="off" style="text-align:center"><button data-send="'+esc(t.tier)+'" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px">تأكيد الدفع</button><div id="pm" class="err" style="margin-top:10px"></div></div>';
+  '<input id="so" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="رمز التحقق (من الإيميل)" style="text-align:center;letter-spacing:3px"><input id="rf" maxlength="40" placeholder="رقم/مرجع المعاملة البنكية" autocomplete="off" style="text-align:center"><button data-t="'+esc(t.tier)+'" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:11.5px;margin:2px 0 12px;text-decoration:underline;cursor:pointer;width:auto">لم يصلك الرمز؟ أرسل رمزاً جديداً</button><button data-send="'+esc(t.tier)+'" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px">تأكيد الدفع</button><div id="pm" class="err" style="margin-top:10px"></div></div>';
 }
 function pendScreen(){
   return '<div style="text-align:center">'+stepsBar(4)+'<div style="font-size:36px;margin-bottom:12px">⏳</div><div style="font-size:15px;margin-bottom:8px">وصلنا تأكيدك — نراجع التحويل الآن</div><div class="lbl" style="line-height:1.8;margin-bottom:14px">يتفعّل اشتراكك بعد اعتماد التحويل. لا تحتاج لفعل أي شيء الآن — ويمكنك إغلاق هذه الصفحة والعودة لاحقًا.</div><button data-chk="1">تحقق من الحالة</button></div>';
@@ -132,6 +135,7 @@ function offerCard(key){
   const scar=(T.max>0&&T.left>0)?'<div style="display:inline-block;margin-top:6px;padding:4px 10px;border-radius:100px;background:rgba(244,63,94,0.18);border:1px solid rgba(244,63,94,0.4);color:#FCA5A5;font-size:10.5px;font-weight:700">🔥 باقي '+money(T.left)+' مكان من '+money(T.max)+'</div>':'';
   let cta;
   if(m.k==='active')cta='<div class="ok" style="text-align:center;font-size:14px;margin-bottom:10px">فعّال حتى '+esc(fmtD(m.end))+' ✓</div><button data-ix="'+(key==='magma'?'dr':key==='fendex'?'rp':'ov')+'" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+t.btnBg+';color:'+t.btnColor+';font-weight:900;font-size:15px;cursor:pointer">ادخل المؤشر ←</button>';
+  else if(m.k==='awaiting')cta='<button data-resume="'+esc(T.tier)+'" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+t.btnBg+';color:'+t.btnColor+';font-weight:900;font-size:15px;cursor:pointer">أكمل الدفع ←</button>';
   else if(m.k==='pending')cta='<div style="text-align:center;font-size:13px;color:'+t.eyebrow+'">قيد المراجعة ⏳</div>';
   else if(T.max>0&&T.left<=0)cta='<button disabled style="width:100%;padding:14px;border:none;border-radius:12px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,.4);font-weight:700;font-size:14px;cursor:not-allowed">🔒 اكتملت العضوية — مفيش أماكن حاليًا</button>';
   else if(!SES)cta='<button data-login="'+esc(T.tier)+'" style="width:100%;padding:14px;border:none;border-radius:12px;background:'+t.btnBg+';color:'+t.btnColor+';font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 20px '+t.glow+'">'+o.cta+'</button>';
@@ -180,8 +184,9 @@ function renderPlans(){
 function openLogin(){const o=$('lo');o.style.display='flex';loginUI()}
 function closeLogin(){$('lo').style.display='none'}
 async function onPlClick(ev){
-  const b=ev.target.closest&&ev.target.closest('[data-go],[data-gopen],[data-gclose],[data-gpath],[data-ix],[data-itab],[data-iclose],[data-rg],button');if(!b)return;
-  if(b.dataset.ix){G.open=false;renderGate();openIx(b.dataset.ix)}
+  const b=ev.target.closest&&ev.target.closest('[data-go],[data-gopen],[data-gclose],[data-gpath],[data-ix],[data-itab],[data-iclose],[data-rg],[data-resume],button');if(!b)return;
+  if(b.dataset.resume){G.s='pay';G.t=PL.tiers.filter(x=>x.tier===b.dataset.resume)[0];renderGate()}
+  else if(b.dataset.ix){G.open=false;renderGate();openIx(b.dataset.ix)}
   else if(b.dataset.itab){IXTAB=b.dataset.itab;renderIx()}
   else if(b.dataset.iclose){IXOPEN=false;renderIx()}
   else if(b.dataset.rg){IXRG=b.dataset.rg;renderIx()}
