@@ -138,9 +138,10 @@ function gAuth(){
     var seen=false;try{seen=localStorage.getItem('lvn_g_ok')===EMAIL&&!!EMAIL}catch(e){}gClient.requestAccessToken({prompt:seen?'':'consent'});
   });
 }
-async function gf(url,opt){
-  const t=await gAuth();opt=opt||{};opt.headers=Object.assign({Authorization:'Bearer '+t},opt.headers||{});
+async function gf(url,opt,retried){
+  const t=await gAuth();opt=Object.assign({},opt||{});opt.headers=Object.assign({},opt.headers||{},{Authorization:'Bearer '+t});
   const r=await fetch(url,opt);let j={};try{j=await r.json()}catch(e){}
+  if(r.status===401&&!retried){gTok='';gExp=0;try{sessionStorage.removeItem('lvn_gt')}catch(e){}return gf(url,opt,true)}
   if(!r.ok){
     const m=(j.error&&j.error.message)||('خطأ '+r.status);
     if(/Apps Script API|has not enabled|not been used in project|accessNotConfigured/i.test(m)){const e=new Error('apiOff');e.apiOff=true;e.detail=m;throw e}
