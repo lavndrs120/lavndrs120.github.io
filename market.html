@@ -219,13 +219,13 @@ async function showView(a){
     pv.innerHTML=h+'</div>';
   }catch(e){pv.innerHTML='<div class="err" style="margin-top:10px">تعذّر الاتصال</div>'}
 }
-const QS=new URLSearchParams(location.search),APP=QS.get('app')==='1',SCH=(QS.get('sch')||'').replace(/[^a-z0-9.]/g,'').slice(0,80),LOGINMODE=QS.get('login')==='1',HC=(QS.get('hc')||'').replace(/[^a-f0-9]/g,'').slice(0,12);
+const QS=new URLSearchParams(location.search),APP=QS.get('app')==='1',SCH=(QS.get('sch')||'').replace(/[^a-z0-9.]/g,'').slice(0,80),LOGINMODE=QS.get('login')==='1',INAPP=(()=>{try{return APP||/; wv\)|\bVersion\/4\.0\b.*Chrome/.test(navigator.userAgent)||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return APP}})(),HC=(QS.get('hc')||'').replace(/[^a-f0-9]/g,'').slice(0,12);
 function loginUI(){
   const box=$('gb');if(!box)return;
   const old0=$('gl');if(old0)old0.remove();
-  if(APP||CODE){
+  if(INAPP||CODE){
     box.style.display='block';
-    box.innerHTML=(APP&&SCH&&window.LavndrMkt?'<button data-bro="1" style="width:100%;padding:13px;border:none;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px;cursor:pointer">الدخول بحساب Google (يفتح المتصفح)</button><div class="lbl" style="margin:14px 0 8px;text-align:center">أو بالبريد:</div>':'')+'<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(APP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
+    box.innerHTML=(APP&&SCH&&window.LavndrMkt?'<button data-bro="1" style="width:100%;padding:13px;border:none;border-radius:100px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px;cursor:pointer">الدخول بحساب Google (يفتح المتصفح)</button><div class="lbl" style="margin:14px 0 8px;text-align:center">أو بالبريد:</div>':'')+'<div class="lbl" style="margin-bottom:6px">اكتب بريدك لنرسل لك رمز دخول:</div><input id="le" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com"><button data-cs="1" style="width:100%">إرسال الرمز</button><div id="lc"></div><div id="lm" class="lbl" style="margin-top:6px"></div>'+(INAPP?'':'<div class="lbl" style="margin-top:8px"><a href="#" data-g="1" style="color:var(--gold2)">الدخول بحساب Google</a></div>');
     return;
   }
   box.style.display='block';box.innerHTML='';const old=$('gl');if(old)old.remove();
