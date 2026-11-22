@@ -155,6 +155,14 @@
     "description": "قيمة شهادة الذهب في لاڤندرز",
     "date": "2026-11-21"
    }
+  },
+  {
+   "id": "app-builder-own-google-account",
+   "title": "Why does a Lavenders store live in the owner's own Google account?",
+   "description": "Lavenders store lives in owner's Google account for data ownership",
+   "slug": "why-does-a-lavenders-store-live-in-the-owner-s-own-google-account",
+   "date": "2026-11-22",
+   "devto": "https://dev.to/lavenders/why-does-a-lavenders-store-live-in-the-owners-own-google-account-4902"
   }
  ],
  "failed": {}
