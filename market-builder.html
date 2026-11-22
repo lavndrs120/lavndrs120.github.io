@@ -216,12 +216,11 @@ function pickNewAcc(c){S.newAcc=c;mkMark(c)}
 
 /* ───── باقات مسار البيانات لمؤشرك: لافا / السنوية / ڤندكس / ماقما — تسعيرك واستلامك واعتمادك ───── */
 const PT=[['lava','لافا (يومي)',1],['annual','الباقة السنوية',365],['fendex','ڤندكس',365],['magma','ماقما',365]];
+const PFIX=[['لافا (يومي)',1.4,120000],['الباقة السنوية',249,675],['ڤندكس',1287,120],['ماقما',100,500]];
 function planCard(m){
-  const p=m.plans||{},t=p.t||{},lk=p.links||{},bk=p.bank||{};
-  const rows=PT.map(x=>{const c=t[x[0]]||{};return '<div style="margin:10px 0;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:12px"><label style="margin:0 0 6px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="pl_'+x[0]+'" '+(c.on?'checked':'')+'> <b>'+x[1]+'</b></label><div class="row"><div><label>السعر ($)</label><input id="pp_'+x[0]+'" type="number" min="1" max="100000" step="0.01" inputmode="decimal" dir="ltr" value="'+(c.p?esc(c.p):'')+'"></div><div><label>أقصى عدد مشتركين</label><input id="pm_'+x[0]+'" type="number" min="1" max="100000" step="1" inputmode="numeric" dir="ltr" value="'+(c.max?esc(c.max):'')+'"></div></div></div>'}).join('');
-  const links=Object.keys(lk).map(k=>k+' | '+lk[k]).join('\n');
-  return '<div class="card"><h2>باقات مسار البيانات</h2><div class="small" style="line-height:1.9;margin-bottom:8px">لمؤشرك باقاتك الخاصة بنفس فكرة لاڤندرز: <b>لافا / السنوية</b> (بيانات المؤشر الكاملة) و<b>ڤندكس</b> (تقرير تحليلي) و<b>ماقما</b> (دليل الأنشطة بروابطها). لكل باقة سعر وسقف مشتركين محدد؛ عند اكتمال السقف يُغلق الاشتراك فيها تلقائياً. أنت تستلم الدفع وتعتمد المشتركين؛ لاڤندرز لا تستلم ولا تحتفظ بأي مبلغ. اشتراك للاطلاع فقط، وليس استثماراً ولا وعداً بعوائد.</div>'+
-  '<label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="pl_on" '+(p.on?'checked':'')+'> تفعيل الباقات على بطاقة مؤشري</label>'+rows+
+  const p=m.plans||{},bk=p.bank||{};
+  const rows=PFIX.map(x=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>'+x[0]+'</b><span dir="ltr">$'+x[1]+' · '+x[2].toLocaleString('en-US')+'</span></div>').join('');
+  return '<div class="card"><h2>باقات مسار البيانات</h2><div class="small" style="line-height:1.9;margin-bottom:8px">باقات مؤشرك بنفس أسعار وسقوف لاڤندرز تماماً، تُفعَّل تلقائياً عند حفظ بياناتك البنكية. أنت تستلم الدفع وتعتمد المشتركين؛ لاڤندرز لا تستلم ولا تحتفظ بأي مبلغ. اشتراك للاطلاع فقط، وليس استثماراً ولا وعداً بعوائد.</div>'+rows+
   '<h2 style="margin-top:16px">الدفع (تحويل بنكي مباشر)</h2><div style="margin:8px 0;padding:11px 13px;border-radius:12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);font-size:13px;line-height:1.9">🔒 <b>معلوماتك البنكية لا تُحفظ في لاڤندرز مطلقاً</b> ولا تمرّ عبرها. تُحفظ في شيتك أنت وتظهر لمن يريد الاشتراك في بطاقة مؤشرك فقط.</div>'+
   '<label>اسم البنك</label><input id="pb_bank" maxlength="60" value="'+esc(bk.bank||'')+'">'+
   '<label>اسم صاحب الحساب</label><input id="pb_holder" maxlength="80" value="'+esc(bk.holder||'')+'">'+
@@ -230,26 +229,20 @@ function planCard(m){
   '<label>BBAN (اختياري)</label><input id="pb_bban" maxlength="60" dir="ltr" value="'+esc(bk.bban||'')+'">'+
   '<label>رمز السويفت — للتحويل الدولي (اختياري)</label><input id="pb_swift" maxlength="30" dir="ltr" value="'+esc(bk.swift||'')+'">'+
   '<label>الفرع (اختياري)</label><input id="pb_branch" maxlength="80" value="'+esc(bk.branch||'')+'">'+
-  '<label>العملة (اختياري)</label><input id="pb_cur" maxlength="5" dir="ltr" placeholder="SDG" value="'+esc(bk.cur||'')+'"><div class="small" style="margin:4px 0 8px">الأسعار بالدولار. إن كان الحساب بعملة أخرى فاكتب رمزها لتظهر ملاحظة أن التحويل الفعلي بها.</div>'+
-  '<label>روابط دليل ماقما — سطر لكل بزنس: <span dir="ltr">الاسم | https://الرابط</span></label><textarea id="pl_links" rows="4" style="direction:ltr;text-align:left">'+esc(links)+'</textarea>'+
-  '<button class="btn" style="margin-top:10px" onclick="savePlans()">حفظ الباقات</button><div id="m10" class="msg"></div>'+
-  '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول تفعيل (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيتي «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز دخول التطبيق).</div>'+
+  '<label>العملة (اختياري)</label><input id="pb_cur" maxlength="5" dir="ltr" placeholder="SDG" value="'+esc(bk.cur||'')+'">'+
+  '<button class="btn" style="margin-top:10px" onclick="savePlans()">حفظ</button><div id="m10" class="msg"></div>'+
+  '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول حفظ (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيتي «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز التحقق).</div>'+
   '<h2 style="margin-top:16px">طلبات الاشتراك</h2><div id="subs" class="small">جاري التحميل…</div></div>';
 }
 async function savePlans(){
   const m=S.cur;if(!m)return;showMsg('m10','جاري الحفظ…','info');
   try{
-    const t={};let any=0;
-    PT.forEach(x=>{const on=$('pl_'+x[0]).checked,pr=parseFloat($('pp_'+x[0]).value),mx=parseInt($('pm_'+x[0]).value,10);if(on){if(!(pr>0&&pr<=100000))throw new Error('أدخل سعراً صحيحاً لباقة '+x[1]);if(!(mx>=1&&mx<=100000))throw new Error('أدخل أقصى عدد مشتركين لباقة '+x[1]);any++}t[x[0]]={on:on?1:0,p:pr>0?Math.round(pr*100)/100:0,max:mx>=1?Math.min(mx,100000):0}});
-    const on=$('pl_on').checked;if(on&&!any)throw new Error('فعّل باقة واحدة على الأقل');
     const g=id=>String($(id).value||'').replace(/[<>]/g,'').trim();
     const bank={bank:g('pb_bank').slice(0,60),holder:g('pb_holder').slice(0,80),account:g('pb_account').slice(0,60),iban:g('pb_iban').slice(0,60),bban:g('pb_bban').slice(0,60),swift:g('pb_swift').slice(0,30),branch:g('pb_branch').slice(0,80),cur:g('pb_cur').toUpperCase().slice(0,5)};
-    if(on&&!bank.account&&!bank.iban)throw new Error('أدخل رقم الحساب أو IBAN');
-    const links={};
-    String($('pl_links').value||'').split('\n').slice(0,120).forEach(l=>{const i=l.indexOf('|');if(i<1)return;const n=l.slice(0,i).trim().slice(0,80),u=l.slice(i+1).trim();if(n&&/^https:\/\/[^\s"'<>]{4,300}$/.test(u))links[n]=u});
-    const p={on:on?1:0,bank:bank,t:t,links:links};
+    const on=(bank.account||bank.iban)?1:0;
+    const p={on:on,bank:bank,links:(m.plans&&m.plans.links)||{}};
     await putVals(m.sheetId,'Config!F1',[[JSON.stringify(p)]]);m.plans=p;
-    showMsg('m10','تم الحفظ ✓ تظهر الباقات في بطاقتك خلال دقائق','good');
+    showMsg('m10',on?'تم الحفظ ✓ الباقات ظاهرة في بطاقتك خلال دقائق':'تم الحفظ — أدخل رقم الحساب أو IBAN لتفعيل الباقات','good');
   }catch(e){showMsg('m10',e.message||'تعذّر الحفظ')}
 }
 async function loadSubs(){
