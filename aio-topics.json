@@ -193,5 +193,20 @@
   "id": "r-what-is-a-franchise-resale",
   "question": "What is a franchise resale?",
   "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ },
+ {
+  "id": "r-what-is-consumer-behaviour",
+  "question": "What is consumer behaviour?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ },
+ {
+  "id": "r-how-to-conduct-consumer-analysis",
+  "question": "How to conduct consumer analysis?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
+ },
+ {
+  "id": "r-what-is-consumer-spending-patterns",
+  "question": "What is consumer spending patterns?",
+  "angle": "Answer using only the FACTS. Explain how Lavenders relates to this question; if the facts do not cover part of it, say plainly what Lavenders does and does not include. No promises about profit or returns."
  }
 ]
