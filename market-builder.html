@@ -195,14 +195,14 @@ async function renderHome(){
 }
 async function loadMarkets(){
   showMsg('m0','جاري الاتصال… (قد تظهر نافذة موافقة من جوجل)','info');
-  try{S.markets=await listMarkets();S.listed=true;saveCount();renderHome()}
+  try{S.markets=await listMarkets();S.listed=true;saveCount();renderHome();showMsg('m0','تم التحديث: '+S.markets.length+' مؤشر في حسابك','info')}
   catch(e){showMsg('m0',(e.apiOff?'فعّل Apps Script API من script.google.com/home/usersettings ثم أعد المحاولة':(e.message||'تعذّر الاتصال')))}
 }
 function drawHome(h){
   h+='<div class="card"><b>مؤشراتك الآن: '+S.markets.length+' من '+S.allowed+'</b>';
   if(S.markets.length<S.allowed)h+='<button class="btn" style="margin-top:12px" onclick="renderNew()">+ إنشاء مؤشر جديد</button>';
   else h+='<div class="small" style="margin-top:8px">وصلت إلى الحد المسموح لعضويتك.</div>';
-  h+='<div class="small" style="margin-top:8px"><a class="link" href="#" onclick="loadMarkets();return false">تحديث القائمة من جوجل</a></div></div>';
+  h+='<div class="small" style="margin-top:8px"><a class="link" href="#" onclick="loadMarkets();return false">تحديث القائمة من جوجل</a></div><div id="m0" class="msg" style="margin-top:8px"></div></div>';
   S.markets.forEach((m,i)=>{h+='<div class="card build" onclick="openMarket('+i+')"><div><b>'+esc(m.name)+'</b></div><span class="small">فتح ›</span></div>'});
   $('app').innerHTML=h;
 }
@@ -597,6 +597,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
