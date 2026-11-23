@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-<script src="lavndr-en.js"></script>
+<meta name="robots" content="noindex">
+<script src="https://lavndrs120.github.io/lavndr-en.js"></script>
 
 <meta charset="UTF-8">
 <meta name="referrer" content="strict-origin">
@@ -10,7 +11,7 @@
 <title>LAVNDR120</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="catalog.js"></script>
+<script src="https://lavndrs120.github.io/catalog.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="LAVNDR120">
@@ -834,13 +835,22 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 <script>
 // ── Config ──
 // ⚠️ عدّل القيمتين دول بعد نشر الـ Cloudflare Worker وإنشاء Google OAuth Client ID (شوف دليل النشر)
+const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 /* ══ طبقة المؤشر المستقل: تترجم نداءات لوحة لاڤندرز إلى خلفية هذا المؤشر (GAS صاحبه) ══ */
-(function () {
-  var QS = new URLSearchParams(location.search), B = '';
-  try { B = QS.get('b') || localStorage.getItem('mkv2_b') || ''; if (QS.get('b')) localStorage.setItem('mkv2_b', B); } catch (e) {}
-  window.MKT_B = B;
-  var W = 'https://mkt.local/w', realFetch = window.fetch.bind(window);
-  function vt() { try { return sessionStorage.getItem('mkv2_vt') || ''; } catch (e) { return ''; } }
+var MKT = (function () {
+  var QS = new URLSearchParams(location.search), B = BACK;
+  try { if (B) localStorage.setItem('mkv2_b', B); else B = localStorage.getItem('mkv2_b') || ''; } catch (e) {}
+  var APP = QS.get('app') === '1', SCH = (QS.get('sch') || '').replace(/[^a-z0-9.]/g, '').slice(0, 80), LOGINMODE = QS.get('login') === '1', HC = (QS.get('hc') || '').replace(/[^a-f0-9]/g, '').slice(0, 12);
+  var INAPP = (function () { try { return APP || /; wv\)|\bVersion\/4\.0\b.*Chrome/.test(navigator.userAgent) || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return APP; } })();
+  var W = 'https://mkt.local/w', realFetch = window.fetch.bind(window), ns = '';
+  try { ns = ':' + btoa(unescape(encodeURIComponent(B))).replace(/[^A-Za-z0-9]/g, '').slice(-14); } catch (e) {}
+  var MIR = { mkv2_token: 1, mkv2_email: 1, mkv2_vt: 1 };
+  try {
+    var si = Storage.prototype.setItem, ri = Storage.prototype.removeItem;
+    Storage.prototype.setItem = function (k, v) { si.call(this, k, v); if (this === window.sessionStorage && MIR[k]) { try { localStorage.setItem(k + ns, v); } catch (e) {} } };
+    Storage.prototype.removeItem = function (k) { ri.call(this, k); if (this === window.sessionStorage && MIR[k]) { try { localStorage.removeItem(k + ns); } catch (e) {} } };
+    Object.keys(MIR).forEach(function (k) { var v = localStorage.getItem(k + ns); if (v && !sessionStorage.getItem(k)) sessionStorage.setItem(k, v); });
+  } catch (e) {}
   function jsonp(params) {
     return new Promise(function (res, rej) {
       var cb = 'mk' + Date.now() + Math.floor(Math.random() * 1e6), s = document.createElement('script'), t = setTimeout(function () { cl(); rej(new Error('timeout')); }, 25000);
@@ -856,48 +866,77 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
     var u = B + (B.indexOf('?') < 0 ? '?' : '&') + new URLSearchParams(params).toString();
     return realFetch(u).then(function (r) { return r.json(); }).catch(function () { return jsonp(params); });
   }
-  window.mktApi = api;
+  function vt() { try { return sessionStorage.getItem('mkv2_vt') || ''; } catch (e) { return ''; } }
   function mine(subs, tier) {
     var now = Date.now(), best = null, rank = { active: 0, pending: 1, awaiting: 2 };
     (subs || []).forEach(function (x) {
-      if (x.tier !== tier) return;
-      if (x.status === 'active' && !(x.end > now)) return;
-      if (rank[x.status] == null) return;
+      if (x.tier !== tier || rank[x.status] == null || (x.status === 'active' && !(x.end > now))) return;
       if (!best || rank[x.status] < rank[best.status]) best = x;
     });
     return best;
   }
   var STAGE = { active: 'active', pending: 'awaiting_review', awaiting: 'awaiting_otp' };
   var NAMES = { lava: 'لافا (يومي)', annual: 'الباقة السنوية', fendex: 'ڤندكس', magma: 'ماقما' };
-  function subsOf(tok) { return api({ action: 'my_sub', s: tok }); }
-  function avail() {
-    return api({ action: 'plans' }).then(function (p) {
-      var a = {}; ((p && p.tiers) || []).forEach(function (t) { a[t.tier] = { available: t.left == null || t.left > 0, remaining: t.left, max: t.max }; }); return a;
-    }).catch(function () { return {}; });
-  }
+  var PL = null;
+  function plans() { return PL ? Promise.resolve(PL) : api({ action: 'plans' }).then(function (p) { PL = p || {}; return PL; }).catch(function () { return {}; }); }
+  function avail(p) { var a = {}; ((p && p.tiers) || []).forEach(function (t) { a[t.tier] = { available: t.left == null || t.left < 0 || t.left > 0, remaining: t.left > 0 ? t.left : undefined }; }); return a; }
+  function bankOf(p) { var b = (p && p.bank) || {}; return { BANK_NAME: b.bank, ACCOUNT_HOLDER: b.holder, ACCOUNT_NUMBER: b.account, IBAN: b.iban, BBAN: b.bban, SWIFT: b.swift, BRANCH: b.branch, CURRENCY: b.cur }; }
+  function priceOf(p, t) { var r = ''; ((p && p.tiers) || []).forEach(function (x) { if (x.tier === t) r = String(x.price); }); return r; }
   function ok(o) { return new Response(JSON.stringify(o), { status: 200, headers: { 'Content-Type': 'application/json' } }); }
+  function endStr(m) { return new Date(m.end).toISOString().slice(0, 10); }
+  function startSub(tok, tier) {
+    return Promise.all([api({ action: 'sub_start', s: tok, tier: tier }), plans()]).then(function (z) {
+      var r = z[0], p = z[1]; if (r.error) return r;
+      return { stage: 'awaiting_otp', tier: tier, amount: priceOf(p, tier), bank: bankOf(p) };
+    });
+  }
+  function handoffScreen(session) {
+    return api({ action: 'mkt_handoff_new', s: session }).then(function (h) {
+      if (!(h && h.c)) return;
+      var u = SCH + '://h?c=' + h.c, d = document.createElement('div');
+      d.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#06060c;display:flex;align-items:center;justify-content:center;text-align:center;font-family:sans-serif;color:#fff';
+      d.innerHTML = '<div><div style="font-size:15px;margin-bottom:18px">تم تسجيل الدخول ✓</div><a href="' + u + '" style="display:inline-block;padding:14px 28px;border-radius:100px;background:#C9A84C;color:#04040A;font-weight:800;text-decoration:none">العودة إلى التطبيق</a></div>';
+      document.body.appendChild(d); setTimeout(function () { location.href = u; }, 400);
+    });
+  }
   function route(action, q, body) {
     var tok = q.get('token') || (body && body.token) || '';
     if (action === 'public_index') return api({ action: 'dash_public' });
-    if (action === 'login') return api({ action: 'mkt_login', idToken: body.idToken }).then(function (r) { return r && r.session ? { token: r.session, email: r.email } : { error: (r && r.error) || 'فشل' }; });
+    if (action === 'login') return api({ action: 'mkt_login', idToken: body.idToken }).then(function (r) {
+      if (!(r && r.session)) return { error: (r && r.error) || 'فشل' };
+      if (LOGINMODE && SCH) handoffScreen(r.session);
+      return { token: r.session, email: r.email };
+    });
     if (action === 'data') return api({ action: 'dash_data', s: tok, vt: vt() });
     if (action === 'month') return api({ action: 'dash_month', s: tok, month: q.get('month') });
+    if (action === 'oracle_report') return api({ action: 'dash_oracle', s: tok, period: q.get('period') });
     if (action === 'select_view_tier') { try { sessionStorage.setItem('mkv2_vt', q.get('tier') || ''); } catch (e) {} return Promise.resolve({ ok: true }); }
-    if (action === 'my_subscriptions') return subsOf(tok).then(function (r) {
+    if (action === 'my_subscriptions') return api({ action: 'my_sub', s: tok }).then(function (r) {
       if (r.error) return r;
-      var items = []; Object.keys(NAMES).forEach(function (t) { var m = mine(r.subs, t); if (m) items.push({ tier: t, tierName: NAMES[t], stage: STAGE[m.status], amount: '', endDate: m.status === 'active' ? new Date(m.end).toISOString().slice(0, 10) : '', country: '', category: 'lavenders' }); });
+      var items = []; Object.keys(NAMES).forEach(function (t) { var m = mine(r.subs, t); if (m) items.push({ tier: t, tierName: NAMES[t], stage: STAGE[m.status], amount: '', endDate: m.status === 'active' ? endStr(m) : '', country: '', category: 'lavenders' }); });
       var o = { active: 0, awaiting_review: 1, awaiting_otp: 2 }; items.sort(function (a, b) { return o[a.stage] - o[b.stage]; });
       return { items: items, activeCount: items.filter(function (i) { return i.stage === 'active'; }).length };
     });
-    if (action === 'subscription_status') return Promise.all([subsOf(tok), avail()]).then(function (z) {
-      var r = z[0], a = z[1]; if (r.error) return r;
-      var t = q.get('tier') || '', m = t && t !== 'none' ? mine(r.subs, t) : null;
-      if (!m) return { stage: 'none', availability: a, marketComplete: true };
-      return { stage: STAGE[m.status], tier: t, endDate: m.status === 'active' ? new Date(m.end).toISOString().slice(0, 10) : '', availability: a, marketComplete: true };
+    if (action === 'subscription_status') return Promise.all([api({ action: 'my_sub', s: tok }), plans()]).then(function (z) {
+      var r = z[0], p = z[1]; if (r.error) return r;
+      var a = avail(p), t = q.get('tier') || '', m = t && t !== 'none' ? mine(r.subs, t) : null;
+      if (!m) {
+        var pick = ''; ['lava', 'annual', 'fendex', 'magma'].forEach(function (k) { if (!pick) { var x = mine(r.subs, k); if (x && x.status !== 'active') { pick = k; m = x; } } });
+        if (!m) return { stage: 'none', availability: a, marketComplete: true };
+        t = pick;
+      }
+      var o = { stage: STAGE[m.status], tier: t, availability: a, marketComplete: true };
+      if (m.status === 'active') o.endDate = endStr(m); else { o.amount = priceOf(p, t); o.bank = bankOf(p); }
+      return o;
     });
-    if (action === 'magma_directory') return api({ action: 'directory', s: tok });
+    if (action === 'prepay_now' || action === 'subscribe' || action === 'subscription_prepay') return startSub(tok, body.tier);
+    if (action === 'verify_subscription') return api({ action: 'sub_confirm', s: tok, tier: body.tier, otp: body.otp, ref: body.txnRef }).then(function (r) { return r.error ? r : { status: 'awaiting_review', stage: 'awaiting_review' }; });
+    if (action === 'magma_directory') return api({ action: 'directory', s: tok }).then(function (r) {
+      if (r.error) return r; var l = r.list || [];
+      return { businesses: l.map(function (x) { return { sheetId: x.name, name: x.name, ticker: '', link: x.link, viewed: false }; }), totalBusinesses: l.length, viewedCount: 0 };
+    });
+    if (action === 'magma_mark_viewed') return Promise.resolve({ ok: true });
     if (action === 'builder_hub') return Promise.resolve({ items: [] });
-    if (action === 'my_business_portal') return Promise.resolve({ error: 'غير متاح في هذا المؤشر' });
     return Promise.resolve({ error: 'غير متاح في هذا المؤشر' });
   }
   window.fetch = function (u, o) {
@@ -908,17 +947,74 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
     var action = q.get('action') || (body && body.action) || '';
     return Promise.resolve(route(action, q, body)).then(ok).catch(function () { return ok({ error: 'فشل الاتصال' }); });
   };
-
+  // تسليم المتصفح للتطبيق: الرمز يُستبدل بجلسة ثم تُنظَّف الواجهة
+  if (HC && B && !sessionStorage.getItem('mkv2_token')) {
+    api({ action: 'mkt_handoff_use', c: HC }).then(function (r) {
+      if (r && r.session) { sessionStorage.setItem('mkv2_token', r.session); sessionStorage.setItem('mkv2_email', r.email || ''); }
+      try { history.replaceState(null, '', location.pathname + '?b=' + encodeURIComponent(B) + (APP ? '&app=1' : '') + (SCH ? '&sch=' + encodeURIComponent(SCH) : '')); } catch (e) {}
+      location.reload();
+    }).catch(function () {});
+  }
   api({ action: 'config' }).then(function (c) {
     if (!c) return; window.MKT_MID = c.mid || ''; window.MKT_NAME = c.name || '';
     if (c.name) {
       document.title = c.name;
-      var apply = function () { var h = document.querySelector('.hero-ticker'); if (h) h.textContent = c.name; document.querySelectorAll('[data-brand],.loader-text').forEach(function (e) { if (e.classList.contains('loader-text')) e.textContent = 'جاري تحميل ' + c.name + '...'; }); };
+      var apply = function () { var h = document.querySelector('.hero-ticker'); if (h) h.textContent = c.name; var l = document.querySelector('.loader-text'); if (l) l.textContent = 'جاري تحميل ' + c.name + '...'; document.querySelectorAll('#loginOverlay > div').forEach(function (e) { if (e.textContent === 'LAVNDR120') e.textContent = c.name; }); };
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply); else apply();
     }
     try { if (window.google && google.accounts && c.mid) google.accounts.id.initialize({ client_id: GSI_CLIENT_ID, callback: handleCredentialResponse, nonce: 'lvnmkt-' + c.mid }); } catch (e) {}
   }).catch(function () {});
+  return { api: api, INAPP: INAPP, APP: APP, SCH: SCH, LOGINMODE: LOGINMODE, B: function () { return B; } };
 })();
+var MKT_CODE = false, MKT_LEM = '';
+function mktLoginUI() {
+  var wrap = document.getElementById('gsiButtonWrap'), box = document.getElementById('mktLg');
+  if (!box) { box = document.createElement('div'); box.id = 'mktLg'; box.style.cssText = 'margin-top:14px;max-width:300px;text-align:center;font-family:sans-serif;color:#aaa'; wrap.insertAdjacentElement('afterend', box); }
+  var inp = 'width:100%;box-sizing:border-box;padding:13px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:15px;text-align:center;outline:none',
+      btn = 'width:100%;padding:13px;border:none;border-radius:100px;background:linear-gradient(135deg,#F0D080,#C9A84C);color:#1a1230;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:8px';
+  if (!(MKT.INAPP || MKT_CODE)) {
+    wrap.style.display = 'block';
+    box.innerHTML = '<a href="#" id="mktToCode" style="color:#C9A84C;font-size:12px">لا يعمل زر Google؟ ادخل برمز على بريدك</a>';
+    document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); MKT_CODE = true; mktLoginUI(); };
+    return;
+  }
+  wrap.style.display = 'none';
+  var lm = document.getElementById('loginMsg'); if (lm && lm.textContent.indexOf('Google') > -1) lm.textContent = 'سجّل دخولك للمتابعة';
+  var bro = (MKT.APP && MKT.SCH && window.LavndrMkt) ? '<button id="mktBro" style="' + btn + '">الدخول بحساب Google (يفتح المتصفح)</button><div style="margin:10px 0;color:#666;font-size:12px">— أو —</div>' : '';
+  if (MKT_LEM) {
+    box.innerHTML = '<div style="font-size:13px;line-height:1.8;margin-bottom:12px">أرسلنا رمزاً من 6 أرقام إلى<br><b dir="ltr" style="color:#fff">' + esc(MKT_LEM) + '</b><br><span style="font-size:11px;color:#777">تحقق من البريد المزعج أيضاً</span></div><input id="mktK" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="الرمز" style="' + inp + ';letter-spacing:8px;font-size:22px"><button id="mktV" style="' + btn + '">دخول</button><div id="mktM" style="min-height:18px;font-size:12px;color:#F43F5E"></div><div style="margin-top:10px;font-size:12px"><a href="#" id="mktRe" style="color:#C9A84C">إعادة إرسال الرمز</a> · <a href="#" id="mktCh" style="color:#888">تغيير البريد</a></div>';
+    document.getElementById('mktV').onclick = mktVerify;
+    document.getElementById('mktRe').onclick = function (e) { e.preventDefault(); mktSend(MKT_LEM); };
+    document.getElementById('mktCh').onclick = function (e) { e.preventDefault(); MKT_LEM = ''; mktLoginUI(); };
+  } else {
+    box.innerHTML = bro + '<div style="font-size:13px;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="mktE" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" dir="ltr" style="' + inp + '"><button id="mktS" style="' + btn + '">إرسال الرمز</button><div id="mktM" style="min-height:18px;font-size:12px;color:#F43F5E"></div>' + (MKT.INAPP ? '' : '<div style="margin-top:10px;font-size:12px"><a href="#" id="mktBackG" style="color:#C9A84C">الدخول بحساب Google</a></div>');
+    document.getElementById('mktS').onclick = function () { var em = (document.getElementById('mktE').value || '').trim().toLowerCase(); if (!em) { document.getElementById('mktM').textContent = 'اكتب بريدك'; return; } mktSend(em); };
+    var bg = document.getElementById('mktBackG'); if (bg) bg.onclick = function (e) { e.preventDefault(); MKT_CODE = false; mktLoginUI(); };
+    var br = document.getElementById('mktBro'); if (br) br.onclick = function () { try { LavndrMkt.open(location.origin + location.pathname + '?b=' + encodeURIComponent(MKT.B()) + '&login=1&sch=' + encodeURIComponent(MKT.SCH)); } catch (e) { alert('حدّث التطبيق لاستخدام هذه الطريقة'); } };
+  }
+}
+function mktSend(em) {
+  var m = document.getElementById('mktM'); if (m) m.textContent = 'جارٍ الإرسال…';
+  MKT.api({ action: 'code_send', email: em }).then(function (r) {
+    if (r && r.status === 'sent') { MKT_LEM = em; mktLoginUI(); } else if (m) m.textContent = (r && r.error) || 'تعذّر الإرسال';
+  }).catch(function () { if (m) m.textContent = 'تعذّر الاتصال'; });
+}
+function mktVerify() {
+  var c = (document.getElementById('mktK').value || '').trim(), m = document.getElementById('mktM');
+  if (!/^\d{6}$/.test(c)) { m.textContent = 'اكتب الرمز المكوّن من 6 أرقام'; return; }
+  m.textContent = 'جارٍ التحقق…';
+  MKT.api({ action: 'code_verify', email: MKT_LEM, code: c }).then(function (r) {
+    if (!(r && r.session)) { m.textContent = (r && r.error) || 'تعذّر الدخول'; return; }
+    MKT_LEM = ''; MKT_CODE = false;
+    invalidateSubs(); builderHub = null; builderHubEmail = '';
+    ['mkv2_role', 'mkv2_tier', 'mkv2_space', 'mkv2_view', 'mkv2_gate_pending', 'mkv2_sub_intent'].forEach(function (k) { try { sessionStorage.removeItem(k); } catch (e) {} });
+    AUTH_TOKEN = r.session; USER_EMAIL = r.email;
+    sessionStorage.setItem('mkv2_token', AUTH_TOKEN); sessionStorage.setItem('mkv2_email', USER_EMAIL);
+    try { sessionStorage.setItem('mkv2_login_chooser', '1'); sessionStorage.setItem('mkv2_fresh_login', String(Date.now())); } catch (e) {}
+    boot();
+  }).catch(function () { m.textContent = 'تعذّر الاتصال'; });
+}
+
 const WORKER_URL    = 'https://mkt.local/w'; // رابط الـ Cloudflare Worker (مو GAS مباشرة)
 const GSI_CLIENT_ID = '776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com'; // Web application Client ID
 
@@ -1374,8 +1470,8 @@ function orRow(r, i, dim) {
     '<div class="orr-m"><div class="orr-name">' + esc(r.name) + (r.ticker ? ' <span class="orr-tk">' + esc(r.ticker) + '</span>' : '') + '</div>' +
     '<div class="orr-bar"><i style="width:' + Math.min(100, r.share || 0) + '%"></i></div>' +
     '<div class="orr-sub"><span>' + orFmt(r.total) + ' طلب · ' + orFmt(r.share) + '%</span><span>' + orChg(r.chg) + '</span></div></div>' +
-    '<div class="orr-f"><div class="l">غداً</div><div class="v">~' + orFmt(r.fTom) + '</div>' + orSpark(r.spark, 56, 20) + '</div></div>';
-  if (!open) return '<div class="orr" data-id="' + esc(id) + '">' + main + '</div>';
+    (r.fTom == null ? '' : '<div class="orr-f"><div class="l">غداً</div><div class="v">~' + orFmt(r.fTom) + '</div>' + orSpark(r.spark, 56, 20) + '</div>') + '</div>';
+  if (!open || r.fTom == null) return '<div class="orr" data-id="' + esc(id) + '">' + main + '</div>';
   const cell = (l, v) => '<div class="orr-c"><div class="l">' + l + '</div><div class="v">' + v + '</div></div>';
   return '<div class="orr open" data-id="' + esc(id) + '">' + main + '<div class="orr-det"><div class="orr-grid">' +
     cell('أمس', orFmt(r.yday)) + cell('اليوم حتى الآن', orFmt(r.today)) + cell('متوسط 7 أيام', orFmt(r.avg7)) +
@@ -1925,6 +2021,7 @@ async function handleCredentialResponse(response) {
 function showLoginUI(message) {
   document.getElementById('loginMsg').textContent = message || 'سجّل دخولك بحساب Google للمتابعة';
   document.getElementById('gsiButtonWrap').style.display = 'block';
+  mktLoginUI();
 }
 
 function boot() {
@@ -2196,7 +2293,7 @@ function tierInfoIsMovementLike(tier) {
 function subscribeGateShell(innerHtml) {
   document.getElementById('subscribeGateModalBody').innerHTML = `
     <div style="max-width:420px;margin:0 auto;padding:56px 20px 40px;text-align:center;">
-      <div style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:6px;">LAVNDR120</div>
+      <div style="font-size:28px;font-weight:900;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:6px;">${esc(window.MKT_NAME || 'LAVNDR120')}</div>
       <div style="font-size:11px;color:#555;letter-spacing:3px;margin-bottom:32px;">المؤشر الاستهلاكي</div>
       ${innerHtml}
       <button onclick="closeSubscribeGateModal()" style="width:100%;margin-top:14px;padding:10px;border:1px solid var(--glass-border);border-radius:10px;background:transparent;color:var(--text-dim);font-size:12px;cursor:pointer;">${(currentRole && currentRole !== 'visitor') ? 'رجوع' : 'تصفح فقط الآن (بيانات تجريبية)'}</button>
@@ -2298,7 +2395,9 @@ const GATE_PATHS = {
   }
 };
 
-function gateRefundNote() {
+function gateRefundNote() { return '';
+}
+function gateRefundNoteOrig() {
   return `<div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;margin-top:10px;">↩︎ استرداد نقدي: يمكنك طلب استرداد مبلغك خلال ${REFUND_DAYS} يومًا (3 أسابيع) وفق إجراءات الاسترداد المعتمدة.</div>`;
 }
 function gateAvail(tier) {
@@ -2350,6 +2449,7 @@ function renderSubscribePickerScreen(availability, marketComplete, loggedIn) {
   gateCtx.availability = availability || null;
   if (typeof marketComplete === 'boolean') gateCtx.marketComplete = marketComplete;
   if (typeof loggedIn === 'boolean') gateCtx.loggedIn = loggedIn;
+  if (window.renderGatePath) { subscribeGateShell(''); return renderGatePath('joinup'); }
   const tile = (key) => {
     const p = GATE_PATHS[key], t = GATE_THEMES[p.theme];
     return `
@@ -2409,7 +2509,6 @@ function renderGatePath(pathKey) {
   const omsHint = '';
   subscribeGateShell(`
     ${gateSteps(1)}
-    ${gateBackBtn('showSubscribeGate()', 'المسارات')}
     <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:6px;">${path.title}</div>
     <div style="font-size:12.5px;color:#aaa;margin-bottom:18px;line-height:1.8;">${path.sub}</div>
     ${cards}
@@ -2665,7 +2764,6 @@ function renderMembershipActiveScreen(status) {
     <div style="font-size:15px;color:#ccc;margin-bottom:8px;">عضويتك مفعّلة — ${esc(tierNameAr(status.tier))}</div>
     <div style="font-size:12px;color:var(--text-dim);line-height:1.8;">شكرًا لانضمامك. سنوافيك بالخطوات التالية عبر البريد/واتساب.</div>
     ${gateFormsBox(status.tier)}
-    <a href="${gateHelpWhatsAppUrl(status.tier)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:16px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a>
   `);
 }
 
@@ -2707,7 +2805,7 @@ async function renderSubscribeOtpScreen(status) {
   const bankHtml = bank ? `
     <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:14px;padding:6px 14px;margin-bottom:16px;text-align:right;">
       ${row('البنك', bank.BANK_NAME)}${row('اسم صاحب الحساب', bank.ACCOUNT_HOLDER)}${row('رقم الحساب', bank.ACCOUNT_NUMBER)}${row('IBAN', bank.IBAN)}${row('BBAN', bank.BBAN)}${row('رمز السويفت — للتحويل الدولي (SWIFT)', bank.SWIFT)}${row('الفرع', bank.BRANCH)}
-      <div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 6px;">القيمة بالدولار، والتحويل الفعلي بالجنيه السوداني (SDG) بما يعادلها يوم التحويل.</div>
+      ${bank.CURRENCY ? '<div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 6px;">القيمة بالدولار، والتحويل الفعلي بـ(' + esc(bank.CURRENCY) + ') بما يعادلها يوم التحويل.</div>' : ''}
     </div>` : '';
   subscribeGateShell(`
     ${gateSteps(3)}
@@ -2724,7 +2822,6 @@ async function renderSubscribeOtpScreen(status) {
     <button id="subConfirmBtn" onclick="submitSubscribeOtp()" style="width:100%;padding:13px;border:none;border-radius:10px;background:var(--gold);color:#04040A;font-weight:800;font-size:14px;cursor:pointer;">تأكيد الدفع</button>
     <div id="subscribeMsg" role="alert" style="margin-top:12px;font-size:12px;color:var(--red);"></div>
     ${gateRefundNote()}
-    <a href="${gateHelpWhatsAppUrl(status.tier)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-size:11px;color:var(--text-faint);">تحتاج مساعدة؟</a>
   `);
   document.querySelectorAll('#subscribeGateModalBody button[data-copy]').forEach(b => {
     b.addEventListener('click', () => gateCopy(b.getAttribute('data-copy'), b));
@@ -3686,8 +3783,8 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<script src="agreement-form.js"></script>
-<script src="demo-data.js"></script>
+<script src="https://lavndrs120.github.io/agreement-form.js"></script>
+<script src="https://lavndrs120.github.io/demo-data.js"></script>
 <script>
 /* تطبيق الأندرويد: Google تمنع تسجيل الدخول داخل WebView، فيُستبدل زر Google بزر يستدعي الدخول الأصلي ثم يمرّر النتيجة إلى handleCredentialResponse */
 (function(){
@@ -3702,14 +3799,11 @@ window.addEventListener('load', function() {
   new MutationObserver(mk).observe(w, { childList: true });
 })();
 </script>
-<script src="lavndr-app.js"></script>
 <script>/* no-copy */
 (function(){function ok(t){return t&&t.closest&&t.closest('input,textarea,[contenteditable="true"],[contenteditable=""]');}
 ['copy','cut','contextmenu','selectstart','dragstart'].forEach(function(e){document.addEventListener(e,function(ev){if(!ok(ev.target))ev.preventDefault();},true);});})();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
+
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("mkv2_token"))sessionStorage.setItem("mkv2_where","dashboard.html")}catch(e){}});</script>
-<script src="lavndr-bell.js" defer></script>
-<script src="lavndr-press.js" defer></script>
 </body>
 </html>
