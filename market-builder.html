@@ -473,13 +473,18 @@ async function hostMarket(){
     const ex=await ghApi('/repos/'+user+'/'+repo);
     if(ex.status===404){const c=await ghApi('/user/repos',{method:'POST',body:JSON.stringify({name:repo,description:'Independent market index card — built with Lavenders (LAVNDR120)',private:false,auto_init:true})});if(c.status>=300)throw new Error('تعذّر إنشاء الريبو');await new Promise(r=>setTimeout(r,2000))}
     else{const mj=await ghApi('/repos/'+user+'/'+repo+'/contents/market.json');if(mj.status===404||!mj.json.content||atob(mj.json.content.replace(/\n/g,'')).indexOf(m.cfg.url)<0)throw new Error('هذا الاسم مستخدم عندك لمشروع آخر، اختر اسماً مختلفاً')}
-    const [pg,tpl]=await Promise.all([fetch('market.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب البطاقة');return r.text()}),fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>r.text())]);
+    const [pg,tpl,dsh]=await Promise.all([fetch('market.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب البطاقة');return r.text()}),fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>r.text()),fetch('market-app.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب لوحة المؤشر');return r.text()})]);
     const a="const BACK=(new URLSearchParams(location.search).get('b')||'').trim();";
     if(pg.indexOf(a)<0)throw new Error('قالب البطاقة غير متوافق');
     const page=pg.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace('<meta name="robots" content="noindex">','');
+    const dk="DASHBASE = 'https://lavndrs120.github.io/market-app.html'";
+    if(dsh.indexOf(a)<0||page.indexOf(dk)<0)throw new Error('قالب البطاقة غير متوافق');
+    const page2=page.replace(dk,"DASHBASE = 'app.html'");
+    const dpage=dsh.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';');
     const short='https://'+user.toLowerCase()+'.github.io/'+repo+'/';
     const readme='# '+m.name+'\n\nبطاقة مؤشر سوق مستقل أنشأتها أداة **لاڤندرز (Lavenders · LAVNDR120)**.\n\nAn independent market index card generated with Lavenders.\n\n- Card: '+short+'\n- Backend template: [backend/Code.gs](backend/Code.gs) (Google Apps Script; the live copy and its sheet run in the owner\'s own Google account)\n- Orders, business sheets and images are not stored here.\n\nThe index reflects real consumer orders. There is no buying, selling or trading of shares, and no promise of returns.\n';
-    await ghPut(user,repo,'index.html',b64u(page),'Lavenders: index card');
+    await ghPut(user,repo,'index.html',b64u(page2),'Lavenders: index card');
+    await ghPut(user,repo,'app.html',b64u(dpage),'Lavenders: dashboard');
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
     await ghPut(user,repo,'backend/Code.gs',b64u(tpl),'Lavenders: backend template');
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
@@ -597,6 +602,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
