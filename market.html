@@ -22,6 +22,25 @@ var MKL = (function () {
   var APP = QS.get('app') === '1', SCH = (QS.get('sch') || '').replace(/[^a-z0-9.]/g, '').slice(0, 80), HC = (QS.get('hc') || '').replace(/[^a-f0-9]/g, '').slice(0, 12);
   function get(k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k + ns) || ''; } catch (e) { return ''; } }
   function dash(extra) { return DASHBASE + '?b=' + encodeURIComponent(B) + (APP ? '&app=1' : '') + (SCH ? '&sch=' + encodeURIComponent(SCH) : '') + (HC ? '&hc=' + HC : '') + (extra || ''); }
+
+  function mktTheme(c) {
+    var d = 'https://lavndrs120.github.io/', m = d + 'bg-m.jpg', dk = d + 'bg-d.jpg', ac = '';
+    if (c && /^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(c.bizImage || '')) { m = dk = c.bizImage; }
+    if (c && /^#[0-9A-Fa-f]{6}$/.test(c.accent || '')) ac = c.accent;
+    var el = document.getElementById('mktTheme'); if (!el) { el = document.createElement('style'); el.id = 'mktTheme'; document.documentElement.appendChild(el); }
+    var css = 'body::after{background:linear-gradient(rgba(6,6,12,.88) 0%,rgba(6,6,12,.62) 40%,rgba(6,6,12,.82) 100%),url("' + m + '") center/cover no-repeat !important}@media(min-width:900px){body::after{background:linear-gradient(rgba(6,6,12,.78),rgba(6,6,12,.70)),url("' + dk + '") center/cover no-repeat !important}}';
+    if (ac) { var r = parseInt(ac.slice(1, 3), 16), g = parseInt(ac.slice(3, 5), 16), b = parseInt(ac.slice(5, 7), 16); css += ':root{--gold:' + ac + ';--gold2:' + ac + ';--gold-dim:rgba(' + r + ',' + g + ',' + b + ',.15);--gold-glow:rgba(' + r + ',' + g + ',' + b + ',.3)}'; }
+    el.textContent = css;
+  }
+  mktTheme(null);
+
+  (function () {
+    var st = document.createElement('style'); st.id = 'mktHide'; st.textContent = '.hero-ticker{visibility:hidden}'; document.documentElement.appendChild(st);
+    var cached = ''; try { cached = localStorage.getItem('mkv2_name' + ns) || ''; } catch (e) {}
+    var ready = function () { if (cached) { var h = document.querySelector('.hero-ticker'); if (h) h.textContent = cached; st.remove(); } };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
+    setTimeout(function () { st.remove(); }, 5000);
+  })();
   function jsonp(params) {
     return new Promise(function (res, rej) {
       var cb = 'ml' + Date.now() + Math.floor(Math.random() * 1e6), s = document.createElement('script'), tm = setTimeout(function () { cl(); rej(new Error('timeout')); }, 25000);
@@ -38,9 +57,10 @@ var MKL = (function () {
   if (HC && B) { location.replace(dash('')); }
   if (!B) note('رابط المؤشر ناقص: لا يوجد عنوان خلفية (b).');
   else api({ action: 'config' }).then(function (c) {
+    try { mktTheme(c); } catch (e) {}
     if (!c || c.error || c.status === 'locked') { note(c && c.status === 'locked' ? 'انتهت التجربة وهذا المؤشر مقفل — تواصل مع صاحبه.' : 'تعذّر قراءة إعدادات المؤشر من الخلفية — حدّث الخلفية من market-builder.'); return; }
     window.MKT_NAME = c.name || '';
-    if (c.name) { document.title = c.name; var n = 0, apply = function () { var h = document.querySelector('.hero-ticker'); if (h && h.textContent !== c.name) h.textContent = c.name; var s = document.querySelector('h1.sr'); if (s) s.textContent = c.name; }; apply(); var iv = setInterval(function () { apply(); if (++n > 30) clearInterval(iv); }, 400); }
+    if (c.name) { document.title = c.name; var n = 0, apply = function () { var h = document.querySelector('.hero-ticker'); if (h && h.textContent !== c.name) h.textContent = c.name; var hs = document.getElementById('mktHide'); if (hs) hs.remove(); try { localStorage.setItem('mkv2_name' + ns, c.name); } catch (e) {} var s = document.querySelector('h1.sr'); if (s) s.textContent = c.name; }; apply(); var iv = setInterval(function () { apply(); if (++n > 30) clearInterval(iv); }, 400); }
   }).catch(function () { note('تعذّر الاتصال بخلفية المؤشر. تأكد أن النشر «أي شخص» وأن التحديث تم.'); });
   return { B: B, get: get, dash: dash, api: api, APP: APP };
 })();
@@ -516,6 +536,5 @@ render(location.hash);
 ['copy','cut','contextmenu','selectstart','dragstart'].forEach(function(e){document.addEventListener(e,function(ev){if(!ok(ev.target))ev.preventDefault();},true);});})();
 </script>
 
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
