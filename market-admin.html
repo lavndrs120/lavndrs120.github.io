@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="strict-origin">
+<title>لوحة إدارة المؤشر</title>
+<style>
+:root{--void:#04040A;--glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);--gold:#C9A84C;--gold-dim:rgba(201,168,76,0.15);--emerald:#10B981;--red:#F43F5E;--text:rgba(255,255,255,0.9);--text-dim:rgba(255,255,255,0.45)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden;max-width:100%}
+body{background:var(--void);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+.wrap{width:100%;max-width:640px;margin:0 auto;padding:0 16px 100px}
+.glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+header{padding:24px 0 16px;text-align:center}
+h1{font-size:20px;font-weight:700;color:var(--gold)}
+.subtitle{font-size:12px;color:var(--text-dim);margin-top:4px}
+.section{margin:20px 0;padding:16px}
+.section h2{font-size:14px;color:var(--gold);margin-bottom:14px}
+.badge{display:inline-block;min-width:20px;padding:1px 7px;border-radius:100px;background:var(--gold-dim);color:var(--gold);font-size:11px;margin-inline-start:6px}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--glass-border);font-size:13px;overflow-wrap:anywhere}
+.row:last-child{border-bottom:0}
+.meta{font-size:11px;color:var(--text-dim)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font-family:inherit;cursor:pointer;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;border:1px solid var(--gold);background:var(--gold);color:#04040A}
+button.sec{background:transparent;color:var(--gold)}
+button.cancel{background:transparent;color:var(--red);border-color:var(--red)}
+button:disabled{opacity:.5}
+input{width:100%;padding:11px 12px;margin:5px 0 10px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,.05);color:#fff;font-size:14px;font-family:inherit}
+label{font-size:12px;color:var(--text-dim)}
+.msg{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.8}
+.msg.err{display:block;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.4);color:#ffb3c0}
+.msg.good{display:block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.4);color:#8ff0c8}
+.msg.info{display:block;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-dim)}
+.empty{font-size:12px;color:var(--text-dim);padding:6px 0}
+#loginBox{position:fixed;inset:0;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;text-align:center;padding:24px}
+#loginBox .in{width:100%;max-width:320px}
+.logo{font-size:24px;font-weight:900;color:var(--gold);margin-bottom:6px}
+a.back{display:inline-block;margin-top:14px;color:var(--text-dim);font-size:12px}
+</style>
+</head>
+<body>
+<div id="loginBox"><div class="in">
+  <div class="logo" id="lgName">لوحة الإدارة</div>
+  <div style="font-size:12px;color:#777;margin-bottom:20px">خاصة بصاحب المؤشر</div>
+  <div id="lgBody"></div>
+  <div id="lgMsg" class="msg"></div>
+</div></div>
+<div class="wrap" id="app" style="display:none">
+  <header><h1 id="hName">لوحة الإدارة</h1><div class="subtitle">إدارة المؤشر — الاشتراكات والبزنسات والدفع</div></header>
+  <div class="glass section"><h2>📡 اشتراكات بانتظار المراجعة <span class="badge" id="pendCount">0</span></h2><div id="pend"></div></div>
+  <div class="glass section"><h2>✅ الاشتراكات الفعّالة <span class="badge" id="actCount">0</span></h2><div id="act"></div></div>
+  <div class="glass section"><h2>🏪 بزنسات المؤشر <span class="badge" id="bizCount">0</span></h2><div id="biz"></div>
+    <label>اسم البزنس</label><input id="bn" maxlength="60">
+    <label>رمز الشيت (Google Sheet ID)</label><input id="bs" dir="ltr" maxlength="80">
+    <button onclick="addBiz()">إضافة بزنس</button><div id="mBiz" class="msg"></div></div>
+  <div class="glass section"><h2>🏦 الدفع (تحويل بنكي مباشر)</h2>
+    <div class="meta" style="line-height:1.9;margin-bottom:10px">تُحفظ في شيتك أنت وتظهر لمن يريد الاشتراك فقط. تُفعَّل الباقات عند إدخال رقم الحساب أو IBAN.</div>
+    <label>اسم البنك</label><input id="pb_bank" maxlength="60">
+    <label>اسم صاحب الحساب</label><input id="pb_holder" maxlength="80">
+    <label>رقم الحساب</label><input id="pb_account" dir="ltr" maxlength="60">
+    <label>IBAN (اختياري)</label><input id="pb_iban" dir="ltr" maxlength="60">
+    <label>BBAN (اختياري)</label><input id="pb_bban" dir="ltr" maxlength="60">
+    <label>رمز السويفت (اختياري)</label><input id="pb_swift" dir="ltr" maxlength="30">
+    <label>الفرع (اختياري)</label><input id="pb_branch" maxlength="80">
+    <label>العملة (اختياري)</label><input id="pb_cur" dir="ltr" maxlength="5" placeholder="SDG">
+    <button onclick="savePlans()">حفظ</button><div id="mPl" class="msg"></div></div>
+  <div class="glass section"><h2>🔄 إعادة عدّ الطلبات من الصفر</h2>
+    <div class="meta" style="line-height:1.9;margin-bottom:10px">يقرأ طلبات كل البزنسات من جديد ويحدّث قيمة المؤشر. قد يستغرق دقيقة أو أكثر.</div>
+    <button class="sec" id="rcBtn" onclick="recalc()">إعادة العدّ</button><div id="mRc" class="msg"></div></div>
+  <div style="text-align:center"><a class="back" id="backLink" href="#">رجوع إلى المؤشر</a> · <a class="back" href="#" onclick="logout();return false">تسجيل الخروج</a></div>
+</div>
+<script>
+const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
+(function(){
+  var B=BACK,QS=new URLSearchParams(location.search),APP=QS.get('app')==='1',SCH=(QS.get('sch')||'').replace(/[^a-z0-9.]/g,'').slice(0,80);
+  var DASH=(window.MKT_DASH||'https://lavndrs120.github.io/market-app.html');
+  var KEY='mkadm_'+(function(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return h})(B);
+  var SESS='';try{SESS=localStorage.getItem(KEY)||''}catch(e){}
+  var $=function(i){return document.getElementById(i)},S=null,LEM='';
+  function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function msg(id,t,c){var e=$(id);if(!e)return;e.className='msg '+(c||'err');e.textContent=t}
+  $('backLink').href=DASH+'?b='+encodeURIComponent(B)+(APP?'&app=1':'')+(SCH?'&sch='+encodeURIComponent(SCH):'');
+  function jsonp(p){return new Promise(function(res,rej){var cb='cb'+Math.random().toString(36).slice(2),sc=document.createElement('script'),t=setTimeout(function(){fin();rej(new Error('timeout'))},60000);
+    function fin(){clearTimeout(t);delete window[cb];sc.remove()}window[cb]=function(d){fin();res(d)};sc.onerror=function(){fin();rej(new Error('net'))};
+    sc.src=B+(B.indexOf('?')<0?'?':'&')+new URLSearchParams(Object.assign({callback:cb},p)).toString();document.head.appendChild(sc)})}
+  function api(p){if(!B)return Promise.reject(new Error('no'));var u=B+(B.indexOf('?')<0?'?':'&')+new URLSearchParams(p).toString();
+    return fetch(u).then(function(r){return r.json()}).catch(function(){return jsonp(p)})}
+  function login(){
+    $('app').style.display='none';$('loginBox').style.display='flex';
+    if(LEM){
+      $('lgBody').innerHTML='<div style="font-size:13px;line-height:1.8;margin-bottom:12px">أرسلنا رمزاً من 6 أرقام إلى<br><b dir="ltr">'+esc(LEM)+'</b></div><input id="lgK" inputmode="numeric" maxlength="6" placeholder="الرمز" style="text-align:center;letter-spacing:8px;font-size:20px"><button style="width:100%" onclick="LV()">دخول</button>';
+    }else{
+      $('lgBody').innerHTML='<div style="font-size:13px;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="lgE" type="email" dir="ltr" placeholder="you@example.com"><button style="width:100%" onclick="LS()">إرسال الرمز</button>';
+    }
+  }
+  window.LS=function(){var em=($('lgE').value||'').trim().toLowerCase();if(!em){msg('lgMsg','اكتب بريدك');return}msg('lgMsg','جارٍ الإرسال…','info');
+    api({action:'code_send',email:em}).then(function(r){if(r&&r.error){msg('lgMsg',r.error);return}LEM=em;$('lgMsg').className='msg';login()}).catch(function(){msg('lgMsg','تعذّر الاتصال')})};
+  window.LV=function(){var c=($('lgK').value||'').trim();if(!/^\d{6}$/.test(c)){msg('lgMsg','اكتب الرمز المكوّن من 6 أرقام');return}msg('lgMsg','جارٍ التحقق…','info');
+    api({action:'code_verify',email:LEM,code:c}).then(function(r){if(!(r&&r.session)){msg('lgMsg',(r&&r.error)||'تعذّر الدخول');return}SESS=r.session;try{localStorage.setItem(KEY,SESS)}catch(e){}LEM='';$('lgMsg').className='msg';load()}).catch(function(){msg('lgMsg','تعذّر الاتصال')})};
+  window.logout=function(){SESS='';try{localStorage.removeItem(KEY)}catch(e){}LEM='';login()};
+  function load(){
+    api({action:'adm_state',s:SESS}).then(function(r){
+      if(r&&r.code===401){SESS='';login();msg('lgMsg','انتهت الجلسة، سجّل الدخول من جديد');return}
+      if(r&&r.error==='not_owner'){SESS='';try{localStorage.removeItem(KEY)}catch(e){}login();msg('lgMsg','هذه اللوحة لصاحب المؤشر فقط');return}
+      if(!r||r.status!=='ok'){login();msg('lgMsg',(r&&r.error)||'تعذّر التحميل');return}
+      S=r;$('loginBox').style.display='none';$('app').style.display='block';draw();
+    }).catch(function(){login();msg('lgMsg','تعذّر الاتصال بالمؤشر')});
+  }
+  function nm(k){return (S.tiers[k]||{}).name||k}
+  function d10(t){return new Date(Number(t)).toISOString().slice(0,10)}
+  function draw(){
+    $('hName').textContent=S.name||'لوحة الإدارة';
+    var pend=[],act=[],now=S.now;
+    S.subs.forEach(function(x){if(x.status==='pending')pend.push(x);else if(x.status==='active'&&x.end>now)act.push(x)});
+    $('pendCount').textContent=pend.length;$('actCount').textContent=act.length;$('bizCount').textContent=S.biz.length;
+    $('pend').innerHTML=pend.length?pend.map(function(x){return '<div class="row"><div><b dir="ltr">'+esc(x.email)+'</b> · '+esc(nm(x.tier))+'<div class="meta">رقم المعاملة: <b dir="ltr">'+esc(x.ref)+'</b></div></div><div class="btns"><button onclick="dec('+x.i+',1)">اعتماد</button><button class="cancel" onclick="dec('+x.i+',0)">رفض</button></div></div>'}).join(''):'<div class="empty">لا طلبات بانتظارك.</div>';
+    $('act').innerHTML=act.length?act.map(function(x){return '<div class="row"><div><span dir="ltr">'+esc(x.email)+'</span> · '+esc(nm(x.tier))+'<div class="meta">حتى '+esc(d10(x.end))+'</div></div><button class="cancel" onclick="dec('+x.i+',2)">إلغاء</button></div>'}).join(''):'<div class="empty">لا مشتركين فعّالين.</div>';
+    $('biz').innerHTML=S.biz.length?S.biz.map(function(b,i){return '<div class="row"><div>'+esc(b.name)+'<div class="meta" dir="ltr">'+esc(b.sid)+'</div></div><button class="cancel" onclick="rmBiz('+i+')">حذف</button></div>'}).join(''):'<div class="empty">لم تُضف بزنسات بعد.</div>';
+    var bk=(S.plans&&S.plans.bank)||{};['bank','holder','account','iban','bban','swift','branch','cur'].forEach(function(k){var e=$('pb_'+k);if(e&&document.activeElement!==e)e.value=bk[k]||''});
+  }
+  window.dec=function(i,mode){var x=S.subs.filter(function(y){return y.i===i})[0];if(!x)return;
+    if(mode===1&&!confirm('اعتماد اشتراك '+x.email+'؟ تأكد أولاً من وصول المبلغ إلى حسابك.'))return;
+    if(mode===2&&!confirm('إلغاء اشتراك '+x.email+'؟'))return;
+    api({action:'adm_sub',s:SESS,row:i,mode:mode}).then(function(r){if(r&&r.error){alert(r.error);return}load()}).catch(function(){alert('تعذّر الاتصال')})};
+  window.addBiz=function(){var n=($('bn').value||'').trim(),s=($('bs').value||'').trim();if(!n||!s){msg('mBiz','اكتب الاسم ورمز الشيت');return}msg('mBiz','جارٍ الإضافة…','info');
+    api({action:'adm_biz',s:SESS,op:'add',name:n,sid:s}).then(function(r){if(r&&r.error){msg('mBiz',r.error);return}$('bn').value='';$('bs').value='';msg('mBiz','تمت الإضافة ✓','good');load()}).catch(function(){msg('mBiz','تعذّر الاتصال')})};
+  window.rmBiz=function(i){var b=S.biz[i];if(!b||!confirm('حذف هذا البزنس من المؤشر؟'))return;
+    api({action:'adm_biz',s:SESS,op:'rm',sid:b.sid}).then(function(r){if(r&&r.error){alert(r.error);return}load()}).catch(function(){alert('تعذّر الاتصال')})};
+  window.savePlans=function(){var g=function(i){return String($('pb_'+i).value||'').replace(/[<>]/g,'').trim()},bank={bank:g('bank'),holder:g('holder'),account:g('account'),iban:g('iban'),bban:g('bban'),swift:g('swift'),branch:g('branch'),cur:g('cur').toUpperCase()};
+    msg('mPl','جاري الحفظ…','info');
+    api({action:'adm_plans',s:SESS,bank:JSON.stringify(bank)}).then(function(r){if(r&&r.error){msg('mPl',r.error);return}msg('mPl',r.on?'تم الحفظ ✓ الباقات ظاهرة لمن يريد الاشتراك':'تم الحفظ — أدخل رقم الحساب أو IBAN لتفعيل الباقات','good')}).catch(function(){msg('mPl','تعذّر الاتصال')})};
+  window.recalc=function(){var b=$('rcBtn');b.disabled=true;msg('mRc','جاري إعادة قراءة الطلبات… قد يستغرق دقيقة أو أكثر','info');
+    api({action:'recalc'}).then(function(r){b.disabled=false;
+      if(r&&r.status==='wait')msg('mRc',r.message||'انتظر دقيقة','info');
+      else if(r&&r.index)msg('mRc','تمت إعادة الحساب ✓ طلبات '+r.orders+' · القيمة $'+r.index.NAV,'good');
+      else msg('mRc',(r&&r.error)||'تعذّرت إعادة الحساب')}).catch(function(){b.disabled=false;msg('mRc','تعذّر الاتصال')})};
+  api({action:'config'}).then(function(c){if(c&&c.name){$('lgName').textContent=c.name;document.title=c.name+' — إدارة'}}).catch(function(){});
+  if(!B){$('lgBody').innerHTML='<div class="empty">رابط غير صحيح</div>';return}
+  if(SESS)load();else login();
+})();
+</script>
+</body>
+</html>

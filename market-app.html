@@ -891,6 +891,15 @@ var MKT = (function () {
     var u = B + (B.indexOf('?') < 0 ? '?' : '&') + new URLSearchParams(params).toString();
     return realFetch(u).then(function (r) { return r.json(); }).catch(function () { return jsonp(params); });
   }
+  var ADMINBASE = 'https://lavndrs120.github.io/market-admin.html';
+  function mktAdminBtn() {
+    if (document.getElementById('mktAdm')) return;
+    var a = document.createElement('a'); a.id = 'mktAdm';
+    a.href = ADMINBASE + '?b=' + encodeURIComponent(B) + (APP ? '&app=1' : '') + (SCH ? '&sch=' + encodeURIComponent(SCH) : '');
+    a.textContent = 'لوحة الإدارة';
+    a.style.cssText = 'position:fixed;bottom:76px;left:14px;z-index:9000;padding:10px 16px;border-radius:100px;background:#C9A84C;color:#04040A;font:800 13px sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.5)';
+    document.body.appendChild(a);
+  }
   function vt() { try { return sessionStorage.getItem('mkv2_vt') || ''; } catch (e) { return ''; } }
   function mine(subs, tier) {
     var now = Date.now(), best = null, rank = { active: 0, pending: 1, awaiting: 2 };
@@ -932,7 +941,7 @@ var MKT = (function () {
       if (LOGINMODE && SCH) handoffScreen(r.session);
       return { token: r.session, email: r.email };
     });
-    if (action === 'data') return api({ action: 'dash_data', s: tok, vt: vt() });
+    if (action === 'data') return api({ action: 'dash_data', s: tok, vt: vt() }).then(function (r) { if (r && r.own) mktAdminBtn(); return r; });
     if (action === 'month') return api({ action: 'dash_month', s: tok, month: q.get('month') });
     if (action === 'oracle_report') return api({ action: 'dash_oracle', s: tok, period: q.get('period') });
     if (action === 'select_view_tier') { try { sessionStorage.setItem('mkv2_vt', q.get('tier') || ''); } catch (e) {} return Promise.resolve({ ok: true }); }
