@@ -48,24 +48,21 @@ a.back{display:inline-block;margin-top:14px;color:var(--text-dim);font-size:12px
   <div id="lgMsg" class="msg"></div>
 </div></div>
 <div class="wrap" id="app" style="display:none">
-  <header><h1 id="hName">لوحة الإدارة</h1><div class="subtitle">إدارة المؤشر — الاشتراكات والبزنسات والدفع</div></header>
+  <header><h1 id="hName">لوحة الإدارة</h1><div class="subtitle">إدارة المؤشر — الاشتراكات والبزنسات والإشعارات</div></header>
   <div class="glass section"><h2>📡 اشتراكات بانتظار المراجعة <span class="badge" id="pendCount">0</span></h2><div id="pend"></div></div>
   <div class="glass section"><h2>✅ الاشتراكات الفعّالة <span class="badge" id="actCount">0</span></h2><div id="act"></div></div>
   <div class="glass section"><h2>🏪 بزنسات المؤشر <span class="badge" id="bizCount">0</span></h2><div id="biz"></div>
     <label>اسم البزنس</label><input id="bn" maxlength="60">
     <label>رمز الشيت (Google Sheet ID)</label><input id="bs" dir="ltr" maxlength="80">
     <button onclick="addBiz()">إضافة بزنس</button><div id="mBiz" class="msg"></div></div>
-  <div class="glass section"><h2>🏦 الدفع (تحويل بنكي مباشر)</h2>
-    <div class="meta" style="line-height:1.9;margin-bottom:10px">تُحفظ في شيتك أنت وتظهر لمن يريد الاشتراك فقط. تُفعَّل الباقات عند إدخال رقم الحساب أو IBAN.</div>
-    <label>اسم البنك</label><input id="pb_bank" maxlength="60">
-    <label>اسم صاحب الحساب</label><input id="pb_holder" maxlength="80">
-    <label>رقم الحساب</label><input id="pb_account" dir="ltr" maxlength="60">
-    <label>IBAN (اختياري)</label><input id="pb_iban" dir="ltr" maxlength="60">
-    <label>BBAN (اختياري)</label><input id="pb_bban" dir="ltr" maxlength="60">
-    <label>رمز السويفت (اختياري)</label><input id="pb_swift" dir="ltr" maxlength="30">
-    <label>الفرع (اختياري)</label><input id="pb_branch" maxlength="80">
-    <label>العملة (اختياري)</label><input id="pb_cur" dir="ltr" maxlength="5" placeholder="SDG">
-    <button onclick="savePlans()">حفظ</button><div id="mPl" class="msg"></div></div>
+  <div class="glass section"><h2>🔔 إرسال إشعار للمشتركين</h2>
+    <div class="meta" style="line-height:1.9;margin-bottom:10px">يصل في جرس المشترك وكإشعار على هاتفه إن كان يستخدم تطبيق المؤشر. نص فقط، بدون روابط.</div>
+    <label>إلى</label><select id="ntTo" style="width:100%;padding:11px 12px;margin:5px 0 10px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,.05);color:#fff;font-size:14px;font-family:inherit"><option value="all">كل المشتركين الفعّالين</option><option value="one">مشترك واحد (بالبريد)</option></select>
+    <div id="ntOneW" style="display:none"><label>بريد المشترك</label><input id="ntEm" type="email" dir="ltr"></div>
+    <label>العنوان (اختياري)</label><input id="ntTitle" maxlength="80">
+    <label>نص الإشعار</label><input id="ntBody" maxlength="500">
+    <button onclick="sendNote()">إرسال</button><div id="mNt" class="msg"></div></div>
+  <div class="glass section"><h2>💬 رسائل المشتركين <span class="badge" id="inCount">0</span></h2><div id="inbox"></div></div>
   <div class="glass section"><h2>🔄 إعادة عدّ الطلبات من الصفر</h2>
     <div class="meta" style="line-height:1.9;margin-bottom:10px">يقرأ طلبات كل البزنسات من جديد ويحدّث قيمة المؤشر. قد يستغرق دقيقة أو أكثر.</div>
     <button class="sec" id="rcBtn" onclick="recalc()">إعادة العدّ</button><div id="mRc" class="msg"></div></div>
@@ -105,7 +102,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
       if(r&&r.code===401){SESS='';login();msg('lgMsg','انتهت الجلسة، سجّل الدخول من جديد');return}
       if(r&&r.error==='not_owner'){SESS='';try{localStorage.removeItem(KEY)}catch(e){}login();msg('lgMsg','هذه اللوحة لصاحب المؤشر فقط');return}
       if(!r||r.status!=='ok'){login();msg('lgMsg',(r&&r.error)||'تعذّر التحميل');return}
-      S=r;$('loginBox').style.display='none';$('app').style.display='block';draw();
+      S=r;$('loginBox').style.display='none';$('app').style.display='block';draw();loadInbox();
     }).catch(function(){login();msg('lgMsg','تعذّر الاتصال بالمؤشر')});
   }
   function nm(k){return (S.tiers[k]||{}).name||k}
@@ -118,7 +115,6 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     $('pend').innerHTML=pend.length?pend.map(function(x){return '<div class="row"><div><b dir="ltr">'+esc(x.email)+'</b> · '+esc(nm(x.tier))+'<div class="meta">رقم المعاملة: <b dir="ltr">'+esc(x.ref)+'</b></div></div><div class="btns"><button onclick="dec('+x.i+',1)">اعتماد</button><button class="cancel" onclick="dec('+x.i+',0)">رفض</button></div></div>'}).join(''):'<div class="empty">لا طلبات بانتظارك.</div>';
     $('act').innerHTML=act.length?act.map(function(x){return '<div class="row"><div><span dir="ltr">'+esc(x.email)+'</span> · '+esc(nm(x.tier))+'<div class="meta">حتى '+esc(d10(x.end))+'</div></div><button class="cancel" onclick="dec('+x.i+',2)">إلغاء</button></div>'}).join(''):'<div class="empty">لا مشتركين فعّالين.</div>';
     $('biz').innerHTML=S.biz.length?S.biz.map(function(b,i){return '<div class="row"><div>'+esc(b.name)+'<div class="meta" dir="ltr">'+esc(b.sid)+'</div></div><button class="cancel" onclick="rmBiz('+i+')">حذف</button></div>'}).join(''):'<div class="empty">لم تُضف بزنسات بعد.</div>';
-    var bk=(S.plans&&S.plans.bank)||{};['bank','holder','account','iban','bban','swift','branch','cur'].forEach(function(k){var e=$('pb_'+k);if(e&&document.activeElement!==e)e.value=bk[k]||''});
   }
   window.dec=function(i,mode){var x=S.subs.filter(function(y){return y.i===i})[0];if(!x)return;
     if(mode===1&&!confirm('اعتماد اشتراك '+x.email+'؟ تأكد أولاً من وصول المبلغ إلى حسابك.'))return;
@@ -128,9 +124,15 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     api({action:'adm_biz',s:SESS,op:'add',name:n,sid:s}).then(function(r){if(r&&r.error){msg('mBiz',r.error);return}$('bn').value='';$('bs').value='';msg('mBiz','تمت الإضافة ✓','good');load()}).catch(function(){msg('mBiz','تعذّر الاتصال')})};
   window.rmBiz=function(i){var b=S.biz[i];if(!b||!confirm('حذف هذا البزنس من المؤشر؟'))return;
     api({action:'adm_biz',s:SESS,op:'rm',sid:b.sid}).then(function(r){if(r&&r.error){alert(r.error);return}load()}).catch(function(){alert('تعذّر الاتصال')})};
-  window.savePlans=function(){var g=function(i){return String($('pb_'+i).value||'').replace(/[<>]/g,'').trim()},bank={bank:g('bank'),holder:g('holder'),account:g('account'),iban:g('iban'),bban:g('bban'),swift:g('swift'),branch:g('branch'),cur:g('cur').toUpperCase()};
-    msg('mPl','جاري الحفظ…','info');
-    api({action:'adm_plans',s:SESS,bank:JSON.stringify(bank)}).then(function(r){if(r&&r.error){msg('mPl',r.error);return}msg('mPl',r.on?'تم الحفظ ✓ الباقات ظاهرة لمن يريد الاشتراك':'تم الحفظ — أدخل رقم الحساب أو IBAN لتفعيل الباقات','good')}).catch(function(){msg('mPl','تعذّر الاتصال')})};
+  window.sendNote=function(){var one=$('ntTo').value==='one',to=one?($('ntEm').value||'').trim().toLowerCase():'all',b=($('ntBody').value||'').trim();
+    if(one&&!to){msg('mNt','اكتب بريد المشترك');return}if(b.length<2){msg('mNt','اكتب نص الإشعار');return}
+    if(/(https?:|www\.|[{}\[\]\\`|])/i.test(b)){msg('mNt','النص فقط — بدون روابط');return}
+    msg('mNt','جارٍ الإرسال…','info');
+    api({action:'adm_send',s:SESS,to:to,title:($('ntTitle').value||'').trim(),body:b}).then(function(r){if(r&&r.error){msg('mNt',r.error);return}$('ntBody').value='';msg('mNt','أُرسل إلى '+r.count+' مشترك ✓ (وصل للهاتف: '+r.pushed+')','good')}).catch(function(){msg('mNt','تعذّر الاتصال')})};
+  function loadInbox(){api({action:'adm_notes',s:SESS}).then(function(r){var it=(r&&r.items)||[];$('inCount').textContent=it.length;
+    $('inbox').innerHTML=it.length?it.map(function(x){return '<div class="row"><div><b dir="ltr">'+esc(x.email)+'</b><div>'+esc(x.body)+'</div><div class="meta">'+esc(String(x.at).slice(0,16).replace('T',' '))+'</div></div><button class="sec" onclick="reply(\''+esc(x.email)+'\')">رد</button></div>'}).join(''):'<div class="empty">لا رسائل.</div>'}).catch(function(){})}
+  window.reply=function(em){$('ntTo').value='one';$('ntOneW').style.display='block';$('ntEm').value=em;$('ntBody').focus();window.scrollTo(0,$('ntBody').getBoundingClientRect().top+window.scrollY-120)};
+  $('ntTo').onchange=function(){$('ntOneW').style.display=this.value==='one'?'block':'none'};
   window.recalc=function(){var b=$('rcBtn');b.disabled=true;msg('mRc','جاري إعادة قراءة الطلبات… قد يستغرق دقيقة أو أكثر','info');
     api({action:'recalc'}).then(function(r){b.disabled=false;
       if(r&&r.status==='wait')msg('mRc',r.message||'انتظر دقيقة','info');
