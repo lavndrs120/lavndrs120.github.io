@@ -162,7 +162,12 @@
    "description": "Lavenders store lives in owner's Google account for data ownership",
    "slug": "why-does-a-lavenders-store-live-in-the-owner-s-own-google-account",
    "date": "2026-11-22",
-   "devto": "https://dev.to/lavenders/why-does-a-lavenders-store-live-in-the-owners-own-google-account-4902"
+   "devto": "https://dev.to/lavenders/why-does-a-lavenders-store-live-in-the-owners-own-google-account-4902",
+   "ar": {
+    "title": "ملكية البيانات في لاڤندرز",
+    "description": "لماذا تعيش متاجر لاڤندرز في حساب مالكها على جوجل؟",
+    "date": "2026-11-25"
+   }
   },
   {
    "id": "golden-certificate-donation",
@@ -188,6 +193,19 @@
     "title": "الانضمام إلى دليل لاڤندرز",
     "description": "كيفية انضمام متجر بناءً على أداة بناء لاڤندرز إلى دليل LAVNDR120",
     "date": "2026-11-24"
+   }
+  },
+  {
+   "id": "app-builder-android",
+   "title": "Is there an Android app for a store built with Lavenders?",
+   "description": "Android app for Lavenders store, downloaded directly",
+   "slug": "is-there-an-android-app-for-a-store-built-with-lavenders",
+   "date": "2026-11-25",
+   "devto": "https://dev.to/lavenders/is-there-an-android-app-for-a-store-built-with-lavenders-2b2e",
+   "ar": {
+    "title": "هل توجد تطبيق أندرويد لمتجر بني باستخدام لاڤندرز؟",
+    "description": "تطبيق أندرويد لمتجر بني باستخدام لاڤندرز، يمكن تحميله مباشرة من الموقع الرسمي",
+    "date": "2026-11-25"
    }
   }
  ],
