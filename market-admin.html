@@ -24,6 +24,8 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
   var INAPP = false; try { INAPP = APP || /; wv\)|\bVersion\/4\.0\b.*Chrome/.test(navigator.userAgent) || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { INAPP = APP; }
   var host = location.pathname.split('/').pop() || '', pre = /^market/.test(host);
   window.MKP = pre ? { home: 'market.html', app: 'market-app.html', admin: 'market-admin.html' } : { home: 'index.html', app: 'app.html', admin: 'admin.html' };
+  /* تطبيق أندرويد قديم (قبل MktApp/2): نوافذ confirm/prompt مكتومة فتفشل الأزرار، فنقبل التأكيد تلقائياً بدل الفشل الصامت */
+  try { if (/; wv\)/.test(navigator.userAgent) && !/MktApp\/2/.test(navigator.userAgent)) { window.confirm = function () { return true; }; window.prompt = function (m, d) { return d == null ? '' : d; }; } } catch (e) {}
   var realFetch = window.fetch.bind(window), CFG = null;
   var hide = document.createElement('style'); hide.id = 'mkHide'; hide.textContent = 'html{visibility:hidden}'; document.documentElement.appendChild(hide);
   var unhide = function () { var h = document.getElementById('mkHide'); if (h) h.remove(); }; setTimeout(unhide, 4000);
