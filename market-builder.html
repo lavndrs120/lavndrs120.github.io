@@ -427,10 +427,10 @@ let HOSTING=false;
 function slugG(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)}
 async function ghPost(path,body){const r=await fetch(WORKER_URL+path,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body||{})});return r.json()}
 function showHtml(id,h,cls){const e=$(id);if(!e)return;e.className='msg '+(cls||'info');e.innerHTML=h}
-async function ghAuth(){
+async function ghAuth(mid){mid=mid||'m7';
   if(GHT)return GHT;
   const d=await ghPost('/gh/device');if(!d.device_code)throw new Error(d.error_description||d.error||'تعذّر بدء الربط بـ GitHub');
-  showHtml('m7','افتح <a href="'+esc(d.verification_uri)+'?user_code='+esc(d.user_code)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">github.com/login/device</a> وأدخل الرمز: <b dir="ltr" style="font-size:18px">'+esc(d.user_code)+'</b> — ثم ارجع هنا.','info');
+  showHtml(mid,'⚠️ <b>مطلوب منك الآن:</b> افتح <a href="'+esc(d.verification_uri)+'?user_code='+esc(d.user_code)+'" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">github.com/login/device</a> وأدخل الرمز: <b dir="ltr" style="font-size:18px">'+esc(d.user_code)+'</b> — ثم ارجع هنا.','info');try{$(mid).scrollIntoView({behavior:'smooth',block:'center'});$(mid).style.fontSize='15px';$(mid).style.border='2px solid #C9A84C'}catch(e){}
   let wait=(d.interval||5)*1000;const end=Date.now()+(d.expires_in||900)*1000;
   while(Date.now()<end){
     await new Promise(r=>setTimeout(r,wait));
@@ -493,7 +493,7 @@ async function hostMarket(){
 async function hostMApk(){
   const m=S.cur;if(!m||!m.home||HOSTING)return;HOSTING=true;
   try{
-    showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth();
+    showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth('m5');
     const user=(await ghApi('/user')).json.login,repo=(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1];
     const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok){let bt='';try{bt=(await ar.text()).slice(0,80)}catch(e){}throw new Error('تعذّر جلب ملف التطبيق الآن ['+ar.status+(bt?' '+bt:'')+']. يمكنك تنزيله من الرابط الحالي.')}
     await ghPut(user,repo,'apk/market.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
