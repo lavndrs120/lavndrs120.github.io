@@ -435,7 +435,7 @@ async function ghAuth(mid){mid=mid||'m7';
   while(Date.now()<end){
     await new Promise(r=>setTimeout(r,wait));
     const t=await ghPost('/gh/token',{device_code:d.device_code});
-    if(t.access_token){GHT=t.access_token;try{sessionStorage.setItem('ghT',GHT)}catch(e){}return GHT}
+    if(t.access_token){GHT=t.access_token;try{sessionStorage.setItem('ghT',GHT)}catch(e){}try{$(mid).style.border='';$(mid).style.fontSize=''}catch(e){}showMsg(mid,'✓ تم الربط بـ GitHub — جاري المتابعة…','good');return GHT}
     if(t.error==='slow_down')wait+=5000;
     else if(t.error&&t.error!=='authorization_pending')throw new Error(t.error_description||t.error);
   }
@@ -495,13 +495,15 @@ async function hostMApk(){
   try{
     showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth('m5');
     const user=(await ghApi('/user')).json.login,repo=(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1];
+    showMsg('m5','جاري جلب ملف التطبيق…','info');
     const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok){let bt='';try{bt=(await ar.text()).slice(0,80)}catch(e){}throw new Error('تعذّر جلب ملف التطبيق الآن ['+ar.status+(bt?' '+bt:'')+']. يمكنك تنزيله من الرابط الحالي.')}
+    showMsg('m5','جاري رفع التطبيق إلى ريبوك… قد يستغرق دقيقة، لا تغلق الصفحة','info');
     await ghPut(user,repo,'apk/market.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
     try{const br=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId)+'&fmt=aab');if(br.ok)await ghPut(user,repo,'apk/market.aab',b64buf(await br.arrayBuffer()),'Lavenders: Google Play bundle (AAB)')}catch(e){}
     const u='https://github.com/'+user+'/'+repo+'/raw/main/apk/market.apk';
     await putVals(m.sheetId,'Config!D1',[[u]]);m.apkHosted=u;
     try{await api('appb_apk_hosted',{appId:m.apkId,url:u},true)}catch(e){}
-    HOSTING=false;loadMApk();
+    HOSTING=false;loadMApk();showMsg('m5','تم النقل ✓ التطبيق الآن في ريبوك','good');
   }catch(err){HOSTING=false;showMsg('m5',err.message||'تعذّر النقل')}
 }
 
