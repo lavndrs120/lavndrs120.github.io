@@ -4,11 +4,22 @@
 <meta name="robots" content="noindex,nofollow">
 <script>
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
+(function () {
+  try {
+    var L = window.localStorage, P = 'mkss:';
+    var W = { getItem: function (k) { return L.getItem(P + k); }, setItem: function (k, v) { L.setItem(P + k, String(v)); }, removeItem: function (k) { L.removeItem(P + k); },
+      clear: function () { Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }).forEach(function (k) { L.removeItem(k); }); },
+      key: function (i) { var a = Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }); return a[i] == null ? null : a[i].slice(P.length); },
+      get length() { return Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }).length; } };
+    L.getItem('x'); Object.defineProperty(window, 'sessionStorage', { configurable: true, get: function () { return W; } });
+  } catch (e) {}
+})();
 /* ══ مؤشر مستقل = نسخة لاڤندرز: هذه الطبقة تحوّل نداءات الـ Worker إلى خلفية هذا المؤشر فقط ══ */
 (function () {
   var QS = new URLSearchParams(location.search), B = BACK;
   try { if (B) localStorage.setItem('mkv2_b', B); else B = localStorage.getItem('mkv2_b') || ''; } catch (e) {}
   window.MKB = B;
+  var SCH = (QS.get('sch') || '').trim(); try { if (/^[a-z][a-z0-9.]{3,80}$/.test(SCH)) localStorage.setItem('mkv2_sch', SCH); else SCH = localStorage.getItem('mkv2_sch') || ''; } catch (e) {}
   var APP = QS.get('app') === '1';
   var INAPP = false; try { INAPP = APP || /; wv\)|\bVersion\/4\.0\b.*Chrome/.test(navigator.userAgent) || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { INAPP = APP; }
   var host = location.pathname.split('/').pop() || '', pre = /^market/.test(host);
@@ -45,11 +56,20 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     var go = function () { run(); var t = 0; new MutationObserver(function () { if (t) return; t = setTimeout(function () { t = 0; run(); }, 150); }).observe(document.body, { childList: true, subtree: true, characterData: true }); };
     if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
   }
-  /* الرابط الداخلي: أسماء صفحات لاڤندرز → صفحات هذا المؤشر */
-  document.addEventListener('DOMContentLoaded', function () {
-    var fix = function () { document.querySelectorAll('a[href]').forEach(function (a) { var h = a.getAttribute('href'); if (h === 'dashboard.html') a.setAttribute('href', MKP.app); else if (h === 'admin.html') a.setAttribute('href', MKP.admin); else if (h === 'index.html') a.setAttribute('href', MKP.home); if (/^(dashboard|admin|index|market|market-app|market-admin|app)\.html$/.test(a.getAttribute('href')) && B && pre) a.setAttribute('href', a.getAttribute('href') + '?b=' + encodeURIComponent(B)); }); };
-    fix(); setInterval(fix, 1500);
-  });
+  /* الروابط: صفحات المؤشر الثلاث + صفحات لاڤندرز المعلوماتية (مطلقة) + إخفاء ما هو خارج نطاق المؤشر */
+  var PUB = 'https://lavndrs120.github.io/', OUT = /^(builder|business|market-builder|app-builder|franchise|reseller|oms|tycoon|embed|funding|donate|verify|verification|store|session-check)(\.html)?(\?|#|$)/;
+  function fixLinks() {
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var h = a.getAttribute('href') || '';
+      if (!h || h.charAt(0) === '#' || /^(https?:|mailto:|tel:|javascript:|data:|blob:|intent:|whatsapp:|sms:)/i.test(h)) return;
+      var m = /^\.?\/?(dashboard|admin|index|market|market-app|market-admin|app)\.html(\?[^#]*)?(#.*)?$/.exec(h), to = null;
+      if (m) { var base = { dashboard: MKP.app, 'market-app': MKP.app, app: MKP.app, admin: MKP.admin, 'market-admin': MKP.admin, index: MKP.home, market: MKP.home }[m[1]]; var q = m[2] || ''; if (B && pre && q.indexOf('b=') < 0) q += (q ? '&' : '?') + 'b=' + encodeURIComponent(B); to = base + q + (m[3] || ''); }
+      else if (OUT.test(h.replace(/^\.?\//, ''))) { a.style.display = 'none'; return; }
+      else to = PUB + h.replace(/^\.?\//, '');
+      if (to !== h) a.setAttribute('href', to);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { fixLinks(); setInterval(fixLinks, 1200); });
   function ok(o) { return new Response(JSON.stringify(o), { status: 200, headers: { 'Content-Type': 'application/json' } }); }
   window.fetch = function (u, o) {
     var url = String(u && u.url || u || '');
@@ -73,7 +93,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
   /* تسجيل الدخول: Google (nonce المؤشر) أو رمز يصل للبريد (للتطبيق والمتصفحات المقيَّدة) */
   window.MKT_wrapGSI = function (cfg) { cfg = cfg || {}; cfg.nonce = 'lvnmkt-' + (window.MKT_MID || ''); return cfg; };
   function api(params) { return window.MKT_CFG.then(function (c) { var q = new URLSearchParams(Object.assign({ key: c.k }, params)); return realFetch(B + (B.indexOf('?') < 0 ? '?' : '&') + q.toString()).then(function (r) { return r.json(); }); }); }
-  var CODE = INAPP, LEM = '';
+  var CODE = false, LEM = '', HSTO = 0;
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   window.MKT_loginUI = function () {
     var wrap = document.getElementById('gsiButtonWrap'); if (!wrap) return;
@@ -81,7 +101,19 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     if (!box) { box = document.createElement('div'); box.id = 'mktLg'; box.style.cssText = 'margin-top:14px;max-width:300px;text-align:center;font-family:sans-serif;color:#aaa'; wrap.insertAdjacentElement('afterend', box); }
     var inp = 'width:100%;box-sizing:border-box;padding:13px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:15px;text-align:center;outline:none',
         btn = 'width:100%;padding:13px;border:none;border-radius:100px;background:linear-gradient(135deg,#F0D080,#C9A84C);color:#1a1230;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:8px';
-    if (!CODE) { wrap.style.display = 'block'; box.innerHTML = '<a href="#" id="mktToCode" style="color:#C9A84C;font-size:12px">لا يعمل زر Google؟ ادخل برمز على بريدك</a>'; document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); CODE = true; MKT_loginUI(); }; return; }
+    if (!CODE) {
+      if (INAPP) {
+        wrap.style.display = 'none';
+        var waiting = hsActive();
+        box.innerHTML = '<button id="mktG" style="' + btn + ';background:#fff;color:#222;display:flex;align-items:center;justify-content:center;gap:10px"><b style="color:#4285F4;font-size:18px">G</b> الدخول بحساب Google</button>' +
+          (waiting ? '<div style="font-size:12.5px;line-height:1.9;color:#C9A84C;margin:8px 0">أكمل الدخول في المتصفح ثم ارجع إلى التطبيق — ننتظرك…<br><a href="#" id="mktHsC" style="color:#aaa;font-size:11.5px">إلغاء</a></div>' : '') +
+          '<a href="#" id="mktToCode" style="color:#aaa;font-size:12px">أو ادخل برمز يصل لبريدك</a>';
+        document.getElementById('mktG').onclick = function () { startHs(); MKT_loginUI(); };
+        var hc = document.getElementById('mktHsC'); if (hc) hc.onclick = function (e) { e.preventDefault(); hsClear(); MKT_loginUI(); };
+        document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); CODE = true; MKT_loginUI(); };
+        return;
+      }
+      wrap.style.display = 'block'; box.innerHTML = '<a href="#" id="mktToCode" style="color:#C9A84C;font-size:12px">لا يعمل زر Google؟ ادخل برمز على بريدك</a>'; document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); CODE = true; MKT_loginUI(); }; return; }
     wrap.style.display = 'none';
     if (LEM) {
       box.innerHTML = '<div style="font-size:13px;line-height:1.8;margin-bottom:12px">أرسلنا رمزاً من 6 أرقام إلى<br><b dir="ltr" style="color:#fff">' + esc(LEM) + '</b></div><input id="mktK" inputmode="numeric" maxlength="6" placeholder="000000" style="' + inp + ';letter-spacing:8px;font-size:20px"><button id="mktV" style="' + btn + '">تأكيد</button><div id="mktM" style="font-size:12px;min-height:18px;color:#f88"></div><a href="#" id="mktRe" style="color:#C9A84C;font-size:12px">إعادة الإرسال</a> · <a href="#" id="mktCh" style="color:#C9A84C;font-size:12px">تغيير البريد</a>';
@@ -89,7 +121,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
       document.getElementById('mktRe').onclick = function (e) { e.preventDefault(); send(LEM); };
       document.getElementById('mktCh').onclick = function (e) { e.preventDefault(); LEM = ''; MKT_loginUI(); };
     } else {
-      box.innerHTML = '<div style="font-size:13px;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="mktE" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" style="' + inp + '"><button id="mktS" style="' + btn + '">إرسال الرمز</button><div id="mktM" style="font-size:12px;min-height:18px;color:#f88"></div>' + (INAPP ? '' : '<a href="#" id="mktBackG" style="color:#C9A84C;font-size:12px">العودة لزر Google</a>');
+      box.innerHTML = '<div style="font-size:13px;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="mktE" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" style="' + inp + '"><button id="mktS" style="' + btn + '">إرسال الرمز</button><div id="mktM" style="font-size:12px;min-height:18px;color:#f88"></div>' + '<a href="#" id="mktBackG" style="color:#C9A84C;font-size:12px">العودة لـ Google</a>';
       document.getElementById('mktS').onclick = function () { var em = (document.getElementById('mktE').value || '').trim().toLowerCase(); if (!em) { document.getElementById('mktM').textContent = 'اكتب بريدك'; return; } send(em); };
       var bg = document.getElementById('mktBackG'); if (bg) bg.onclick = function (e) { e.preventDefault(); CODE = false; MKT_loginUI(); };
     }
@@ -105,6 +137,25 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
       LEM = ''; window.__mkSess = r; if (typeof handleCredentialResponse === 'function') handleCredentialResponse({ credential: 'mkcode' });
     }).catch(function () { m.textContent = 'تعذّر الاتصال'; });
   }
+  /* دخول Google في التطبيق: صفحة دخول في المتصفح الخارجي + استلام الجلسة بمعرّف سري (لا حاجة لرجوع آلي) */
+  function hsActive() { try { var v = (localStorage.getItem('mkv2_hs') || '').split(':'); return v[0] && Date.now() - Number(v[1]) < 300000 ? v[0] : ''; } catch (e) { return ''; } }
+  function hsClear() { try { localStorage.removeItem('mkv2_hs'); } catch (e) {} clearTimeout(HSTO); }
+  function rnd() { var a = new Uint8Array(16); (window.crypto || window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function startHs() {
+    var id = rnd(); try { localStorage.setItem('mkv2_hs', id + ':' + Date.now()); } catch (e) {}
+    var u = 'https://lavndrs120.github.io/market-login.html?b=' + encodeURIComponent(B) + '&hs=' + id + (/^[a-z][a-z0-9.]{3,80}$/.test(SCH) ? '&sch=' + SCH : '');
+    try { if (window.LavndrMkt && typeof LavndrMkt.open === 'function') LavndrMkt.open(u); else window.open(u, '_blank'); } catch (e) { window.open(u, '_blank'); }
+    pollHs();
+  }
+  function pollHs() {
+    clearTimeout(HSTO); var id = hsActive(); if (!id) return;
+    api({ action: 'hs_poll', id: id }).then(function (r) {
+      if (r && r.token) { hsClear(); window.__mkSess = r; if (typeof handleCredentialResponse === 'function') handleCredentialResponse({ credential: 'mkcode' }); return; }
+      HSTO = setTimeout(pollHs, 2000);
+    }).catch(function () { HSTO = setTimeout(pollHs, 4000); });
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && hsActive()) pollHs(); });
+  document.addEventListener('DOMContentLoaded', function () { if (hsActive()) pollHs(); });
   /* تسجيل جهاز الإشعارات داخل التطبيق */
   (function () {
     if (!window.LavndrMkt || typeof LavndrMkt.fcm !== 'function') return;
@@ -568,7 +619,7 @@ body.builder-mode #builderPanel { display:block; }
 html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 </style>
-<style>#footLinks,#footLinksEn{display:none!important}</style></head>
+<style>#footLinks,#footLinksEn,[onclick*="builder.html"]{display:none!important}</style></head>
 <body>
 <div id="loginOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(6,6,12,.60);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;font-family:sans-serif;">
 <!-- ✅ جديد: زر إغلاق — تسجيل الدخول بقى اختياري بالكامل، أي زائر يقدر يقفل الشاشة دي
@@ -1138,7 +1189,7 @@ async function bhResSubmit(n) {
     '<div style="font-size:15px;font-weight:800;color:var(--gold);margin-bottom:4px;">ادفع ثم ارفع للأدمن — ' + esc(nm) + '</div>' +
     '<div style="font-size:26px;font-weight:900;margin:6px 0 10px;">$' + esc(rh.saleFee || 22.58) + '</div>' +
     '<div style="font-size:11px;color:var(--text-dim);line-height:1.8;margin-bottom:10px;">رسم دخول هذا البزنس إلى المؤشر. حوّل المبلغ ثم أدخل مرجع المعاملة.</div>' +
-    '<div style="background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:14px;padding:4px 14px;margin-bottom:10px;">' + bhBankRows(rh.bank || {}) + '<div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 4px;">القيمة بالدولار، والتحويل الفعلي بالجنيه السوداني (SDG) بما يعادلها يوم التحويل.</div></div>' +
+    '<div style="background:rgba(255,255,255,.04);border:1px solid var(--glass-border);border-radius:14px;padding:4px 14px;margin-bottom:10px;">' + bhBankRows(rh.bank || {}) + '<div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 4px;">القيمة بالدولار، والتحويل الفعلي بعملة حسابنا البنكي بما يعادلها يوم التحويل.</div></div>' +
     '<input id="rTxn" placeholder="رقم/مرجع المعاملة من إشعار البنك" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:10px;color:#fff;font-size:13px;padding:11px;outline:none;">' +
     '<div id="rMsg" style="font-size:12px;color:var(--red);margin:8px 0;"></div>' +
     '<button id="rGo" style="width:100%;padding:13px;border:none;border-radius:12px;background:var(--gold);color:#111;font-weight:900;font-size:14px;cursor:pointer;">أرسل الطلب والدفعة للأدمن</button>' +
@@ -2741,7 +2792,7 @@ async function renderSubscribeOtpScreen(status) {
   const bankHtml = bank ? `
     <div style="background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:14px;padding:6px 14px;margin-bottom:16px;text-align:right;">
       ${row('البنك', bank.BANK_NAME)}${row('اسم صاحب الحساب', bank.ACCOUNT_HOLDER)}${row('رقم الحساب', bank.ACCOUNT_NUMBER)}${row('IBAN', bank.IBAN)}${row('BBAN', bank.BBAN)}${row('رمز السويفت — للتحويل الدولي (SWIFT)', bank.SWIFT)}${row('الفرع', bank.BRANCH)}
-      <div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 6px;">القيمة بالدولار، والتحويل الفعلي بالجنيه السوداني (SDG) بما يعادلها يوم التحويل.</div>
+      <div style="font-size:10.5px;color:var(--text-faint);line-height:1.7;padding:8px 0 6px;">القيمة بالدولار، والتحويل الفعلي بعملة حسابنا البنكي بما يعادلها يوم التحويل.</div>
     </div>` : '';
   subscribeGateShell(`
     ${gateSteps(3)}
@@ -3824,7 +3875,7 @@ window.addEventListener('load', function() {
 
 </script>
 <script>
-(function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK'))w.style.display='none';},500);})();
+(function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK')||document.getElementById('mktG'))w.style.display='none';},500);})();
 </script>
 </body>
 </html>

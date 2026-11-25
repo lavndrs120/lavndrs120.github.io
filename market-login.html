@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>تسجيل الدخول</title>
+<style>
+html,body{margin:0;background:#0a0a10;color:#fff;font-family:'Segoe UI',Tahoma,sans-serif}
+.w{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box}
+h1{font-size:20px;margin:0 0 6px;color:#F0D080}
+p{color:#bbb;font-size:14px;line-height:1.9;max-width:320px;margin:8px 0}
+#g{margin:18px 0;min-height:44px}
+.ok{color:#8ff0c8;font-size:17px;font-weight:700}
+.er{color:#f88;font-size:13px}
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="w">
+  <h1 id="nm">تسجيل الدخول</h1>
+  <p id="msg">سجّل دخولك بحساب Google ثم ارجع إلى التطبيق.</p>
+  <div id="g"></div>
+  <a id="back" style="display:none;margin-top:6px;padding:13px 28px;border-radius:100px;background:linear-gradient(135deg,#F0D080,#C9A84C);color:#1a1230;font-weight:900;font-size:15px;text-decoration:none">العودة إلى التطبيق</a>
+</div>
+<script>
+(function () {
+  var Q = new URLSearchParams(location.search), B = (Q.get('b') || '').trim(), HS = (Q.get('hs') || '').trim(), SCH = (Q.get('sch') || '').trim();
+  var CLIENT_ID = '776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
+  var $ = function (i) { return document.getElementById(i); }, CFG = null;
+  function msg(t, c) { var m = $('msg'); m.textContent = t; m.className = c || ''; }
+  if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(B) || !/^[a-f0-9]{32}$/.test(HS)) { msg('الرابط غير صالح. ارجع إلى التطبيق وأعد المحاولة.', 'er'); return; }
+  fetch(B + '?action=config').then(function (r) { return r.json(); }).then(function (c) {
+    if (!c || !c.k || c.status === 'locked') { msg('هذا المؤشر غير متاح حالياً.', 'er'); return; }
+    CFG = c; if (c.name) { $('nm').textContent = c.name; document.title = c.name; }
+    var t = 0; (function init() {
+      if (!(window.google && google.accounts && google.accounts.id)) { if (t++ < 100) return setTimeout(init, 100); msg('تعذّر تحميل Google. تأكد من الاتصال.', 'er'); return; }
+      google.accounts.id.initialize({ client_id: CLIENT_ID, nonce: 'lvnmkt-' + c.mid, callback: done, ux_mode: 'popup' });
+      google.accounts.id.renderButton($('g'), { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', locale: 'ar' });
+    })();
+  }).catch(function () { msg('تعذّر الاتصال بالمؤشر.', 'er'); });
+  function done(resp) {
+    msg('جارٍ التحقق…');
+    fetch(B + '?key=' + encodeURIComponent(CFG.k) + '&action=hs_put', { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'hs_put', id: HS, idToken: resp.credential }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (j && j.status === 'ok') { $('g').style.display = 'none'; msg('✓ تم تسجيل الدخول', 'ok'); if (/^[a-z][a-z0-9.]{3,80}$/.test(SCH)) { var bk = $('back'), u = SCH + '://auth?ok=1'; bk.href = u; bk.style.display = 'inline-block'; setTimeout(function () { try { location.href = u; } catch (e) {} }, 600); } else msg('✓ تم تسجيل الدخول. ارجع الآن إلى التطبيق.', 'ok'); }
+        else msg((j && j.error) || 'تعذّر الدخول. أعد المحاولة.', 'er');
+      }).catch(function () { msg('تعذّر الاتصال. أعد المحاولة.', 'er'); });
+  }
+})();
+</script>
+</body>
+</html>
