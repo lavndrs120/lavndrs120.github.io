@@ -4,7 +4,7 @@
 [![Lavenders (LAVNDR120) MCP server](https://mcprush.com/badge/lavenders-lavndr120-mcp/card.svg)](https://mcprush.com/to/lavenders-lavndr120-mcp?ref=badge)
 
 **Lavenders (LAVNDR120)** is a consumer index for a market of 120 businesses and brands. Each business has its own order app, and the 120 apps are linked inside one market index that tracks real consumer orders.
-
+[![io.github.lavndrs120/lavenders MCP connector](https://glama.ai/mcp/connectors/io.github.lavndrs120/lavenders/badges/score.svg)](https://glama.ai/mcp/connectors/io.github.lavndrs120/lavenders)
 **لاڤندرز (LAVNDR120)** مؤشر استهلاكي لسوق من 120 بزنساً وبراند. لكل بزنس تطبيق طلبات خاص به، وتُربط التطبيقات الـ120 داخل مؤشر سوق واحد يتتبع طلبات المستهلكين الفعلية.
 
 - Website | الموقع: https://lavndrs120.github.io/
