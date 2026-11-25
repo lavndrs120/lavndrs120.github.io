@@ -233,7 +233,7 @@ function planCard(m){
   '<label>العملة (اختياري)</label><input id="pb_cur" maxlength="5" dir="ltr" placeholder="SDG" value="'+esc(bk.cur||'')+'">'+
   '<button class="btn" style="margin-top:10px" onclick="savePlans()">حفظ</button><div id="m10" class="msg"></div>'+
   '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول حفظ (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيتي «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز التحقق).</div>'+
-  '<h2 style="margin-top:16px">طلبات الاشتراك</h2><div id="subs" class="small">جاري التحميل…</div></div>';
+  '<div class="small" style="line-height:1.9;margin-top:10px">طلبات الاشتراك تصلك في <b>لوحة إدارة المؤشر</b> (اعتماد/رفض) وعلى بريدك.</div></div>';
 }
 async function savePlans(){
   const m=S.cur;if(!m)return;showMsg('m10','جاري الحفظ…','info');
@@ -247,7 +247,7 @@ async function savePlans(){
   }catch(e){showMsg('m10',e.message||'تعذّر الحفظ')}
 }
 async function loadSubs(){
-  const m=S.cur;if(!m)return;let rows=[];
+  return;const m=S.cur;if(!m)return;let rows=[];
   try{const j=await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+'/values/'+encodeURIComponent('Subs!A2:H500')+'?valueRenderOption=UNFORMATTED_VALUE');rows=j.values||[]}catch(e){rows=[]}
   m.subs=rows;const el=$('subs');if(!el||S.cur!==m)return;
   const nm=k=>(PT.filter(x=>x[0]===k)[0]||[k,k])[1],now=Date.now(),pend=[],act=[];
@@ -292,13 +292,11 @@ async function runCreate(){
   let n=0;
   try{
     stepsUI(0);await gAuth();n=1;stepsUI(1);
-    if(!P.sheetId){const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+P.name,timeZone:'Africa/Khartoum'},sheets:[{properties:{title:'Businesses'}},{properties:{title:'Totals'}},{properties:{title:'Snapshots'}},{properties:{title:'Config'}}]})});
-    P.sheetId=s.spreadsheetId;
-    await gf('https://sheets.googleapis.com/v4/spreadsheets/'+P.sheetId+'/values:batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valueInputOption:'RAW',data:[
-      {range:'Businesses!A1',values:[['Name','SheetId','Added']]},{range:'Totals!A1',values:[['SheetId','Sum','Count','UpdatedAt','Readable']]},{range:'Snapshots!A1',values:[['Time','NAV']]}]})});}
+    if(!P.sheetId){const s=await gf('https://sheets.googleapis.com/v4/spreadsheets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({properties:{title:PREFIX+P.name,timeZone:'Africa/Khartoum'},sheets:[{properties:{title:'Config'}}]})});
+    P.sheetId=s.spreadsheetId;}
     const sheetId=P.sheetId,name=P.name;
     n=2;stepsUI(2);
-    const [c,m]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب المؤشر');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
+    const [c,m]=await Promise.all([api('mkt_core',{},true).then(j=>{if(!j||!j.code)throw new Error((j&&j.error)||'تعذّر تحميل قالب المؤشر');return j.code}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
     const mid=P.mid||(P.mid=rid());let tr=null;
     if(S.trial){const rv=await api('mkt_trial_reserve',{mid:mid},true);if(rv.error)throw new Error(rv.error);if(!rv.entitled)tr=rv}
     const cfg={id:mid,name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
@@ -330,7 +328,7 @@ async function openMarket(i){
   try{
     const cv=await getVals(m.sheetId,'Config!A1:F1'),cr=cv[0]||[];try{m.plans=JSON.parse(cr[5]||'{}')||{}}catch(e){m.plans={}}m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
-    m.cfg=cfg;m.biz=(await getVals(m.sheetId,'Businesses!A2:C121'));
+    m.cfg=cfg;try{m.biz=(await getVals(m.sheetId,'BusinessSheets!A2:B200')).map(r=>[r[1]||'',r[0]||''])}catch(e){m.biz=[]}
     renderMarket();checkHealth();loadMApk();mktTrialUI();loadSubs();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
 }
@@ -340,7 +338,7 @@ async function updateBackend(){
   showMsg('m3','جاري التحديث…','info');
   try{
     await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+':batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[{updateSpreadsheetProperties:{properties:{timeZone:'Africa/Khartoum'},fields:'timeZone'}}]})});
-    const [c,mf]=await Promise.all([fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل القالب');return r.text()}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل الإعدادات');return r.text()})]);
+    const [c,mf]=await Promise.all([api('mkt_core',{},true).then(j=>{if(!j||!j.code)throw new Error((j&&j.error)||'تعذّر تحميل قالب المؤشر');return j.code}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل الإعدادات');return r.text()})]);
     const cfg={id:m.cfg.mid||rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120};
     if(m.cfg.trialEnds&&m.cfg.unlockHash){cfg.trialEnds=m.cfg.trialEnds;cfg.unlockHash=m.cfg.unlockHash}
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
@@ -474,24 +472,18 @@ async function hostMarket(){
     const ex=await ghApi('/repos/'+user+'/'+repo);
     if(ex.status===404){const c=await ghApi('/user/repos',{method:'POST',body:JSON.stringify({name:repo,description:'Independent market index card — built with Lavenders (LAVNDR120)',private:false,auto_init:true})});if(c.status>=300)throw new Error('تعذّر إنشاء الريبو');await new Promise(r=>setTimeout(r,2000))}
     else{const mj=await ghApi('/repos/'+user+'/'+repo+'/contents/market.json');if(mj.status===404||!mj.json.content||atob(mj.json.content.replace(/\n/g,'')).indexOf(m.cfg.url)<0)throw new Error('هذا الاسم مستخدم عندك لمشروع آخر، اختر اسماً مختلفاً')}
-    const [pg,tpl,dsh,adm]=await Promise.all([fetch('market.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب البطاقة');return r.text()}),fetch('market-index.gs.txt',{cache:'no-cache'}).then(r=>r.text()),fetch('market-app.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب لوحة المؤشر');return r.text()}),fetch('market-admin.html',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل قالب لوحة الإدارة');return r.text()})]);
-    const a="const BACK=(new URLSearchParams(location.search).get('b')||'').trim();";
-    if(pg.indexOf(a)<0)throw new Error('قالب البطاقة غير متوافق');
-    const page=pg.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace('<meta name="robots" content="noindex">','');
-    const dk="DASHBASE = 'https://lavndrs120.github.io/market-app.html'";
-    if(dsh.indexOf(a)<0||page.indexOf(dk)<0)throw new Error('قالب البطاقة غير متوافق');
-    const page2=page.replace(dk,"DASHBASE = 'app.html'");
-    const ak="var ADMINBASE = 'https://lavndrs120.github.io/market-admin.html'",dk2="'https://lavndrs120.github.io/market-app.html')";
-    if(dsh.indexOf(ak)<0||adm.indexOf(a)<0||adm.indexOf(dk2)<0)throw new Error('قالب لوحة الإدارة غير متوافق');
-    const dpage=dsh.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace(ak,"var ADMINBASE = 'admin.html'");
-    const apage=adm.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace(dk2,"'app.html')");
+    const gt=(f,e)=>fetch(f,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(e);return r.text()});
+    const [pg,dsh,adm]=await Promise.all([gt('market.html','تعذّر تحميل قالب البطاقة'),gt('market-app.html','تعذّر تحميل قالب لوحة المؤشر'),gt('market-admin.html','تعذّر تحميل قالب لوحة الإدارة')]);
+    const a="const BACK=(new URLSearchParams(location.search).get('b')||'').trim();",nx='<meta name="robots" content="noindex,nofollow">';
+    if(pg.indexOf(a)<0||dsh.indexOf(a)<0||adm.indexOf(a)<0)throw new Error('القوالب غير متوافقة');
+    const fx=t=>t.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace(nx,'');
+    const page2=fx(pg),dpage=fx(dsh),apage=fx(adm);
     const short='https://'+user.toLowerCase()+'.github.io/'+repo+'/';
-    const readme='# '+m.name+'\n\nبطاقة مؤشر سوق مستقل أنشأتها أداة **لاڤندرز (Lavenders · LAVNDR120)**.\n\nAn independent market index card generated with Lavenders.\n\n- Card: '+short+'\n- Backend template: [backend/Code.gs](backend/Code.gs) (Google Apps Script; the live copy and its sheet run in the owner\'s own Google account)\n- Orders, business sheets and images are not stored here.\n\nThe index reflects real consumer orders. There is no buying, selling or trading of shares, and no promise of returns.\n';
+    const readme='# '+m.name+'\n\nبطاقة مؤشر سوق مستقل أنشأتها أداة **لاڤندرز (Lavenders · LAVNDR120)**.\n\nAn independent market index card generated with Lavenders.\n\n- Card: '+short+'\n- Backend: Google Apps Script running in the owner\'s own Google account\n- Orders, business sheets and images are not stored here.\n\nThe index reflects real consumer orders. There is no buying, selling or trading of shares, and no promise of returns.\n';
     await ghPut(user,repo,'index.html',b64u(page2),'Lavenders: index card');
     await ghPut(user,repo,'app.html',b64u(dpage),'Lavenders: dashboard');
     await ghPut(user,repo,'admin.html',b64u(apage),'Lavenders: admin board');
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
-    await ghPut(user,repo,'backend/Code.gs',b64u(tpl),'Lavenders: backend template');
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
     try{await ghApi('/repos/'+user+'/'+repo+'/pages',{method:'POST',body:JSON.stringify({source:{branch:'main',path:'/'}})})}catch(e){}
     await putVals(m.sheetId,'Config!C1',[[short]]);m.home=short;HOSTING=false;
@@ -524,6 +516,7 @@ async function recalcOrders(){
   }catch(e){showMsg('m8','تعذّر الاتصال بالمؤشر. حاول بعد قليل.')}
   if(b)b.disabled=false;
 }
+function adminLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market-admin.html?b='+encodeURIComponent(m.cfg.url)}
 function viewLink(m){return location.origin+location.pathname.replace(/[^\/]*$/,'')+'market.html?b='+encodeURIComponent(m.cfg.url)}
 function renderMarket(){
   const m=S.cur,n=(m.biz||[]).filter(r=>r&&r[1]).length;
@@ -531,16 +524,12 @@ function renderMarket(){
   h+='<div id="mtrial"></div>';
   h+='<div class="card" id="hcard"><h2>حالة المؤشر</h2><div class="small">جاري الفحص…</div></div>';
   h+='<div class="card"><h2>رابط بطاقة المؤشر</h2><a class="link" href="'+esc(viewLink(m))+'" target="_blank" rel="noopener">'+esc(viewLink(m))+'</a><button class="btn sec sm" style="margin-top:8px" onclick="copyTxt(\''+esc(viewLink(m))+'\');this.textContent=\'تم النسخ ✓\'">نسخ الرابط</button></div>';
-  h+='<div class="card"><h2>إضافة بزنس أو براند</h2><div class="small" style="line-height:1.9;margin-bottom:8px">اطلب من البزنس مشاركة شيت طلباته معك (عرض فقط) على بريدك <b dir="ltr">'+esc(EMAIL)+'</b>، ثم الصق هنا رمز الشيت (يجده في صفحة متجره ضمن «رمز الشيت»).</div><label>اسم البزنس (لك فقط، لا يظهر للعامة)</label><input id="bname" maxlength="80"><label>رمز الشيت</label><input id="bsid" dir="ltr" placeholder="1AbC…"><button class="btn" style="margin-top:10px" onclick="addBiz()" '+(n>=120?'disabled':'')+'>إضافة</button><div id="m2" class="msg"></div></div>';
+  h+='<div class="card"><h2>لوحة إدارة المؤشر</h2><div class="small" style="line-height:1.9;margin-bottom:8px">نفس لوحة أدمن لاڤندرز تماماً: البزنسات، المشتركون واعتماد الاشتراكات، الإشعارات، وكل ما فيها. سجّل الدخول ببريدك <b dir="ltr">'+esc(EMAIL)+'</b>.</div><a class="btn" style="display:block;text-align:center;text-decoration:none" href="'+esc(adminLink(m))+'" target="_blank" rel="noopener">فتح لوحة الإدارة</a></div>';
   h+='<div class="card"><h2>لون المؤشر</h2><div class="small">لون العناوين والتمييز في بطاقة مؤشرك.</div>'+mkSwatches(m.acc,'pickMAcc')+'<div id="m9" class="msg"></div></div>';
   h+=planCard(m);
   h+='<div class="card"><h2>خلفية المؤشر</h2>'+mImgBox(m)+'</div>';
   h+='<div class="card"><h2>استقلالك الكامل: بطاقتك في حسابك</h2>'+ghBox(m)+'</div>';
   h+='<div class="card"><h2>تطبيق الأندرويد للمؤشر</h2><div id="mapk" class="small">…</div></div>';
-  h+='<div class="card"><h2>البزنسات ('+n+')</h2>';
-  if(!n)h+='<div class="small">لم تُضف بزنسات بعد.</div>';
-  (m.biz||[]).forEach((r,i)=>{if(r&&r[1])h+='<div class="ord"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>'+esc(r[0]||'—')+'</span><button class="btn sec sm" onclick="rmBiz('+i+')">حذف</button></div></div>'});
-  h+='</div>';
   h+='<div class="card"><h2>تحديث الخلفية</h2><div class="small" style="line-height:1.9;margin-bottom:8px">إن ظهر خطأ عند فتح رابط البطاقة، اضغط هنا لتثبيت آخر نسخة من كود المؤشر في حسابك (يبقى الرابط نفسه).</div><button class="btn sec" onclick="updateBackend()">تحديث الخلفية</button><div id="m3" class="msg"></div></div>';
   h+='<div class="card"><h2>حذف المؤشر</h2><div class="small" style="line-height:1.9;margin-bottom:8px">يُوقف رابط البطاقة ويُنقل شيت المؤشر وكوده إلى سلة Drive في حسابك (تستطيع استعادتهما منها). لا يمسّ شيتات البزنسات ولا متاجرها. بعد الحذف يتحرر مقعد من حدّك.</div><label>اكتب اسم المؤشر للتأكيد</label><input id="dname" maxlength="60"><button class="btn bad" id="dbtn" style="margin-top:10px" onclick="delMarket()">حذف المؤشر</button><div id="m6" class="msg"></div></div>';
   h+='<div class="card"><h2>الشيت الكامل</h2><a class="link" href="https://docs.google.com/spreadsheets/d/'+esc(m.sheetId)+'" target="_blank" rel="noopener">فتح الشيت في حسابك</a></div>';
@@ -563,12 +552,15 @@ async function mktTrialUI(){
 async function checkHealth(){
   const m=S.cur,el=$('hcard');if(!el)return;
   try{
-    const r=await callBack(m.cfg.url,{action:'health'});
-    if(r&&r.status==='ok'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل · بزنسات مقروءة '+r.readable+' من '+r.businesses+' · طلبات مقبولة '+r.orders+'</div><div class="small" style="margin-top:8px;line-height:1.9">إن ظهر بزنس غير مقروء فالسبب غالباً أن شيته لم يُشارك معك بعد.</div><button class="btn" id="rcBtn" style="margin-top:8px" onclick="recalcOrders()">إعادة حساب الطلبات</button><div id="m8" class="msg"></div><button class="btn sec sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل التحديث التلقائي (مرة واحدة)</button>';return}
-    if(r&&r.status==='locked'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#ffb3c0">⛔ متوقف — انتهت التجربة المؤقتة</div>';return}
+    const r=await callBack(m.cfg.url,{action:'ping'});
+    if(r&&r.status==='ok'){
+      const c=await callBack(m.cfg.url,{action:'config'}).catch(()=>null);
+      if(c&&c.status==='locked'){el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#ffb3c0">⛔ متوقف — انتهت التجربة المؤقتة</div>';return}
+      el.innerHTML='<h2>حالة المؤشر</h2><div class="small" style="color:#8ff0c8">✓ يعمل</div><div class="small" style="margin-top:8px;line-height:1.9">'+(r.mail==='ok'?'':'⚠ البريد غير مفعَّل: افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> ووافق على الصلاحيات. ')+'أضف البزنسات (حتى 120) من لوحة الإدارة؛ يكتمل السوق ويبدأ الاشتراك عند 120 بزنساً كما في لاڤندرز.</div>';
+      return}
     throw 0;
   }catch(e){
-    el.innerHTML='<h2>تفعيل المؤشر</h2><div class="small" style="line-height:1.9">مرة واحدة فقط: اضغط الزر، ثم في صفحة جوجل اختر حسابك ← «متقدم» ← «الانتقال» ← «السماح». بعدها اضغط «تحديث».</div><button class="btn ok sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=setup\',\'_blank\')">تفعيل</button> <button class="btn sec sm" onclick="checkHealth()">تحديث</button>';
+    el.innerHTML='<h2>تفعيل المؤشر</h2><div class="small" style="line-height:1.9">مرة واحدة فقط: اضغط الزر، ثم في صفحة جوجل اختر حسابك ← «متقدم» ← «الانتقال» ← «السماح». بعدها اضغط «تحديث».</div><button class="btn ok sm" style="margin-top:8px" onclick="window.open(\''+esc(m.cfg.url)+'?action=ping\',\'_blank\')">تفعيل</button> <button class="btn sec sm" onclick="checkHealth()">تحديث</button>';
   }
 }
 async function writeBiz(){
@@ -607,6 +599,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
