@@ -65,6 +65,7 @@ textarea{resize:vertical;min-height:60px}select option{background:#12121c}
 const WORKER_URL='https://lavndr.omssolutionorders.workers.dev';
 const GSI_CLIENT_ID='776097955989-go2bsq8e7c1umei4vj984jtabve49m32.apps.googleusercontent.com';
 const G_SCOPES='https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+function mkTier(){const t=S.tiers||[];return t.some(x=>x==='tycoon'||x==='tycoon_sector')?'tycoon':(t.indexOf('franchise')>-1?'franchise':'')}
 const LIMITS={franchise:1,tycoon:20,tycoon_sector:400};
 const PREFIX='LAVNDR Market — ';
 let TOKEN='',EMAIL='';try{TOKEN=sessionStorage.getItem('appb_token')||sessionStorage.getItem('lavndr_token')||'';EMAIL=sessionStorage.getItem('appb_email')||sessionStorage.getItem('lavndr_email')||''}catch(e){}
@@ -299,7 +300,7 @@ async function runCreate(){
     const [c,m]=await Promise.all([api('mkt_core',{},true).then(j=>{if(!j||!j.code)throw new Error((j&&j.error)||'تعذّر تحميل قالب المؤشر');return j.code}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل إعدادات المؤشر');return r.text()})]);
     const mid=P.mid||(P.mid=rid());let tr=null;
     if(S.trial){const rv=await api('mkt_trial_reserve',{mid:mid},true);if(rv.error)throw new Error(rv.error);if(!rv.entitled)tr=rv}
-    const cfg={id:mid,name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120};
+    const cfg={id:mid,name:name,owner:EMAIL,sheetId:sheetId,orderValue:4.275,max:120,tier:mkTier()};
     if(tr){cfg.trialEnds=tr.trialEnds;cfg.unlockHash=tr.unlockHash}
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
     if(!P.scriptId){const pr=await gf('https://script.googleapis.com/v1/projects',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:PREFIX+name})});P.scriptId=pr.scriptId}
@@ -339,7 +340,7 @@ async function updateBackend(){
   try{
     await gf('https://sheets.googleapis.com/v4/spreadsheets/'+m.sheetId+':batchUpdate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requests:[{updateSpreadsheetProperties:{properties:{timeZone:'Africa/Khartoum'},fields:'timeZone'}}]})});
     const [c,mf]=await Promise.all([api('mkt_core',{},true).then(j=>{if(!j||!j.code)throw new Error((j&&j.error)||'تعذّر تحميل قالب المؤشر');return j.code}),fetch('market-appsscript.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('تعذّر تحميل الإعدادات');return r.text()})]);
-    const cfg={id:m.cfg.mid||rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120};
+    const cfg={id:m.cfg.mid||rid(),name:m.cfg.name,owner:EMAIL,sheetId:m.sheetId,orderValue:4.275,max:120,tier:mkTier()};
     if(m.cfg.trialEnds&&m.cfg.unlockHash){cfg.trialEnds=m.cfg.trialEnds;cfg.unlockHash=m.cfg.unlockHash}
     const json=JSON.stringify(cfg).split(String.fromCharCode(8232)).join('\\u2028').split(String.fromCharCode(8233)).join('\\u2029');
     const sid=m.cfg.scriptId;

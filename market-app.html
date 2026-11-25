@@ -20,7 +20,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
   var cacheName = ''; try { cacheName = localStorage.getItem('mkv2_name:' + B.slice(-20)) || ''; } catch (e) {}
   window.MKT_CFG = (B ? realFetch(B + (B.indexOf('?') < 0 ? '?' : '&') + 'action=config').then(function (r) { return r.json(); }) : Promise.reject(new Error('no backend'))).then(function (c) {
     if (!c || c.error || c.status === 'locked') { note(c && c.status === 'locked' ? 'انتهت التجربة وهذا المؤشر مقفل — تواصل مع صاحبه.' : 'تعذّر قراءة إعدادات المؤشر' + (c && c.error ? ': ' + c.error : '') + ' — حدّث الخلفية من أداة الإنشاء.'); return (CFG = c || {}); }
-    CFG = c; window.MKT_MID = c.mid; window.MKT_NAME = c.name; try { localStorage.setItem('mkv2_name:' + B.slice(-20), c.name || ''); } catch (e) {}
+    CFG = c; window.MKT_TIER = c.tier; window.MKT_MID = c.mid; window.MKT_NAME = c.name; try { localStorage.setItem('mkv2_name:' + B.slice(-20), c.name || ''); } catch (e) {}
     theme(c); brand(c.name); unhide(); return c;
   }).catch(function () { note(B ? 'تعذّر الاتصال بخلفية المؤشر. تأكد أن النشر «أي شخص» وأن التحديث تم.' : 'رابط المؤشر ناقص: لا يوجد عنوان خلفية (b).'); return (CFG = {}); });
   function theme(c) {
@@ -2414,7 +2414,7 @@ function renderSubscribePickerScreen(availability, marketComplete, loggedIn) {
 if (window.LavCatalog) { LavCatalog.apply(GATE_OFFERS); LavCatalog.refresh(function (ch) { if (ch) LavCatalog.apply(GATE_OFFERS); }); }
 function renderGatePath(pathKey) {
   const path = GATE_PATHS[pathKey];
-  const cards = path.offers.map(k => {
+  const cards = path.offers.filter(k => window.MKT_TIER !== 'franchise' || (k !== 'franchise' && k !== 'tycoon')).map(k => {
     const o = GATE_OFFERS[k], t = GATE_THEMES[o.theme];
     const prices = o.variants.map(v => v.price).join(' / ');
     const first = o.variants[0];
