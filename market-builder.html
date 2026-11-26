@@ -487,6 +487,7 @@ async function hostMarket(){
     await ghPut(user,repo,'app.html',b64u(dpage),'Lavenders: dashboard');
     await ghPut(user,repo,'admin.html',b64u(apage),'Lavenders: admin board');
     await ghPut(user,repo,'business.html',b64u(bpage),'Lavenders: business portal');
+    try{const bj=JSON.parse(await gt('market-bundle.json','تعذّر تحميل صفحات النسخة الإنجليزية'));let bi=0;const bk=Object.keys(bj);for(const f of bk){bi++;try{await ghPut(user,repo,f,b64u(bj[f]),'Lavenders: '+f)}catch(e){}}}catch(e){}
     for(const n of INFO_PAGES){try{const t=await gt('market-'+n+'.html','تعذّر تحميل صفحة '+n);await ghPut(user,repo,n+'.html',b64u(fx(t)),'Lavenders: '+n)}catch(e){if(/GitHub|token|401|403/.test(String(e&&e.message)))throw e}}
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
@@ -608,6 +609,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

@@ -70,6 +70,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
       if (m && window.MKT_TIER === 'franchise' && (m[1] === 'franchise' || m[1] === 'tycoon')) { a.style.display = 'none'; return; }
       if (m) { var base = INFO_.indexOf(m[1]) >= 0 ? (pre ? 'market-' + m[1] + '.html' : m[1] + '.html') : { business: MKP.biz, 'market-business': MKP.biz, dashboard: MKP.app, 'market-app': MKP.app, app: MKP.app, admin: MKP.admin, 'market-admin': MKP.admin, index: MKP.home, market: MKP.home }[m[1]]; var q = m[2] || ''; if (B && pre && q.indexOf('b=') < 0) q += (q ? '&' : '?') + 'b=' + encodeURIComponent(B); to = base + q + (m[3] || ''); }
       else if (OUT.test(h.replace(/^\.?\//, '')) || (window.MKT_TIER === 'franchise' && /^(franchise|tycoon)(\.html)?(\?|#|$)/.test(h.replace(/^\.?\//, '')))) { a.style.display = 'none'; return; }
+      else if (!pre && /^(en\/|insights\/)/.test(h.replace(/^\.?\//, ''))) return;
       else to = PUB + h.replace(/^\.?\//, '');
       if (to !== h) a.setAttribute('href', to);
     });
@@ -707,7 +708,7 @@ body.builder-mode #builderPanel { display:block; }
 html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 </style>
-<style>#footLinks,#footLinksEn,[onclick*="builder.html"]{display:none!important}</style></head>
+<style>#footLinksEn,[onclick*="builder.html"]{display:none!important}</style></head>
 <body>
 <div id="loginOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(6,6,12,.60);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;font-family:sans-serif;">
 <!-- ✅ جديد: زر إغلاق — تسجيل الدخول بقى اختياري بالكامل، أي زائر يقدر يقفل الشاشة دي
@@ -3965,6 +3966,5 @@ window.addEventListener('load', function() {
 <script>
 (function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK')||document.getElementById('mktG'))w.style.display='none';},500);})();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
