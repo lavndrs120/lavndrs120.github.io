@@ -3,6 +3,8 @@
 <head>
 <meta name="robots" content="noindex,nofollow">
 <script>
+/* جسر اللغة: lavndr-en.js يستعمل mkv2_lang وبقية صفحات المؤشر mkv2_lang */
+try{(function(){var q=new URLSearchParams(location.search).get('lang'),L=window.localStorage,v=(q==='en'||q==='ar')?q:(L.getItem('mkv2_lang')||L.getItem('mkv2_lang'));if(v==='en'||v==='ar'){L.setItem('mkv2_lang',v);L.setItem('mkv2_lang',v)}})()}catch(e){}
 const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
 (function () {
   try {
@@ -60,7 +62,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
   }
   /* الروابط: صفحات المؤشر الثلاث + صفحات لاڤندرز المعلوماتية (مطلقة) + إخفاء ما هو خارج نطاق المؤشر */
   var INFO_ = ['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index'];
-  var PUB = 'https://lavndrs120.github.io/', OUT = /^(builder|market-builder|app-builder|embed|store|session-check)(\.html)?(\?|#|$)/;
+  var PUB = 'https://lavndrs120.github.io/', OUT = /^(en\/)?(builder|market-builder|app-builder|embed|store|session-check)(\.html)?(\?|#|$)/;
   function fixLinks() {
     document.querySelectorAll('a[href]').forEach(function (a) {
       var h = a.getAttribute('href') || '';
