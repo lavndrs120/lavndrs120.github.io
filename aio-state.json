@@ -207,6 +207,19 @@
     "description": "تطبيق أندرويد لمتجر بني باستخدام لاڤندرز، يمكن تحميله مباشرة من الموقع الرسمي",
     "date": "2026-11-25"
    }
+  },
+  {
+   "id": "golden-certificate-vs-shares",
+   "title": "Is the Lavenders golden certificate a share or an investment?",
+   "description": "The Lavenders golden certificate is not a share or investment",
+   "slug": "is-the-lavenders-golden-certificate-a-share-or-an-investment",
+   "date": "2026-11-26",
+   "devto": "https://dev.to/lavenders/is-the-lavenders-golden-certificate-a-share-or-an-investment-1khc",
+   "ar": {
+    "title": "ما هي شهادة لاڤندرز الذهبية؟",
+    "description": "لاڤندرز لا تتيح شراء أو بيع أو تداول الأسهم",
+    "date": "2026-11-26"
+   }
   }
  ],
  "failed": {}
