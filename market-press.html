@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<script>
+const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
+(function () {
+  try {
+    var L = window.localStorage, P = 'mkss:';
+    var W = { getItem: function (k) { return L.getItem(P + k); }, setItem: function (k, v) { L.setItem(P + k, String(v)); }, removeItem: function (k) { L.removeItem(P + k); },
+      clear: function () { Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }).forEach(function (k) { L.removeItem(k); }); },
+      key: function (i) { var a = Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }); return a[i] == null ? null : a[i].slice(P.length); },
+      get length() { return Object.keys(L).filter(function (k) { return k.indexOf(P) === 0; }).length; } };
+    L.getItem('x'); Object.defineProperty(window, 'sessionStorage', { configurable: true, get: function () { return W; } });
+  } catch (e) {}
+})();
+/* ══ مؤشر مستقل = نسخة لاڤندرز: هذه الطبقة تحوّل نداءات الـ Worker إلى خلفية هذا المؤشر فقط ══ */
+(function () {
+  var QS = new URLSearchParams(location.search), B = BACK;
+  try { if (B) localStorage.setItem('mkv2_b', B); else B = localStorage.getItem('mkv2_b') || ''; } catch (e) {}
+  window.MKB = B;
+  var SCH = (QS.get('sch') || '').trim(); try { if (/^[a-z][a-z0-9.]{3,80}$/.test(SCH)) localStorage.setItem('mkv2_sch', SCH); else SCH = localStorage.getItem('mkv2_sch') || ''; } catch (e) {}
+  var APP = QS.get('app') === '1';
+  var INAPP = false; try { INAPP = APP || /; wv\)|\bVersion\/4\.0\b.*Chrome/.test(navigator.userAgent) || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { INAPP = APP; }
+  var host = location.pathname.split('/').pop() || '', pre = /^market/.test(host);
+  window.MKP = pre ? { home: 'market.html', app: 'market-app.html', admin: 'market-admin.html', biz: 'market-business.html' } : { home: 'index.html', app: 'app.html', admin: 'admin.html', biz: 'business.html' };
+  /* تطبيق أندرويد قديم (قبل MktApp/2): نوافذ confirm/prompt مكتومة فتفشل الأزرار، فنقبل التأكيد تلقائياً بدل الفشل الصامت */
+  try { if (/; wv\)/.test(navigator.userAgent) && !/MktApp\/2/.test(navigator.userAgent)) { window.confirm = function () { return true; }; window.prompt = function (m, d) { return d == null ? '' : d; }; } } catch (e) {}
+  var realFetch = window.fetch.bind(window), CFG = null;
+  var hide = document.createElement('style'); hide.id = 'mkHide'; hide.textContent = 'html{visibility:hidden}'; document.documentElement.appendChild(hide);
+  var unhide = function () { var h = document.getElementById('mkHide'); if (h) h.remove(); }; setTimeout(unhide, 4000);
+  function note(t) { var go = function () { if (document.getElementById('mkNote')) return; var d = document.createElement('div'); d.id = 'mkNote'; d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;font:13px/1.7 sans-serif;padding:8px 14px;text-align:center'; d.textContent = t; document.body.appendChild(d); }; if (document.body) go(); else document.addEventListener('DOMContentLoaded', go); unhide(); }
+  var cacheName = ''; try { cacheName = localStorage.getItem('mkv2_name:' + B.slice(-20)) || ''; } catch (e) {}
+  window.MKT_CFG = (B ? realFetch(B + (B.indexOf('?') < 0 ? '?' : '&') + 'action=config').then(function (r) { return r.json(); }) : Promise.reject(new Error('no backend'))).then(function (c) {
+    if (!c || c.error || c.status === 'locked') { note(c && c.status === 'locked' ? 'انتهت التجربة وهذا المؤشر مقفل — تواصل مع صاحبه.' : 'تعذّر قراءة إعدادات المؤشر' + (c && c.error ? ': ' + c.error : '') + ' — حدّث الخلفية من أداة الإنشاء.'); return (CFG = c || {}); }
+    CFG = c; window.MKT_TIER = c.tier; window.MKT_WA = c.wa || ''; try { window.WHATSAPP_NUMBER = c.wa || ''; } catch (e) {} window.MKT_MID = c.mid; window.MKT_NAME = c.name; try { localStorage.setItem('mkv2_name:' + B.slice(-20), c.name || ''); } catch (e) {}
+    theme(c); brand(c.name); unhide(); return c;
+  }).catch(function () { note(B ? 'تعذّر الاتصال بخلفية المؤشر. تأكد أن النشر «أي شخص» وأن التحديث تم.' : 'رابط المؤشر ناقص: لا يوجد عنوان خلفية (b).'); return (CFG = {}); });
+  function theme(c) {
+    var d = 'https://lavndrs120.github.io/', m = d + 'bg-m.jpg', dk = d + 'bg-d.jpg', ac = '';
+    if (/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(c.bizImage || '')) { m = dk = c.bizImage; }
+    if (/^#[0-9A-Fa-f]{6}$/.test(c.accent || '')) ac = c.accent;
+    var el = document.createElement('style'), css = '';
+    if (m !== d + 'bg-m.jpg') css += 'body::after{background:linear-gradient(rgba(6,6,12,.88) 0%,rgba(6,6,12,.62) 40%,rgba(6,6,12,.82) 100%),url("' + m + '") center/cover no-repeat !important}@media(min-width:900px){body::after{background:linear-gradient(rgba(6,6,12,.78),rgba(6,6,12,.70)),url("' + dk + '") center/cover no-repeat !important}}';
+    if (ac) { var r = parseInt(ac.slice(1, 3), 16), g = parseInt(ac.slice(3, 5), 16), b = parseInt(ac.slice(5, 7), 16); css += ':root{--gold:' + ac + ';--gold2:' + ac + ';--gold-dim:rgba(' + r + ',' + g + ',' + b + ',.15);--gold-glow:rgba(' + r + ',' + g + ',' + b + ',.3)}'; }
+    css += 'a[href="builder.html"],a[href="market-builder.html"]{display:none!important}';
+    el.textContent = css; document.documentElement.appendChild(el);
+  }
+  function brand(name) {
+    if (!name) return;
+    document.title = name;
+    var walk = function (root) {
+      var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, a = [];
+      while ((n = w.nextNode())) { var p = n.parentNode && n.parentNode.nodeName; if (p === 'SCRIPT' || p === 'STYLE') continue; if (n.nodeValue.indexOf('LAVNDR120') > -1) a.push(n); }
+      a.forEach(function (t) { t.nodeValue = t.nodeValue.split('LAVNDR120').join(name); });
+    };
+    var run = function () { try { walk(document.body); } catch (e) {} };
+    var go = function () { run(); var t = 0; new MutationObserver(function () { if (t) return; t = setTimeout(function () { t = 0; run(); }, 150); }).observe(document.body, { childList: true, subtree: true, characterData: true }); };
+    if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+  }
+  /* الروابط: صفحات المؤشر الثلاث + صفحات لاڤندرز المعلوماتية (مطلقة) + إخفاء ما هو خارج نطاق المؤشر */
+  var INFO_ = ['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index'];
+  var PUB = 'https://lavndrs120.github.io/', OUT = /^(builder|market-builder|app-builder|embed|store|session-check)(\.html)?(\?|#|$)/;
+  function fixLinks() {
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var h = a.getAttribute('href') || '';
+      if (!h || h.charAt(0) === '#' || /^(https?:|mailto:|tel:|javascript:|data:|blob:|intent:|whatsapp:|sms:)/i.test(h)) return;
+      var m = /^\.?\/?(dashboard|admin|index|market|market-app|market-admin|app|business|market-business|about|faq|packages|press|privacy|lava|magma|vindex|oms|tycoon|franchise|reseller|businesses|golden-certificate|consumer-index)\.html(\?[^#]*)?(#.*)?$/.exec(h), to = null;
+      if (!m && /^\.?\/?(\?[^#]*)?(#.*)?$/.test(h)) m = [h, 'index', (/^\.?\/?(\?[^#]*)?/.exec(h) || [])[1] || '', (/(#.*)$/.exec(h) || [])[1] || ''];
+      if (m && window.MKT_TIER === 'franchise' && (m[1] === 'franchise' || m[1] === 'tycoon')) { a.style.display = 'none'; return; }
+      if (m) { var base = INFO_.indexOf(m[1]) >= 0 ? (pre ? 'market-' + m[1] + '.html' : m[1] + '.html') : { business: MKP.biz, 'market-business': MKP.biz, dashboard: MKP.app, 'market-app': MKP.app, app: MKP.app, admin: MKP.admin, 'market-admin': MKP.admin, index: MKP.home, market: MKP.home }[m[1]]; var q = m[2] || ''; if (B && pre && q.indexOf('b=') < 0) q += (q ? '&' : '?') + 'b=' + encodeURIComponent(B); to = base + q + (m[3] || ''); }
+      else if (OUT.test(h.replace(/^\.?\//, '')) || (window.MKT_TIER === 'franchise' && /^(franchise|tycoon)(\.html)?(\?|#|$)/.test(h.replace(/^\.?\//, '')))) { a.style.display = 'none'; return; }
+      else to = PUB + h.replace(/^\.?\//, '');
+      if (to !== h) a.setAttribute('href', to);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { fixLinks(); setInterval(fixLinks, 1200); });
+  function ok(o) { return new Response(JSON.stringify(o), { status: 200, headers: { 'Content-Type': 'application/json' } }); }
+  window.fetch = function (u, o) {
+    var url = String(u && u.url || u || '');
+    if (url.indexOf('workers.dev') < 0) return realFetch.apply(window, arguments);
+    var opt = Object.assign({}, o || {}), hd = Object.assign({}, opt.headers || {});
+    return window.MKT_CFG.then(function (c) {
+      if (!c || !c.k) return ok({ error: 'المؤشر غير جاهز', code: 503 });
+      var q = new URLSearchParams(url.split('?')[1] || ''), tok = q.get('token') || '', au = hd.Authorization || hd.authorization || '';
+      if (!tok && /^Bearer /.test(au)) tok = au.slice(7);
+      var body = null; try { body = opt.body ? JSON.parse(opt.body) : null; } catch (e) {}
+      if (body && !tok && body.token) tok = body.token;
+      var action = q.get('action') || (body && body.action) || '';
+      if (action === 'login' && body && body.idToken === 'mkcode' && window.__mkSess) { var s = window.__mkSess; window.__mkSess = null; return ok(s); }
+      q.set('key', c.k); if (tok) q.set('token', tok); else q.delete('token');
+      var target = B + (B.indexOf('?') < 0 ? '?' : '&') + q.toString();
+      var init = { method: opt.method || 'GET' };
+      if (init.method.toUpperCase() === 'POST') { init.method = 'POST'; init.headers = { 'Content-Type': 'text/plain;charset=utf-8' }; init.body = opt.body || '{}'; }
+      return realFetch(target, init);
+    });
+  };
+  /* تسجيل الدخول: Google (nonce المؤشر) أو رمز يصل للبريد (للتطبيق والمتصفحات المقيَّدة) */
+  window.MKT_wrapGSI = function (cfg) { cfg = cfg || {}; cfg.nonce = 'lvnmkt-' + (window.MKT_MID || ''); return cfg; };
+  function api(params) { return window.MKT_CFG.then(function (c) { var q = new URLSearchParams(Object.assign({ key: c.k }, params)); return realFetch(B + (B.indexOf('?') < 0 ? '?' : '&') + q.toString()).then(function (r) { return r.json(); }); }); }
+  var CODE = false, LEM = '', HSTO = 0;
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.MKT_loginUI = function () {
+    var wrap = document.getElementById('gsiButtonWrap'); if (!wrap) return;
+    var box = document.getElementById('mktLg');
+    if (!box) { box = document.createElement('div'); box.id = 'mktLg'; box.style.cssText = 'margin-top:14px;max-width:300px;text-align:center;font-family:sans-serif;color:#aaa'; wrap.insertAdjacentElement('afterend', box); }
+    var inp = 'width:100%;box-sizing:border-box;padding:13px;margin-bottom:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:15px;text-align:center;outline:none',
+        btn = 'width:100%;padding:13px;border:none;border-radius:100px;background:linear-gradient(135deg,#F0D080,#C9A84C);color:#1a1230;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:8px';
+    if (!CODE) {
+      if (INAPP) {
+        wrap.style.display = 'none';
+        var waiting = hsActive();
+        box.innerHTML = '<button id="mktG" style="' + btn + ';background:#fff;color:#222;display:flex;align-items:center;justify-content:center;gap:10px"><b style="color:#4285F4;font-size:18px">G</b> الدخول بحساب Google</button>' +
+          (waiting ? '<div style="font-size:12.5px;line-height:1.9;color:#C9A84C;margin:8px 0">أكمل الدخول في المتصفح ثم ارجع إلى التطبيق — ننتظرك…<br><a href="#" id="mktHsC" style="color:#aaa;font-size:11.5px">إلغاء</a></div>' : '') +
+          '<a href="#" id="mktToCode" style="color:#aaa;font-size:12px">أو ادخل برمز يصل لبريدك</a>';
+        document.getElementById('mktG').onclick = function () { startHs(); MKT_loginUI(); };
+        var hc = document.getElementById('mktHsC'); if (hc) hc.onclick = function (e) { e.preventDefault(); hsClear(); MKT_loginUI(); };
+        document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); CODE = true; MKT_loginUI(); };
+        return;
+      }
+      wrap.style.display = 'block'; box.innerHTML = '<a href="#" id="mktToCode" style="color:#C9A84C;font-size:12px">لا يعمل زر Google؟ ادخل برمز على بريدك</a>'; document.getElementById('mktToCode').onclick = function (e) { e.preventDefault(); CODE = true; MKT_loginUI(); }; return; }
+    wrap.style.display = 'none';
+    if (LEM) {
+      box.innerHTML = '<div style="font-size:13px;line-height:1.8;margin-bottom:12px">أرسلنا رمزاً من 6 أرقام إلى<br><b dir="ltr" style="color:#fff">' + esc(LEM) + '</b></div><input id="mktK" inputmode="numeric" maxlength="6" placeholder="000000" style="' + inp + ';letter-spacing:8px;font-size:20px"><button id="mktV" style="' + btn + '">تأكيد</button><div id="mktM" style="font-size:12px;min-height:18px;color:#f88"></div><a href="#" id="mktRe" style="color:#C9A84C;font-size:12px">إعادة الإرسال</a> · <a href="#" id="mktCh" style="color:#C9A84C;font-size:12px">تغيير البريد</a>';
+      document.getElementById('mktV').onclick = verify;
+      document.getElementById('mktRe').onclick = function (e) { e.preventDefault(); send(LEM); };
+      document.getElementById('mktCh').onclick = function (e) { e.preventDefault(); LEM = ''; MKT_loginUI(); };
+    } else {
+      box.innerHTML = '<div style="font-size:13px;margin-bottom:10px">اكتب بريدك لنرسل لك رمز دخول</div><input id="mktE" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" style="' + inp + '"><button id="mktS" style="' + btn + '">إرسال الرمز</button><div id="mktM" style="font-size:12px;min-height:18px;color:#f88"></div>' + '<a href="#" id="mktBackG" style="color:#C9A84C;font-size:12px">العودة لـ Google</a>';
+      document.getElementById('mktS').onclick = function () { var em = (document.getElementById('mktE').value || '').trim().toLowerCase(); if (!em) { document.getElementById('mktM').textContent = 'اكتب بريدك'; return; } send(em); };
+      var bg = document.getElementById('mktBackG'); if (bg) bg.onclick = function (e) { e.preventDefault(); CODE = false; MKT_loginUI(); };
+    }
+    var lm = document.getElementById('loginMsg'); if (lm && /Google/.test(lm.textContent)) lm.textContent = 'سجّل دخولك للمتابعة';
+  };
+  function send(em) { var m = document.getElementById('mktM'); if (m) m.textContent = 'جارٍ الإرسال…'; api({ action: 'code_send', email: em }).then(function (r) { if (r && r.status === 'sent') { LEM = em; MKT_loginUI(); } else if (m) m.textContent = (r && r.error) || 'تعذّر الإرسال'; }).catch(function () { if (m) m.textContent = 'تعذّر الاتصال'; }); }
+  function verify() {
+    var c = (document.getElementById('mktK').value || '').trim(), m = document.getElementById('mktM');
+    if (!/^\d{6}$/.test(c)) { m.textContent = 'اكتب الرمز المكوّن من 6 أرقام'; return; }
+    m.textContent = 'جارٍ التحقق…';
+    api({ action: 'code_verify', email: LEM, code: c }).then(function (r) {
+      if (!(r && r.token)) { m.textContent = (r && r.error) || 'تعذّر الدخول'; return; }
+      LEM = ''; window.__mkSess = r; if (typeof handleCredentialResponse === 'function') handleCredentialResponse({ credential: 'mkcode' });
+    }).catch(function () { m.textContent = 'تعذّر الاتصال'; });
+  }
+  /* دخول Google في التطبيق: صفحة دخول في المتصفح الخارجي + استلام الجلسة بمعرّف سري (لا حاجة لرجوع آلي) */
+  function hsActive() { try { var v = (localStorage.getItem('mkv2_hs') || '').split(':'); return v[0] && Date.now() - Number(v[1]) < 300000 ? v[0] : ''; } catch (e) { return ''; } }
+  function hsClear() { try { localStorage.removeItem('mkv2_hs'); } catch (e) {} clearTimeout(HSTO); }
+  function rnd() { var a = new Uint8Array(16); (window.crypto || window.msCrypto).getRandomValues(a); return Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  function startHs() {
+    var id = rnd(); try { localStorage.setItem('mkv2_hs', id + ':' + Date.now()); } catch (e) {}
+    var u = 'https://lavndrs120.github.io/market-login.html?b=' + encodeURIComponent(B) + '&hs=' + id + (/^[a-z][a-z0-9.]{3,80}$/.test(SCH) ? '&sch=' + SCH : '');
+    try { if (window.LavndrMkt && typeof LavndrMkt.open === 'function') LavndrMkt.open(u); else window.open(u, '_blank'); } catch (e) { window.open(u, '_blank'); }
+    pollHs();
+  }
+  function pollHs() {
+    clearTimeout(HSTO); var id = hsActive(); if (!id) return;
+    api({ action: 'hs_poll', id: id }).then(function (r) {
+      if (r && r.token) { hsClear(); window.__mkSess = r; if (typeof handleCredentialResponse === 'function') handleCredentialResponse({ credential: 'mkcode' }); return; }
+      HSTO = setTimeout(pollHs, 2000);
+    }).catch(function () { HSTO = setTimeout(pollHs, 4000); });
+  }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && hsActive()) pollHs(); });
+  document.addEventListener('DOMContentLoaded', function () { if (hsActive()) pollHs(); });
+  /* تسجيل جهاز الإشعارات داخل التطبيق */
+  (function () {
+    if (!window.LavndrMkt || typeof LavndrMkt.fcm !== 'function') return;
+    var tries = 0;
+    (function go() {
+      tries++; var t = '', s = ''; try { t = String(LavndrMkt.fcm() || ''); s = sessionStorage.getItem('mkv2_token') || ''; } catch (e) {}
+      if (t && s) { var key = 'mkv2_pushreg'; try { if (localStorage.getItem(key) === s.slice(-24) + t.slice(-24)) return; } catch (e) {}
+        fetch('https://lavndr.omssolutionorders.workers.dev?action=register_device', { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8', Authorization: 'Bearer ' + s }, body: JSON.stringify({ action: 'register_device', fcmToken: t }) }).then(function (r) { return r.json(); }).then(function (r) { if (r && !r.error) { try { localStorage.setItem(key, s.slice(-24) + t.slice(-24)); } catch (e) {} } }).catch(function () {});
+        return; }
+      if (tries < 40) setTimeout(go, 3000);
+    })();
+  })();
+})();
+
+/* طبقة بلا إنترنت (مأخوذة من lavndr-app.js في لاڤندرز دون زر تحميل تطبيق لاڤندرز): رسالة واضحة عند انقطاع الاتصال + تحديث عند عودته */
+(function () {
+  var MSG = 'لا يوجد اتصال بالإنترنت — تعذّر تنفيذ هذا الإجراء. جرّب مرة أخرى عند عودة الاتصال.';
+  var rf = window.fetch ? window.fetch.bind(window) : null, bar, bt;
+  function isApi(u) { return /workers\.dev|script\.google\.com/.test(String(u || '')); }
+  function offResp() { return new Response(JSON.stringify({ error: MSG, offline: true, code: 0 }), { status: 200, headers: { 'Content-Type': 'application/json' } }); }
+  function showBar(t, kind, ms) {
+    try {
+      if (!bar) { bar = document.createElement('div'); bar.setAttribute('role', 'status'); bar.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2147483000;max-width:92vw;padding:9px 16px;border-radius:100px;font:600 12.5px/1.5 system-ui,Tahoma,sans-serif;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.45);display:none;text-align:center;direction:rtl'; (document.body || document.documentElement).appendChild(bar); }
+      bar.textContent = t; bar.style.background = kind === 'ok' ? 'rgba(16,185,129,.95)' : (kind === 'warn' ? 'rgba(180,83,9,.96)' : 'rgba(60,60,70,.96)'); bar.style.display = 'block';
+      clearTimeout(bt); if (ms) bt = setTimeout(function () { bar.style.display = 'none'; }, ms);
+    } catch (e) {}
+  }
+  if (rf) {
+    window.fetch = function (input, init) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '', method = String((init && init.method) || (input && input.method) || 'GET').toUpperCase();
+      if (isApi(url) && method !== 'GET' && navigator.onLine === false) { showBar(MSG, 'warn', 4000); return Promise.resolve(offResp()); }
+      return rf(input, init).catch(function (err) { if (isApi(url) && method !== 'GET') { showBar(MSG, 'warn', 4000); return offResp(); } throw err; });
+    };
+  }
+  window.addEventListener('offline', function () { showBar('📴 أنت غير متصل — الإجراءات تحتاج اتصالاً.', 'info', 0); });
+  window.addEventListener('online', function () {
+    showBar('✓ عاد الاتصال — جارٍ تحديث البيانات', 'ok', 2500);
+    try { window.dispatchEvent(new Event('lavndr-online')); } catch (e) {}
+    try { if (typeof window.loadData === 'function' && window.AUTH_TOKEN !== undefined) window.loadData(); } catch (e) {}
+  });
+  document.addEventListener('DOMContentLoaded', function () { if (navigator.onLine === false) showBar('📴 أنت غير متصل — الإجراءات تحتاج اتصالاً.', 'info', 0); });
+})();
+
+/* زر «حمّل التطبيق» / «حمّل التحديث» — نفس نظام لاڤندرز: يظهر عند وجود app-version.json في ريبو المالك (بعد نقل التطبيق إلى GitHub) */
+(function () {
+  var UA = navigator.userAgent || '', mm = UA.match(/MktApp\/2(?:\/(\d+))?/);
+  var IN_APP = !!mm, APP_CODE = mm && mm[1] ? parseInt(mm[1], 10) : 0, IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+  var row, btn, latest = null;
+  var SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.14-.52.38.38 0 0 0-.52.14l-1.87 3.24A11.4 11.4 0 0 0 12 8.2c-1.7 0-3.3.38-4.9 1l-1.88-3.24a.38.38 0 0 0-.52-.14.38.38 0 0 0-.14.52l1.84 3.18C3.3 11.28 1.3 14.3 1 17.8h22c-.3-3.5-2.3-6.52-5.4-8.32zM7 15.3a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>';
+  function css() {
+    if (document.getElementById('mktAppCss')) return;
+    var st = document.createElement('style'); st.id = 'mktAppCss';
+    st.textContent = '@keyframes lvPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.65);transform:scale(1)}50%{box-shadow:0 0 0 9px rgba(16,185,129,0);transform:scale(1.06)}}#mktAppBtn{display:inline-flex;align-items:center;gap:6px;border:none;cursor:pointer;color:#fff;font:700 12px/1 system-ui,Tahoma,sans-serif;padding:8px 13px;border-radius:100px;background:linear-gradient(135deg,#10B981,#059669);box-shadow:0 2px 10px rgba(16,185,129,.35);white-space:nowrap}#mktAppBtn.upd{animation:lvPulse 1.4s ease-in-out infinite;background:linear-gradient(135deg,#34D399,#10B981)}';
+    document.head.appendChild(st);
+  }
+  function build() {
+    if (row) return; css();
+    row = document.createElement('div'); row.id = 'mktAppRow';
+    row.style.cssText = 'direction:ltr;display:none;margin:8px auto 0;padding:0 10px;box-sizing:border-box;position:relative;z-index:5';
+    btn = document.createElement('button'); btn.id = 'mktAppBtn'; btn.type = 'button';
+    btn.onclick = function () { if (latest && latest.apkUrl) location.href = latest.apkUrl; };
+    row.appendChild(btn); document.body.insertBefore(row, document.body.firstChild);
+  }
+  function side() {
+    var sels = ['#accountActionBtn', '.login:not(.guest)', '#bellBtn', 'header button[onclick*="clearSession"]', '#loginOverlay'];
+    for (var i = 0; i < sels.length; i++) {
+      var el = document.querySelector(sels[i]); if (!el) continue;
+      var r = el.getBoundingClientRect(); if (!r.width || !r.height) continue;
+      var c = (r.left + r.right) / 2, w = window.innerWidth;
+      return c < w * 0.4 ? 'right' : 'left';
+    }
+    return 'left';
+  }
+  function place() {
+    if (!row) return;
+    var wrap = document.querySelector('.wrap'), mw = wrap ? getComputedStyle(wrap).maxWidth : 'none';
+    row.style.maxWidth = (mw && mw !== 'none') ? mw : '560px';
+    row.style.justifyContent = side() === 'left' ? 'flex-start' : 'flex-end';
+  }
+  function render() {
+    if (!latest || !latest.apkUrl || IS_IOS) { if (row) row.style.display = 'none'; return; }
+    var newer = APP_CODE > 0 ? (parseInt(latest.versionCode, 10) > APP_CODE) : true;
+    if (IN_APP && !newer) { if (row) row.style.display = 'none'; return; }
+    build();
+    if (IN_APP) { btn.innerHTML = SVG + '<span>حمّل التحديث</span>'; btn.className = 'upd'; }
+    else { btn.innerHTML = SVG + '<span>حمّل التطبيق الآن</span>'; btn.className = ''; }
+    btn.id = 'mktAppBtn'; row.style.display = 'flex'; place();
+  }
+  function check() {
+    if (navigator.onLine === false || !/^https?:$/.test(location.protocol)) return;
+    var u = location.href.split('#')[0].split('?')[0].replace(/[^\/]*$/, '') + 'app-version.json?_=' + Date.now();
+    fetch(u, { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (j && j.apkUrl && /^https:\/\/github\.com\//.test(j.apkUrl)) { latest = j; render(); } }).catch(function () {});
+  }
+  function start() { check(); setInterval(place, 2500); window.addEventListener('resize', place); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لاڤندرز تكشف سلوك المستهلك من الطلبات الحقيقية لـ120 نشاطاً</title>
+<meta name="description" content="بيان صحفي: لاڤندرز (LAVNDR120) تتيح مؤشرها الاستهلاكي الحي للعرض العام، مع منشئ التطبيقات والشهادة الذهبية، وما ليست عليه.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+
+
+
+
+
+
+
+
+
+
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lavndrs120.github.io/og-card.jpg">
+
+<style>
+:root{--void:#04040A;--gold:#C9A84C;--text:rgba(255,255,255,.88);--dim:rgba(255,255,255,.55);--line:rgba(255,255,255,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(900px 500px at 50% -10%,rgba(201,168,76,.10),transparent),var(--void);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;line-height:1.95;min-height:100vh}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 70px}
+.logo{text-align:center;font-size:28px;font-weight:900;letter-spacing:2px;background:linear-gradient(135deg,#C9A84C,#F0D080);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px 0 18px;font-size:12.5px}
+nav a{color:var(--dim);text-decoration:none}nav a:hover,nav a[aria-current]{color:var(--gold)}
+h1{text-align:center;font-size:22px;margin:6px 0 4px;line-height:1.6}
+.upd{text-align:center;font-size:12px;color:var(--dim);margin-bottom:22px}
+section{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:14px}
+h2{font-size:16px;color:var(--gold);margin-bottom:8px}
+h3{font-size:14px;color:#fff;margin:10px 0 2px}
+p,li{font-size:14px;color:var(--text)}
+p+p{margin-top:6px}
+ul,ol{padding-inline-start:22px}
+li{margin:3px 0}
+a{color:var(--gold)}
+.cta{display:block;text-align:center;margin:18px 0 0;padding:13px;border-radius:30px;background:var(--gold);color:#111;font-weight:800;text-decoration:none}
+footer{text-align:center;font-size:12px;color:var(--dim);margin-top:24px}
+</style>
+<style>#footLinks,#footLinksEn,[onclick*="builder.html"]{display:none!important}</style></head>
+<body>
+<div class="wrap">
+  <div class="logo">LAVNDR120</div>
+  <nav aria-label="التنقل"><a href="./">الرئيسية</a><a href="about.html">عن لاڤندرز</a><a href="packages.html">الباقات</a><a href="consumer-index.html">المؤشر الاستهلاكي</a><a href="businesses.html">للبزنسات والبراندات</a><a href="faq.html">أسئلة شائعة</a><a href="privacy.html">الخصوصية</a><a href="insights/ar/index.html">مقالات</a><a href="press.html" aria-current="page">البيان الصحفي</a><a href="embed.html">ودجت</a></nav>
+  <div style="text-align:center;font-size:13px;margin:-6px 0 14px"><a href="en/press.html" hreflang="en" lang="en">English</a></div>
+  <main>
+  <h1>لاڤندرز تكشف سلوك المستهلك من الطلبات الحقيقية لـ120 نشاطاً</h1>
+  <div class="upd">بيان صحفي · عالمي · 17 نوفمبر 2026</div>
+  <section>
+    <p>أتاحت لاڤندرز، وهي منظومة سوق رقمية، مؤشرها الاستهلاكي الحي LAVNDR120 للعرض العام. يُبنى المؤشر من الطلبات الحقيقية لـ120 نشاطاً وعلامة، ويُظهر ماذا يطلب الناس فعلاً، ومتى، ومن أي الأنشطة.</p>
+    <p>لكل نشاط في السوق تطبيق طلبات (OMS) خاص به على الويب وأندرويد. تتجمع حركة طلباتهم في LAVNDR120، وتتوفر تقارير مبنية على البيانات نفسها للأنشطة والعلامات.</p>
+  </section>
+  <section>
+    <h2>أداتان للأنشطة</h2>
+    <p><strong>منشئ التطبيقات.</strong> يتيح للنشاط إنشاء متجر ويب وتطبيق أندرويد داخل حساب جوجل الخاص به، يطلب فيه العملاء برمز يصل بالإيميل ويقبل المالك كل طلب أو يرفضه. <a href="app-builder.html">التفاصيل</a>.</p>
+    <p><strong>الشهادة الذهبية.</strong> شهادة اختيارية للأنشطة التي لديها 100 طلب موثّق على الأقل، وتخضع لمراجعة الإدارة. <a href="golden-certificate.html">التفاصيل</a>.</p>
+  </section>
+  <section>
+    <h2>ما ليست عليه لاڤندرز</h2>
+    <p>لاڤندرز ليست منصة تداول: لا بيع ولا شراء ولا تداول حصص، والمحتوى ليس نصيحة استثمارية، ولا يوجد وعد بربح أو عائد. الشروط والاتفاقيات مسودات قيد المراجعة القانونية.</p>
+  </section>
+  <section>
+    <h2>للناس وللذكاء الاصطناعي</h2>
+    <p>تُنشر الحقائق نفسها للمساعدات الذكية والزواحف عبر <a href="llms.txt">llms.txt</a> و<a href="llms-full.txt">llms-full.txt</a> ونقاط JSON وخادم MCP للقراءة فقط مسجّل في سجل MCP الرسمي باسم <code>io.github.lavndrs120/lavenders</code>.</p>
+  </section>
+  <section>
+    <h2>عن لاڤندرز</h2>
+    <p>لاڤندرز (LAVNDR120) منظومة سوق رقمية تجمع 120 نشاطاً وعلامة في سوق واحد. لاڤندرز هي العلامة، وLAVNDR120 هو المؤشر. لا علاقة لها بنبات اللافندر ولا بزيته.</p>
+    <p>الموقع: <a href="./">lavndrs120.github.io</a> · انستغرام: <a href="https://www.instagram.com/lavenders120/">@lavenders120</a> · التواصل: عبر الموقع.</p>
+  </section>
+  <a class="cta" href="./">شاهد المؤشر الآن</a>
+  </main>
+  <footer>© لاڤندرز · LAVNDR120 — المعلومات تعريفية وليست نصيحة استثمارية.</footer>
+</div>
+
+</body>
+</html>

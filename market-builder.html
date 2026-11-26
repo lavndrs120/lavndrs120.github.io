@@ -232,8 +232,9 @@ function planCard(m){
   '<label>رمز السويفت — للتحويل الدولي (اختياري)</label><input id="pb_swift" maxlength="30" dir="ltr" value="'+esc(bk.swift||'')+'">'+
   '<label>الفرع (اختياري)</label><input id="pb_branch" maxlength="80" value="'+esc(bk.branch||'')+'">'+
   '<label>العملة (اختياري)</label><input id="pb_cur" maxlength="5" dir="ltr" placeholder="SDG" value="'+esc(bk.cur||'')+'">'+
+  '<label>رقم واتساب خدمة العملاء (اختياري)</label><input id="pb_wa" maxlength="20" dir="ltr" inputmode="tel" placeholder="249912345678" value="'+esc(p.wa||'')+'"><div class="small" style="margin-top:4px">يظهر لمشتركيك للمساعدة والاستفسار (رابط واتساب). اكتبه بالصيغة الدولية بأرقام فقط دون + أو أصفار، مثل 249912345678.</div>'+
   '<button class="btn" style="margin-top:10px" onclick="savePlans()">حفظ</button><div id="m10" class="msg"></div>'+
-  '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول حفظ (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيتي «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز التحقق).</div>'+
+  '<div class="small" style="line-height:1.9;margin-top:10px">بعد أول حفظ (أو بعد «تحديث الخلفية») افتح <a class="link" href="'+esc(m.cfg.url)+'?action=ping" target="_blank" rel="noopener">رابط الخلفية</a> مرة واحدة من حسابك ووافق على صلاحيات «الاتصال الخارجي» (للتحقق من حسابات المشتركين) و«إرسال البريد» (لرمز التحقق) و«Google Drive» (لحفظ وثائق توثيق البزنسات ونسخ بياناتك الاحتياطية في مجلد داخل حسابك أنت فقط).</div>'+
   '<div class="small" style="line-height:1.9;margin-top:10px">طلبات الاشتراك تصلك في <b>لوحة إدارة المؤشر</b> (اعتماد/رفض) وعلى بريدك.</div></div>';
 }
 async function savePlans(){
@@ -242,7 +243,8 @@ async function savePlans(){
     const g=id=>String($(id).value||'').replace(/[<>]/g,'').trim();
     const bank={bank:g('pb_bank').slice(0,60),holder:g('pb_holder').slice(0,80),account:g('pb_account').slice(0,60),iban:g('pb_iban').slice(0,60),bban:g('pb_bban').slice(0,60),swift:g('pb_swift').slice(0,30),branch:g('pb_branch').slice(0,80),cur:g('pb_cur').toUpperCase().slice(0,5)};
     const on=(bank.account||bank.iban)?1:0;
-    const p={on:on,bank:bank,links:(m.plans&&m.plans.links)||{}};
+    const wa=g('pb_wa').replace(/\D/g,'').slice(0,15);
+    const p={on:on,bank:bank,wa:wa,links:(m.plans&&m.plans.links)||{}};
     await putVals(m.sheetId,'Config!F1',[[JSON.stringify(p)]]);m.plans=p;
     showMsg('m10',on?'تم الحفظ ✓ الباقات ظاهرة في بطاقتك خلال دقائق':'تم الحفظ — أدخل رقم الحساب أو IBAN لتفعيل الباقات','good');
   }catch(e){showMsg('m10',e.message||'تعذّر الحفظ')}
@@ -474,16 +476,18 @@ async function hostMarket(){
     if(ex.status===404){const c=await ghApi('/user/repos',{method:'POST',body:JSON.stringify({name:repo,description:'Independent market index card — built with Lavenders (LAVNDR120)',private:false,auto_init:true})});if(c.status>=300)throw new Error('تعذّر إنشاء الريبو');await new Promise(r=>setTimeout(r,2000))}
     else{const mj=await ghApi('/repos/'+user+'/'+repo+'/contents/market.json');if(mj.status===404||!mj.json.content||atob(mj.json.content.replace(/\n/g,'')).indexOf(m.cfg.url)<0)throw new Error('هذا الاسم مستخدم عندك لمشروع آخر، اختر اسماً مختلفاً')}
     const gt=(f,e)=>fetch(f,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(e);return r.text()});
-    const [pg,dsh,adm]=await Promise.all([gt('market.html','تعذّر تحميل قالب البطاقة'),gt('market-app.html','تعذّر تحميل قالب لوحة المؤشر'),gt('market-admin.html','تعذّر تحميل قالب لوحة الإدارة')]);
+    const [pg,dsh,adm,biz]=await Promise.all([gt('market.html','تعذّر تحميل قالب البطاقة'),gt('market-app.html','تعذّر تحميل قالب لوحة المؤشر'),gt('market-admin.html','تعذّر تحميل قالب لوحة الإدارة'),gt('market-business.html','تعذّر تحميل قالب بوابة البزنس')]);
     const a="const BACK=(new URLSearchParams(location.search).get('b')||'').trim();",nx='<meta name="robots" content="noindex,nofollow">';
-    if(pg.indexOf(a)<0||dsh.indexOf(a)<0||adm.indexOf(a)<0)throw new Error('القوالب غير متوافقة');
+    if(pg.indexOf(a)<0||dsh.indexOf(a)<0||adm.indexOf(a)<0||biz.indexOf(a)<0)throw new Error('القوالب غير متوافقة');
     const fx=t=>t.replace(a,'const BACK='+JSON.stringify(m.cfg.url)+';').replace(nx,'');
-    const page2=fx(pg),dpage=fx(dsh),apage=fx(adm);
+    const page2=fx(pg),dpage=fx(dsh),apage=fx(adm),bpage=fx(biz);
     const short='https://'+user.toLowerCase()+'.github.io/'+repo+'/';
     const readme='# '+m.name+'\n\nبطاقة مؤشر سوق مستقل أنشأتها أداة **لاڤندرز (Lavenders · LAVNDR120)**.\n\nAn independent market index card generated with Lavenders.\n\n- Card: '+short+'\n- Backend: Google Apps Script running in the owner\'s own Google account\n- Orders, business sheets and images are not stored here.\n\nThe index reflects real consumer orders. There is no buying, selling or trading of shares, and no promise of returns.\n';
     await ghPut(user,repo,'index.html',b64u(page2),'Lavenders: index card');
     await ghPut(user,repo,'app.html',b64u(dpage),'Lavenders: dashboard');
     await ghPut(user,repo,'admin.html',b64u(apage),'Lavenders: admin board');
+    await ghPut(user,repo,'business.html',b64u(bpage),'Lavenders: business portal');
+    for(const n of INFO_PAGES){try{const t=await gt('market-'+n+'.html','تعذّر تحميل صفحة '+n);await ghPut(user,repo,n+'.html',b64u(fx(t)),'Lavenders: '+n)}catch(e){if(/GitHub|token|401|403/.test(String(e&&e.message)))throw e}}
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
     try{await ghApi('/repos/'+user+'/'+repo+'/pages',{method:'POST',body:JSON.stringify({source:{branch:'main',path:'/'}})})}catch(e){}
@@ -491,17 +495,19 @@ async function hostMarket(){
     renderMarket();checkHealth();loadMApk();mktTrialUI();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
   }catch(err){HOSTING=false;showMsg('m7',err.message||'تعذّر النقل')}
 }
+const INFO_PAGES=['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index'];
 async function hostMApk(){
   const m=S.cur;if(!m||!m.home||HOSTING)return;HOSTING=true;
   try{
     showMsg('m5','جاري نقل التطبيق إلى ريبوك…','info');await ghAuth('m5');
     const user=(await ghApi('/user')).json.login,repo=(/\.github\.io\/([^\/]+)\//.exec(m.home)||[])[1];
-    showMsg('m5','جاري جلب ملف التطبيق…','info');
+    showMsg('m5','جاري جلب ملف التطبيق…','info');let j0=null;try{j0=await api('appb_download',{appId:m.apkId})}catch(e){}
     const ar=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId));if(!ar.ok){let bt='';try{bt=(await ar.text()).slice(0,80)}catch(e){}throw new Error('تعذّر جلب ملف التطبيق الآن ['+ar.status+(bt?' '+bt:'')+']. يمكنك تنزيله من الرابط الحالي.')}
     showMsg('m5','جاري رفع التطبيق إلى ريبوك… قد يستغرق دقيقة، لا تغلق الصفحة','info');
     await ghPut(user,repo,'apk/market.apk',b64buf(await ar.arrayBuffer()),'Lavenders: Android app');
     try{const br=await fetch(WORKER_URL+'/gh/apk?id='+encodeURIComponent(m.apkId)+'&fmt=aab');if(br.ok)await ghPut(user,repo,'apk/market.aab',b64buf(await br.arrayBuffer()),'Lavenders: Google Play bundle (AAB)')}catch(e){}
     const u='https://github.com/'+user+'/'+repo+'/raw/main/apk/market.apk';
+    try{const vc=parseInt(j0&&j0.versionCode,10)||Math.floor(Date.now()/60000);await ghPut(user,repo,'app-version.json',b64u(JSON.stringify({versionName:'1.0',versionCode:vc,apkUrl:u,notes:''},null,2)),'Lavenders: app version')}catch(e){}
     await putVals(m.sheetId,'Config!D1',[[u]]);m.apkHosted=u;
     try{await api('appb_apk_hosted',{appId:m.apkId,url:u},true)}catch(e){}
     HOSTING=false;loadMApk();showMsg('m5','تم النقل ✓ التطبيق الآن في ريبوك','good');
@@ -602,6 +608,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
