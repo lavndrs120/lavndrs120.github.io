@@ -497,7 +497,7 @@ async function hostMarket(){
     renderMarket();checkHealth();loadMApk();mktTrialUI();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
   }catch(err){HOSTING=false;showMsg('m7',err.message||'تعذّر النقل')}
 }
-const INFO_PAGES=['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index','embed'];
+const INFO_PAGES=['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index','embed','app-builder'];
 async function hostMApk(){
   const m=S.cur;if(!m||!m.home||HOSTING)return;HOSTING=true;
   try{

@@ -61,8 +61,8 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
   }
   /* الروابط: صفحات المؤشر الثلاث + صفحات لاڤندرز المعلوماتية (مطلقة) + إخفاء ما هو خارج نطاق المؤشر */
-  var INFO_ = ['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index','embed'];
-  var PUB = 'https://lavndrs120.github.io/', OUT = /^(en\/)?(builder|market-builder|app-builder|store|session-check)(\.html)?(\?|#|$)/;
+  var INFO_ = ['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index','embed','app-builder'];
+  var PUB = 'https://lavndrs120.github.io/', OUT = /^(en\/)?(builder|market-builder|store|session-check)(\.html)?(\?|#|$)/;
   function hideA(a) {
     a.style.display = 'none';
     if (a.getAttribute('data-hid')) return; a.setAttribute('data-hid', '1');
@@ -79,7 +79,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     document.querySelectorAll('a[href]').forEach(function (a) {
       var h = a.getAttribute('href') || '';
       if (!h || h.charAt(0) === '#' || /^(https?:|mailto:|tel:|javascript:|data:|blob:|intent:|whatsapp:|sms:)/i.test(h)) return;
-      var m = /^\.?\/?(dashboard|admin|index|market|market-app|market-admin|app|business|market-business|about|faq|packages|press|privacy|lava|magma|vindex|oms|tycoon|franchise|reseller|businesses|golden-certificate|consumer-index|embed)\.html(\?[^#]*)?(#.*)?$/.exec(h), to = null;
+      var m = /^\.?\/?(dashboard|admin|index|market|market-app|market-admin|app|business|market-business|about|faq|packages|press|privacy|lava|magma|vindex|oms|tycoon|franchise|reseller|businesses|golden-certificate|consumer-index|embed|app-builder)\.html(\?[^#]*)?(#.*)?$/.exec(h), to = null;
       if (!m && /^\.?\/?(\?[^#]*)?(#.*)?$/.test(h)) m = [h, 'index', (/^\.?\/?(\?[^#]*)?/.exec(h) || [])[1] || '', (/(#.*)$/.exec(h) || [])[1] || ''];
       if (m && window.MKT_TIER === 'franchise' && (m[1] === 'franchise' || m[1] === 'tycoon')) { hideA(a); return; }
       if (m) { var base = INFO_.indexOf(m[1]) >= 0 ? (pre ? 'market-' + m[1] + '.html' : m[1] + '.html') : { business: MKP.biz, 'market-business': MKP.biz, dashboard: MKP.app, 'market-app': MKP.app, app: MKP.app, admin: MKP.admin, 'market-admin': MKP.admin, index: MKP.home, market: MKP.home }[m[1]]; var q = m[2] || ''; if (B && pre && q.indexOf('b=') < 0) q += (q ? '&' : '?') + 'b=' + encodeURIComponent(B); to = base + q + (m[3] || ''); }
