@@ -488,6 +488,7 @@ async function hostMarket(){
     await ghPut(user,repo,'admin.html',b64u(apage),'Lavenders: admin board');
     await ghPut(user,repo,'business.html',b64u(bpage),'Lavenders: business portal');
     try{const bj=JSON.parse(await gt('market-bundle.json','تعذّر تحميل صفحات النسخة الإنجليزية'));let bi=0;const bk=Object.keys(bj);for(const f of bk){bi++;try{await ghPut(user,repo,f,b64u(bj[f]),'Lavenders: '+f)}catch(e){}}}catch(e){}
+    try{const wj=await gt('market-widget.js','تعذّر تحميل الودجت');await ghPut(user,repo,'widget.js',b64u(wj.split('__MKT_BACK__').join(m.cfg.url)),'Lavenders: widget')}catch(e){}
     for(const n of INFO_PAGES){try{const t=await gt('market-'+n+'.html','تعذّر تحميل صفحة '+n);await ghPut(user,repo,n+'.html',b64u(fx(t)),'Lavenders: '+n)}catch(e){if(/GitHub|token|401|403/.test(String(e&&e.message)))throw e}}
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
     await ghPut(user,repo,'market.json',b64u(JSON.stringify({name:m.name,backend:m.cfg.url,generator:'https://lavndrs120.github.io/'},null,1)),'Lavenders: market info');
@@ -496,7 +497,7 @@ async function hostMarket(){
     renderMarket();checkHealth();loadMApk();mktTrialUI();showMsg('m7','تم ✓ بطاقتك في حسابك. قد يستغرق ظهور الرابط دقيقة. أعد بناء التطبيق ليفتح بطاقتك.','good');
   }catch(err){HOSTING=false;showMsg('m7',err.message||'تعذّر النقل')}
 }
-const INFO_PAGES=['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index'];
+const INFO_PAGES=['about','faq','packages','press','privacy','lava','magma','vindex','oms','tycoon','franchise','reseller','businesses','golden-certificate','consumer-index','embed'];
 async function hostMApk(){
   const m=S.cur;if(!m||!m.home||HOSTING)return;HOSTING=true;
   try{
