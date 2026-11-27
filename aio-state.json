@@ -220,6 +220,19 @@
     "description": "لاڤندرز لا تتيح شراء أو بيع أو تداول الأسهم",
     "date": "2026-11-26"
    }
+  },
+  {
+   "id": "orders-to-certificate-path",
+   "title": "From first order to golden certificate: the path of a business in Lavenders",
+   "description": "From first order to golden certificate",
+   "slug": "from-first-order-to-golden-certificate-the-path-of-a-business-in-laven",
+   "date": "2026-11-27",
+   "devto": "https://dev.to/lavenders/from-first-order-to-golden-certificate-the-path-of-a-business-in-lavenders-291",
+   "ar": {
+    "title": "مسار العمل في لاڤندرز",
+    "description": "من الطلب الأول إلى شهادة الذهب",
+    "date": "2026-11-27"
+   }
   }
  ],
  "failed": {}
