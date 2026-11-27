@@ -1346,12 +1346,15 @@ function bhAddBizHtml(f) {
     '<input id="bzName" maxlength="80" placeholder="اسم البزنس / البراند" style="' + inp + '">' +
     '<input id="bzSheet" placeholder="رابط شيت الطلبات أو معرّفه" style="' + inp + 'direction:ltr;text-align:left;">';
   if (f.platformFull) {
-    h += '<div style="font-size:11.5px;color:#6EE7B7;line-height:1.9;margin-top:10px;">مؤشر لاڤندرز مكتمل (' + (f.platformTotal || 120) + ' بزنس) — سيُحسب هذا البزنس مباشرة في سوقك الخاص.</div>';
+    h += '<div style="font-size:11.5px;color:#6EE7B7;line-height:1.9;margin-top:10px;">مؤشر لاڤندرز مكتمل (' + (f.platformTotal || 120) + ' بزنس) — سيُحسب هذا البزنس مباشرة في سوقك الخاص' + (f.markets && f.markets.length === 1 ? ' (مؤشرك «' + esc(f.markets[0].name) + '»)' : '') + '.</div>';
   } else {
     h += '<div style="font-size:11.5px;color:var(--text-dim);line-height:1.9;margin-top:10px;">مؤشر لاڤندرز لم يكتمل بعد (' + (f.platformCount || 0) + ' / ' + (f.platformTotal || 120) + '). اختر:</div>' +
       '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:8px;cursor:pointer;"><input type="radio" name="bzPl" value="platform" checked onchange="bhPl()" style="margin-top:3px;"><span>ضمّه إلى مؤشر لاڤندرز على المنصة <small style="color:var(--text-faint);">(وفق ضوابط اتفاقية الانضمام · رسم دخول المؤشر $' + (f.entryFee || 22.58) + ' يراجعه الأدمن)</small></span></label>' +
-      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:6px;cursor:pointer;"><input type="radio" name="bzPl" value="private" onchange="bhPl()" style="margin-top:3px;"><span>أستكمل سوقي الخاص (يبقى في سوقي فقط)</span></label>' +
+      '<label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin-top:6px;cursor:pointer;"><input type="radio" name="bzPl" value="private" onchange="bhPl()" style="margin-top:3px;"><span>أستكمل سوقي الخاص (يبقى في سوقي فقط' + (f.markets && f.markets.length === 1 ? ' — مؤشري «' + esc(f.markets[0].name) + '»' : (f.markets && f.markets.length > 1 ? ' — اختر مؤشرك أدناه' : '')) + ')</span></label>' +
       '<label id="bzAckRow" style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px;color:var(--text-dim);margin-top:10px;cursor:pointer;"><input type="checkbox" id="bzAck" style="margin-top:3px;"><span>أُقرّ بأنني اطلعت على ضوابط الانضمام لمؤشر لاڤندرز وألتزم بها.</span></label>';
+  }
+  if (f.markets && f.markets.length > 1) {
+    h += '<select id="bzMk" style="' + inp + '">' + f.markets.map(function (m) { return '<option value="' + esc(m.id) + '">سوقي: «' + esc(m.name) + '»</option>'; }).join('') + '</select>';
   }
   return h + '<button onclick="bhSubmitBiz()" style="width:100%;margin-top:12px;padding:12px;border:none;border-radius:12px;background:var(--gold);color:#111;font-weight:800;font-size:14px;cursor:pointer;">أرسل للمراجعة</button><div id="bzMsg" style="font-size:12px;color:var(--red);margin-top:8px;"></div></div>';
 }
@@ -1362,7 +1365,7 @@ async function bhSubmitBiz() {
   if (msg) msg.textContent = 'جاري الإرسال...';
   try {
     const r = await fetch(WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'builder_add_business', token: AUTH_TOKEN, idx: g('bzIdx'), name: g('bzName'), sheetId: g('bzSheet'), placement: pl ? pl.value : '', ack: !!(ack && ack.checked) }) });
+      body: JSON.stringify({ action: 'builder_add_business', token: AUTH_TOKEN, idx: g('bzIdx'), name: g('bzName'), sheetId: g('bzSheet'), marketId: g('bzMk'), placement: pl ? pl.value : '', ack: !!(ack && ack.checked) }) });
     const j = await r.json();
     if (j.error) { if (msg) msg.textContent = j.error; return; }
     showNotif('أُرسل طلبك للأدمن ✓'); renderBuilderHub();
@@ -3980,6 +3983,5 @@ window.addEventListener('load', function() {
 <script>
 (function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK')||document.getElementById('mktG'))w.style.display='none';},500);})();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

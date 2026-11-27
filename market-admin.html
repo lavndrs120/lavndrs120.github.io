@@ -1015,7 +1015,7 @@ async function loadFranchiseBiz() {
       <div class="row">
         <div class="info">
           <div class="email">${esc(r.name)} <small>· مقعد ${esc(r.idx)}</small></div>
-          <div class="meta">${esc(r.email)} · ${r.placement === 'platform' ? '🌐 ضمّ لمؤشر المنصة (رسم دخول $' + esc(data.entryFee) + ' — راجع الدفع)' : '🏛️ سوق الفرانشايز فقط'} · المدفوع $${esc(r.paidUsd)} · ${r.seatPaid ? 'المقعد مدفوع ✓' : '⚠️ المقعد غير مدفوع'} · <a href="https://docs.google.com/spreadsheets/d/${esc(r.sheetId)}" target="_blank" rel="noopener" style="color:var(--gold);">الشيت</a></div>
+          <div class="meta">${esc(r.email)} · ${r.placement === 'platform' ? '🌐 ضمّ لمؤشر المنصة (رسم دخول $' + esc(data.entryFee) + ' — راجع الدفع)' : (String(r.placement).indexOf('market:') === 0 ? '🔗 يُربط بمؤشره المنشأ عبر لاڤندرز' : '🏛️ سوق الفرانشايز فقط')} · المدفوع $${esc(r.paidUsd)} · ${r.seatPaid ? 'المقعد مدفوع ✓' : '⚠️ المقعد غير مدفوع'} · <a href="https://docs.google.com/spreadsheets/d/${esc(r.sheetId)}" target="_blank" rel="noopener" style="color:var(--gold);">الشيت</a></div>
         </div>
         <div class="btns"><button class="approve" data-fb="${i}" data-d="approved">✓ قبول</button><button class="reject" data-fb="${i}" data-d="rejected">رفض</button></div>
       </div>`).join('');
@@ -1766,6 +1766,5 @@ window.addEventListener('load', async function() { try { await window.MKT_CFG; }
 <script>
 (function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK')||document.getElementById('mktG'))w.style.display='none';},500);})();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

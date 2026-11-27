@@ -331,7 +331,7 @@ async function openMarket(i){
   try{
     const cv=await getVals(m.sheetId,'Config!A1:F1'),cr=cv[0]||[];try{m.plans=JSON.parse(cr[5]||'{}')||{}}catch(e){m.plans={}}m.home=/^https:\/\/[a-z0-9-]{1,39}\.github\.io\/[a-z0-9._-]{1,100}\/$/.test(cr[2]||'')?cr[2]:'';m.apkHosted=/^https:\/\/github\.com\/[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}\/raw\/main\/apk\/[A-Za-z0-9._-]{1,80}\.apk$/.test(cr[3]||'')?cr[3]:'';const cfg=JSON.parse(cr[0]||'null');m.acc=MKRX.test(cr[4]||'')?cr[4]:'';m.img=/^https:\/\/drive\.google\.com\/thumbnail\?id=[A-Za-z0-9_-]{10,80}&sz=w\d{3,4}$/.test(cr[1]||'')?cr[1]:'';
     if(!cfg){$('app').innerHTML='<div class="card"><div class="msg err" style="display:block">إعداد هذا المؤشر لم يكتمل.</div><button class="btn" style="margin-top:10px" onclick="resumeMarket('+i+')">إكمال الإعداد</button><button class="btn sec" onclick="renderHome()">رجوع</button></div>';return}
-    m.cfg=cfg;try{m.biz=(await getVals(m.sheetId,'BusinessSheets!A2:B200')).map(r=>[r[1]||'',r[0]||''])}catch(e){m.biz=[]}
+    m.cfg=cfg;try{api('mkt_register',{backendUrl:cfg.url,name:cfg.name},true)}catch(e){}try{m.biz=(await getVals(m.sheetId,'BusinessSheets!A2:B200')).map(r=>[r[1]||'',r[0]||''])}catch(e){m.biz=[]}
     renderMarket();checkHealth();loadMApk();mktTrialUI();loadSubs();
   }catch(e){$('app').innerHTML='<div class="card"><div class="msg err">'+esc(e.message||'تعذّر التحميل')+'</div><button class="btn sec" onclick="renderHome()">رجوع</button></div>'}
 }
@@ -611,6 +611,5 @@ boot();
 <script>addEventListener("pagehide",function(){try{if(sessionStorage.getItem("appb_token")||sessionStorage.getItem("lavndr_token"))sessionStorage.setItem("lavndr_where","market-builder.html")}catch(e){}});</script>
 <script src="lavndr-bell.js" defer></script>
 <script src="lavndr-press.js" defer></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

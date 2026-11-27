@@ -742,7 +742,7 @@ async function loadFranchiseBiz() {
       <div class="row">
         <div class="info">
           <div class="email">${esc(r.name)} <small>· مقعد ${esc(r.idx)}</small></div>
-          <div class="meta">${esc(r.email)} · ${r.placement === 'platform' ? '🌐 ضمّ لمؤشر المنصة (رسم دخول $' + esc(data.entryFee) + ' — راجع الدفع)' : '🏛️ سوق الفرانشايز فقط'} · المدفوع $${esc(r.paidUsd)} · ${r.seatPaid ? 'المقعد مدفوع ✓' : '⚠️ المقعد غير مدفوع'} · <a href="https://docs.google.com/spreadsheets/d/${esc(r.sheetId)}" target="_blank" rel="noopener" style="color:var(--gold);">الشيت</a></div>
+          <div class="meta">${esc(r.email)} · ${r.placement === 'platform' ? '🌐 ضمّ لمؤشر المنصة (رسم دخول $' + esc(data.entryFee) + ' — راجع الدفع)' : (String(r.placement).indexOf('market:') === 0 ? '🔗 يُربط بمؤشره المنشأ عبر لاڤندرز' : '🏛️ سوق الفرانشايز فقط')} · المدفوع $${esc(r.paidUsd)} · ${r.seatPaid ? 'المقعد مدفوع ✓' : '⚠️ المقعد غير مدفوع'} · <a href="https://docs.google.com/spreadsheets/d/${esc(r.sheetId)}" target="_blank" rel="noopener" style="color:var(--gold);">الشيت</a></div>
         </div>
         <div class="btns"><button class="approve" data-fb="${i}" data-d="approved">✓ قبول</button><button class="reject" data-fb="${i}" data-d="rejected">رفض</button></div>
       </div>`).join('');
