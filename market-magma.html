@@ -84,7 +84,7 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
       if (m && window.MKT_TIER === 'franchise' && (m[1] === 'franchise' || m[1] === 'tycoon')) { hideA(a); return; }
       if (m) { var base = INFO_.indexOf(m[1]) >= 0 ? (pre ? 'market-' + m[1] + '.html' : m[1] + '.html') : { business: MKP.biz, 'market-business': MKP.biz, dashboard: MKP.app, 'market-app': MKP.app, app: MKP.app, admin: MKP.admin, 'market-admin': MKP.admin, index: MKP.home, market: MKP.home }[m[1]]; var q = m[2] || ''; if (B && pre && q.indexOf('b=') < 0) q += (q ? '&' : '?') + 'b=' + encodeURIComponent(B); to = base + q + (m[3] || ''); }
       else if (OUT.test(h.replace(/^\.?\//, '')) || (window.MKT_TIER === 'franchise' && /^(franchise|tycoon)(\.html)?(\?|#|$)/.test(h.replace(/^\.?\//, '')))) { hideA(a); return; }
-      else if (!pre && /^(en\/|insights\/)/.test(h.replace(/^\.?\//, ''))) return;
+      else if (!pre && (/^(en\/|insights\/)/.test(h.replace(/^\.?\//, '')) || /^[\w-]+\.pdf([?#]|$)/.test(h.replace(/^\.?\//, '')))) return;
       else to = PUB + h.replace(/^\.?\//, '');
       if (to !== h) a.setAttribute('href', to);
     });

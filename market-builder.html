@@ -488,6 +488,7 @@ async function hostMarket(){
     await ghPut(user,repo,'admin.html',b64u(apage),'Lavenders: admin board');
     await ghPut(user,repo,'business.html',b64u(bpage),'Lavenders: business portal');
     try{const bj=JSON.parse(await gt('market-bundle.json','تعذّر تحميل صفحات النسخة الإنجليزية'));let bi=0;const bk=Object.keys(bj);for(const f of bk){bi++;try{await ghPut(user,repo,f,b64u(bj[f]),'Lavenders: '+f)}catch(e){}}}catch(e){}
+    for(const pf of ['agreement.pdf','franchise-agreement.pdf','funding.pdf','roadmap.pdf']){try{const ex=await ghApi('/repos/'+user+'/'+repo+'/contents/'+pf);if(ex.status===200)continue;const r=await fetch('https://lavndrs120.github.io/'+pf);if(!r.ok)continue;await ghPut(user,repo,pf,b64buf(await r.arrayBuffer()),'Lavenders: '+pf)}catch(e){}}
     try{const wj=await gt('market-widget.js','تعذّر تحميل الودجت');await ghPut(user,repo,'widget.js',b64u(wj.split('__MKT_BACK__').join(m.cfg.url)),'Lavenders: widget')}catch(e){}
     for(const n of INFO_PAGES){try{const t=await gt('market-'+n+'.html','تعذّر تحميل صفحة '+n);await ghPut(user,repo,n+'.html',b64u(fx(t)),'Lavenders: '+n)}catch(e){if(/GitHub|token|401|403/.test(String(e&&e.message)))throw e}}
     await ghPut(user,repo,'README.md',b64u(readme),'Lavenders: README');
