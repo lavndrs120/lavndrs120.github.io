@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-28T14:34:24"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-28T07:14:22"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -2004,7 +2004,7 @@ const SUB_STAGE_LABEL = {
 };
 function renderSubscriptionChooser(items) {
   // صاحب بزنس مرتبط: «بزنسك» ضمن اشتراكاته أيضاً (يدخل بها المؤشر/السوق الداخلي)
-  if (currentRole === 'participant' && !items.some(x => x.tier === '__business')) items = [{ tier: '__business', tierName: '🏪 بزنسك — المؤشر والسوق الداخلي', stage: 'active', endDate: '' }].concat(items);
+  if ((currentRole === 'participant' || (currentRole === 'admin' && globalData && globalData.bizOwner)) && !items.some(x => x.tier === '__business')) items = [{ tier: '__business', tierName: '🏪 بزنسك — المؤشر والسوق الداخلي', stage: 'active', endDate: '' }].concat(items);
   const cards = items.map((it, i) => {
     const lab = SUB_STAGE_LABEL[it.stage] || ['', '#ccc'];
     const meta = TIER_META[it.tier] || {};

@@ -2278,7 +2278,7 @@ const SUB_STAGE_LABEL = {
 };
 function renderSubscriptionChooser(items) {
   // صاحب بزنس مرتبط: «بزنسك» ضمن اشتراكاته أيضاً (يدخل بها المؤشر/السوق الداخلي)
-  if (currentRole === 'participant' && !items.some(x => x.tier === '__business')) items = [{ tier: '__business', tierName: '🏪 بزنسك — المؤشر والسوق الداخلي', stage: 'active', endDate: '' }].concat(items);
+  if ((currentRole === 'participant' || (currentRole === 'admin' && globalData && globalData.bizOwner)) && !items.some(x => x.tier === '__business')) items = [{ tier: '__business', tierName: '🏪 بزنسك — المؤشر والسوق الداخلي', stage: 'active', endDate: '' }].concat(items);
   const cards = items.map((it, i) => {
     const lab = SUB_STAGE_LABEL[it.stage] || ['', '#ccc'];
     const meta = TIER_META[it.tier] || {};
