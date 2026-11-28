@@ -187,7 +187,7 @@ async function boot(){
 }
 function saveCount(){try{const k=String(EMAIL).toLowerCase();localStorage.setItem('lavndr_mkt_'+k,JSON.stringify({n:S.markets.length,t:Date.now()}));localStorage.setItem('lavndr_mktl_'+k,JSON.stringify(S.markets.map(m=>({sheetId:m.sheetId,name:m.name}))))}catch(e){}}
 function loadCached(){try{const a=JSON.parse(localStorage.getItem('lavndr_mktl_'+String(EMAIL).toLowerCase())||'null');if(Array.isArray(a)){S.markets=a.filter(m=>m&&SHEETRX.test(m.sheetId||''));S.listed=true;return true}}catch(e){}return false}
-function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+(S.trial?'<div class="card" style="border-color:rgba(201,168,76,.5)"><div class="small" style="line-height:2">🕐 <b>تجربة فعلية لمدة 24 ساعة:</b> تُنشئ مؤشراً حقيقياً يعمل كاملاً ويمكنك مشاركته. بعد 24 ساعة يتوقف تلقائياً، ويُفتح بالاشتراك في الفرانشايز أو التايكون. مؤشر تجريبي واحد لكل حساب.</div></div>':'')+privNote()}
+function homeHead(){return '<h1>مؤشر سوقك</h1><p class="sub">أنشئ نسختك الخاصة من مؤشر LAVNDR120، وأضف إليها بزنساتك وبراندك.</p>'+(S.trial?'<div class="card" style="border-color:rgba(201,168,76,.5)"><div class="small" style="line-height:2">🕐 <b>تجربة فعلية لمدة 24 ساعة:</b> تُنشئ مؤشراً حقيقياً يعمل كاملاً ويمكنك مشاركته. بعد 24 ساعة يتوقف تلقائياً، ويُفتح بالاشتراك في الفرانشايز أو التايكون. مؤشر تجريبي واحد لكل حساب.</div></div>':'')+privNote()+'<div class="card"><b>تريد بناء تطبيق طلبات لبزنسك؟</b><div class="small" style="margin:6px 0 10px">متجر طلبات وتطبيق أندرويد باسم بزنسك، يعمل من حسابك أنت.</div><a class="btn sec" href="builder.html">بناء تطبيقك</a></div>'}
 async function renderHome(){
   const h=homeHead();
   if(!S.listed)loadCached();
