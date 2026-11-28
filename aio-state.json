@@ -233,6 +233,19 @@
     "description": "من الطلب الأول إلى شهادة الذهب",
     "date": "2026-11-27"
    }
+  },
+  {
+   "id": "vindex-package",
+   "title": "What does the Vindex package include?",
+   "description": "Vindex package details and pricing",
+   "slug": "what-does-the-vindex-package-include",
+   "date": "2026-11-28",
+   "devto": null,
+   "ar": {
+    "title": "ما هو حزمة Vindex؟",
+    "description": "تقرير توقعات أوراكل، عدد المقاعد وسعر الحزمة",
+    "date": "2026-11-28"
+   }
   }
  ],
  "failed": {}
