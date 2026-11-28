@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-28T11:19:37"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-28T07:14:22"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1059,17 +1059,17 @@ function bhResellerHtml(r) {
     bhDetails('عن عضوية الريسلر', (GATE_OFFERS.reseller || {}).body) + '</div>';
 }
 function bhAddBizHtml(f) {
-  const paid = f.seatsPaid || 0, reqs = f.requests || [];
+  const tyc = !!f.capacity, paid = tyc ? 0 : (f.seatsPaid || 0), reqs = f.requests || [];
   const busy = {}; reqs.forEach(function (r) { if (r.status === 'pending' || r.status === 'approved') busy[r.idx] = r.status; });
   const free = []; for (let i = 1; i <= paid; i++) if (!busy[i]) free.push(i);
   const pend = reqs.filter(function (r) { return r.status === 'pending'; });
   const inp = 'width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid var(--glass-border);border-radius:10px;color:#fff;font-size:13px;padding:10px;margin-top:8px;outline:none;';
   let h = '<div style="margin-top:16px;padding:14px;border:1px solid rgba(201,168,76,.35);border-radius:14px;background:rgba(201,168,76,.05);text-align:right;">' +
     '<div style="font-size:14px;font-weight:800;color:var(--gold);margin-bottom:4px;">➕ أضف بزنساً إلى سوقك</div>' +
-    '<div style="font-size:11px;color:var(--text-dim);line-height:1.9;margin-bottom:6px;">اربط شيت طلبات البزنس بأحد مقاعدك المدفوعة؛ يراجعه الأدمن (وحالة الدفع) ثم يقبله أو يرفضه.</div>';
+    '<div style="font-size:11px;color:var(--text-dim);line-height:1.9;margin-bottom:6px;">اربط شيت طلبات البزنس؛ يراجعه الأدمن ثم يقبله أو يرفضه.</div>';
   if (pend.length) h += '<div style="font-size:11.5px;color:var(--gold);margin-bottom:6px;">⏳ قيد المراجعة: ' + pend.map(function (r) { return esc(r.name) + ' (مقعد ' + r.idx + ')'; }).join('، ') + '</div>';
-  if (!free.length) return h + '<div style="font-size:12px;color:var(--text-faint);">لا مقعد مدفوع شاغر لإضافة بزنس — ادفع الدفعة التالية لفتح مقعد.</div></div>';
-  h += '<select id="bzIdx" style="' + inp + '">' + free.map(function (i) { return '<option value="' + i + '">مقعد ' + i + '</option>'; }).join('') + '</select>' +
+  if (!tyc && !free.length) return h + '<div style="font-size:12px;color:var(--text-faint);">لا مقعد مدفوع شاغر لإضافة بزنس — ادفع الدفعة التالية لفتح مقعد.</div></div>';
+  h += (tyc ? '' : '<select id="bzIdx" style="' + inp + '">' + free.map(function (i) { return '<option value="' + i + '">مقعد ' + i + '</option>'; }).join('') + '</select>') +
     '<input id="bzName" maxlength="80" placeholder="اسم البزنس / البراند" style="' + inp + '">' +
     '<input id="bzSheet" placeholder="رابط شيت الطلبات أو معرّفه" style="' + inp + 'direction:ltr;text-align:left;">';
   if (f.platformFull) {
@@ -1206,6 +1206,7 @@ async function renderBuilderHub(fresh) {
         '<div style="font-size:16px;font-weight:800;color:var(--gold);margin:6px 0 4px;">' + esc(tierNameAr(i.tier)) + (i.country ? ' — ' + esc(i.country) : '') + '</div>' +
         '<div style="font-size:12px;color:#6EE7B7;">✅ عضويتك مفعّلة' + (i.endDate ? ' · حتى ' + esc(bhEnd(i.endDate)) : '') + '</div>' +
         ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') ? '<div style="margin:12px 0 4px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);font-size:12px;line-height:2;text-align:right;"><b style="color:var(--gold);">🗺️ مقر التايكون</b><br>مؤشراتك المسموحة: <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> مؤشر سوق مستقل، وفي كل مؤشر حتى 120 بزنساً وبراند. تُنشأ وتُدار من «مؤشر سوقك».<br>وتبني أيضاً حتى <b>' + (i.tier === 'tycoon' ? 20 : 400) + '</b> تطبيق طلبات لبزنساتك من «ابنِ تطبيق طلباتك».</div>' : '') +
+        ((i.tier === 'tycoon' || i.tier === 'tycoon_sector') && h.tycoon ? bhAddBizHtml(h.tycoon) : '') +
         gateFormsBox(i.tier, true) +
         '<a href="' + gateHelpWhatsAppUrl(i.tier) + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--text-faint);">تحتاج مساعدة؟</a></div>');
     });
