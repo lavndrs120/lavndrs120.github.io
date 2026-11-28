@@ -829,7 +829,7 @@ input,textarea,[contenteditable="true"],[contenteditable=""]{-webkit-user-select
 
 
 <script>
-/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-28T06:19:36"};/*LIVE_DATA_END*/
+/*LIVE_DATA_START*/window.LAST_PUBLIC_INDEX={"index": {"NAV": "0.00", "change": "0.00", "changePercent": "0.00", "dayHigh": "0.00", "dayLow": "0.00", "volatility": "0.00"}, "timestamp": "2026-11-18T23:54:25"};/*LIVE_DATA_END*/
 </script>
 <script>
 // ── Config ──
@@ -1332,7 +1332,7 @@ async function orAsk(q) {
   const btn = document.getElementById('orSend'); if (btn) btn.disabled = true;
   let out = 'تعذّر الاتصال — حاول مجدداً';
   try {
-    const r = await fetch(WORKER_URL + '?action=oracle_chat&period=' + encodeURIComponent(_orPeriod) + '&q=' + encodeURIComponent(q) + '&h=' + encodeURIComponent(hist) + '&token=' + encodeURIComponent(AUTH_TOKEN));
+    const r = await fetch(WORKER_URL + '?action=oracle_chat&period=' + encodeURIComponent(_orPeriod) + '&q=' + encodeURIComponent(q) + '&h=' + encodeURIComponent(hist) + '&lang=' + (localStorage.getItem('lavndr_lang') === 'en' ? 'en' : 'ar') + '&token=' + encodeURIComponent(AUTH_TOKEN));
     const raw = await r.text(); let j;
     try { j = JSON.parse(raw); } catch (pe) { j = { error: 'ردّ غير متوقع من الخادم', detail: 'HTTP ' + r.status + ': ' + raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').slice(0, 180) }; }
     if (typeof j.remaining === 'number') _orRem = j.remaining;
@@ -1349,7 +1349,7 @@ async function orAiSummary(period) {
   if (c && Date.now() - c.t < 3 * 3600e3 && c.x) { el.innerHTML = orSumHtml(c.x); return; }
   el.innerHTML = '<div class="empty" style="padding:6px">🔮 أُعدّ الخلاصة…</div>';
   try {
-    const r = await fetch(WORKER_URL + '?action=oracle_chat&summary=1&period=' + encodeURIComponent(period) + '&token=' + encodeURIComponent(AUTH_TOKEN));
+    const r = await fetch(WORKER_URL + '?action=oracle_chat&summary=1&period=' + encodeURIComponent(period) + '&lang=' + (localStorage.getItem('lavndr_lang') === 'en' ? 'en' : 'ar') + '&token=' + encodeURIComponent(AUTH_TOKEN));
     const j = await r.json();
     if (period !== _orPeriod) return;
     if (j.text) { try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), x: j.text })); } catch (e) {} el.innerHTML = orSumHtml(j.text); }

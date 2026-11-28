@@ -253,7 +253,8 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     if (!row) return;
     var wrap = document.querySelector('.wrap'), mw = wrap ? getComputedStyle(wrap).maxWidth : 'none';
     row.style.maxWidth = (mw && mw !== 'none') ? mw : '560px';
-    row.style.justifyContent = side() === 'left' ? 'flex-start' : 'flex-end';
+    var bellLeft = false; try { var bb = document.getElementById('lvnBell'), br = bb && bb.getBoundingClientRect(); bellLeft = !!(br && br.width && (br.left + br.right) / 2 < window.innerWidth * 0.4); } catch (e) {}
+    row.style.justifyContent = bellLeft ? 'flex-end' : (side() === 'left' ? 'flex-start' : 'flex-end');
   }
   function render() {
     if (!latest || !latest.apkUrl || IS_IOS) { if (row) row.style.display = 'none'; return; }

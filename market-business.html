@@ -253,7 +253,8 @@ const BACK=(new URLSearchParams(location.search).get('b')||'').trim();
     if (!row) return;
     var wrap = document.querySelector('.wrap'), mw = wrap ? getComputedStyle(wrap).maxWidth : 'none';
     row.style.maxWidth = (mw && mw !== 'none') ? mw : '560px';
-    row.style.justifyContent = side() === 'left' ? 'flex-start' : 'flex-end';
+    var bellLeft = false; try { var bb = document.getElementById('lvnBell'), br = bb && bb.getBoundingClientRect(); bellLeft = !!(br && br.width && (br.left + br.right) / 2 < window.innerWidth * 0.4); } catch (e) {}
+    row.style.justifyContent = bellLeft ? 'flex-end' : (side() === 'left' ? 'flex-start' : 'flex-end');
   }
   function render() {
     if (!latest || !latest.apkUrl || IS_IOS) { if (row) row.style.display = 'none'; return; }
@@ -876,6 +877,5 @@ function startDemo() {
 <script>
 (function(){var n=0;setInterval(function(){var w=document.getElementById('gsiButtonWrap');if(!w||!window.MKT_loginUI)return;if(!document.getElementById('mktLg'))MKT_loginUI();else if(document.getElementById('mktToCode')==null&&document.getElementById('mktE')||document.getElementById('mktK')||document.getElementById('mktG'))w.style.display='none';},500);})();
 </script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "d361bba7041d4a1bbc4d5aba1003356b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
